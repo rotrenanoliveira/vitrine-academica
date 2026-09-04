@@ -10,6 +10,7 @@ import {
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod'
 import { env } from '@/environment-variables'
+import { routes } from './routes'
 
 const app = fastify({
   logger:
@@ -33,6 +34,7 @@ app.register(fastifyCookie, {
 app.register(fastifySwagger, {
   openapi: {
     info: {
+      // TODO: Setar o titulo e a descrição da API
       title: 'API do Projeto',
       description: 'API do Projeto',
       version: '1.0.0',
@@ -50,5 +52,7 @@ app.register(fastifySwaggerUi, {
 app.get('/health', (_, reply) => {
   return reply.status(200).send({ status: 'ok' })
 })
+
+app.register(routes, { prefix: '/api/v1' })
 
 export { app }

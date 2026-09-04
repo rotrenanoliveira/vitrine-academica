@@ -3,6 +3,7 @@
   "include": ["src/**/*", "tests/**/*", "@types/**/*"],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
+    "types": ["@faker-js/faker", "vitest/globals"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],

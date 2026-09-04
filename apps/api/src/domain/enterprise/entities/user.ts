@@ -62,6 +62,7 @@ export class User extends Entity<UserProps> {
     return new User(
       {
         ...props,
+        email: props.email.toLocaleLowerCase(),
         status: props.status ?? UserStatus.PENDING,
         createdAt: props.createdAt ?? new Date(),
       },
