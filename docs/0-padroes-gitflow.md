@@ -2,6 +2,8 @@
 
 Este documento explica **como trabalhamos com Git** neste projeto. O objetivo é que qualquer pessoa júnior consiga criar branches, abrir PRs e integrar código sem medo de “quebrar” a `main`.
 
+Para um tutorial **passo a passo** (puxar a `develop`, criar branches, semantic commits em inglês e o ciclo completo até o PR), veja [docs/guia-commits-e-branches.md](docs/1-padroes-commits.md).
+
 ---
 
 ## O que é Gitflow?
@@ -205,4 +207,4 @@ Se o time ainda não usa releases formais, o caminho mais comum é: features →
 ## Resumo em uma frase
 
 > Trabalhe em `feat/...` a partir de `develop` → abra PR para `develop` → depois `develop` vai para `main` quando estiver estável; hotfixes saem da `main` e voltam também para `develop`.
-`)
+`
