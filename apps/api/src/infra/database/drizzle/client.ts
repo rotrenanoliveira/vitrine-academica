@@ -5,4 +5,6 @@ const db = drizzle(env.DATABASE_URL, {
   logger: env.NODE_ENV === 'development',
 })
 
-export { db }
+type DrizzleClient = typeof db
+
+export { type DrizzleClient, db }
