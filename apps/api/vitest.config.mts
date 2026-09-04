@@ -22,6 +22,7 @@ export default defineConfig({
           include: ['**/*.spec.ts'],
           exclude: ['**/*.e2e.spec.ts'],
         },
+        dir: './tests',
       },
       {
         extends: true,
@@ -30,11 +31,12 @@ export default defineConfig({
           include: ['**/*.e2e.spec.ts'],
           exclude: ['**/*.spec.ts'],
         },
+        dir: './tests',
       },
     ],
   },
   resolve: {
-    tsConfigPaths: true,
+    tsconfigPaths: true,
   },
   plugins: [
     swc.vite({
