@@ -1,0 +1,11 @@
+{
+  "extends": "@vitrine-academica/tsconfig/node.json",
+  "include": ["src/**/*", "tests/**/*", "@types/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "@tests/*": ["./tests/*"]
+    }
+  }
+}
