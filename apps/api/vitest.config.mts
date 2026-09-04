@@ -20,7 +20,7 @@ export default defineConfig({
         test: {
           name: 'unit',
           include: ['**/*.spec.ts'],
-          exclude: ['**/*.e2e.spec.ts'],
+          exclude: ['**/*.e2e.spec.ts', '**/*.test.ts'],
         },
         dir: './tests',
       },
@@ -28,10 +28,11 @@ export default defineConfig({
         extends: true,
         test: {
           name: 'e2e',
-          include: ['**/*.e2e.spec.ts'],
+          include: ['**/*.e2e.spec.ts', '**/*.test.ts'],
           exclude: ['**/*.spec.ts'],
+          setupFiles: ['./tests/setup-e2e.ts'],
+          fileParallelism: false,
         },
-        dir: './tests',
       },
     ],
   },
