@@ -9,8 +9,8 @@
     "db:studio": "pnpm env:load drizzle-kit studio",
     "test:unit:watch": "vitest --project unit",
     "test:unit:run": "vitest run --project unit",
-    "test:e2e:watch": "dotenv -e ../../.env.local --vitest --project e2e",
-    "test:e2e:run": "dotenv -e ../../.env.local --vitest run --project e2e",
+    "test:e2e:watch": "dotenv -e ../../.env.local -- vitest --project e2e",
+    "test:e2e:run": "dotenv -e ../../.env.local -- vitest run --project e2e",
     "dev": "pnpm env:load tsx --watch src/infra/http/server.ts",
     "env:load": "dotenv -e ../../.env --"
   },
@@ -18,9 +18,11 @@
     "@faker-js/faker": "^10.6.0",
     "@types/node": "^26.4.1",
     "@types/pg": "^8.23.1",
+    "@types/supertest": "^7.2.1",
     "@vitrine-academica/tsconfig": "workspace:*",
     "dotenv-cli": "^11.0.0",
     "drizzle-kit": "1.0.0-rc.4",
+    "supertest": "^7.2.2",
     "tsx": "^4.23.13",
     "unplugin-swc": "^1.5.11",
     "vitest": "^5.0.0"
