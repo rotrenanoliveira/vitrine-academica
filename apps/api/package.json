@@ -4,16 +4,21 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
+    "test:unit:watch": "vitest --project unit",
+    "test:unit:run": "vitest run --project unit",
     "dev": "pnpm env:load tsx --watch src/infra/http/server.ts",
     "env:load": "dotenv -e ../../.env --"
   },
-  "dependencies": {
-    "dotenv": "^17.4.2"
-  },
   "devDependencies": {
+    "@faker-js/faker": "^10.6.0",
     "@types/node": "^26.4.1",
     "@vitrine-academica/tsconfig": "workspace:*",
     "dotenv-cli": "^11.0.0",
-    "tsx": "^4.23.13"
+    "tsx": "^4.23.13",
+    "unplugin-swc": "^1.5.11",
+    "vitest": "^5.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
   }
 }
