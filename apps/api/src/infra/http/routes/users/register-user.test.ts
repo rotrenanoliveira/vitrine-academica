@@ -1,7 +1,7 @@
 import { appForTest as app } from '@tests/app'
 import { makeUser } from '@tests/factories/make-user'
 import request from 'supertest'
-import { UserStatus } from '@/domain/enterprise/entities/user'
+import { UserStatus } from '@/domain/identity/enterprise/entities/user'
 
 describe('(E2E) - POST /api/v1/users', () => {
   afterAll(async () => await app.close())
@@ -14,6 +14,8 @@ describe('(E2E) - POST /api/v1/users', () => {
       email: user.email,
     })
 
+    console.log(response.body)
+
     expect(response.status).toBe(201)
     expect(response.body).toEqual({
       user: {
@@ -21,7 +23,7 @@ describe('(E2E) - POST /api/v1/users', () => {
         email: user.email,
         status: UserStatus.PENDING,
         id: expect.any(String),
-        createdAt: expect.any(String),
+        accountId: expect.any(String),
       },
     })
   })
