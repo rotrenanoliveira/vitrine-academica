@@ -14,7 +14,6 @@ export interface UserProps {
   name: string
   email: string
   status: UserStatus
-  createdAt: Date
   updatedAt?: Date | null
 }
 
@@ -46,10 +45,6 @@ export class User extends Entity<UserProps> {
     this.touch()
   }
 
-  get createdAt(): Date {
-    return this.props.createdAt
-  }
-
   get updatedAt(): Date | null | undefined {
     return this.props.updatedAt
   }
@@ -58,13 +53,12 @@ export class User extends Entity<UserProps> {
     this.props.updatedAt = new Date()
   }
 
-  static create(props: Optional<UserProps, 'createdAt' | 'status'>, id?: UniqueEntityId) {
+  static create(props: Optional<UserProps, 'status'>, id?: UniqueEntityId) {
     return new User(
       {
         ...props,
         email: props.email.toLocaleLowerCase(),
         status: props.status ?? UserStatus.PENDING,
-        createdAt: props.createdAt ?? new Date(),
       },
       id,
     )
