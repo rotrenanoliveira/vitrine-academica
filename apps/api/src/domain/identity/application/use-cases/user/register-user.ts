@@ -1,5 +1,5 @@
 import { type Either, left, right } from '@/core/either'
-import { User } from '@/domain/enterprise/entities/user'
+import { User } from '@/domain/identity/enterprise/entities/user'
 import { UserAlreadyExistsError } from '../../_errors/user-already-exists-error'
 import type { UsersRepository } from '../../repositories/users-repository'
 
