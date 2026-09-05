@@ -1,4 +1,4 @@
-import type { User } from '@/domain/enterprise/entities/user'
+import type { User } from '../../enterprise/entities/user'
 
 export interface UsersRepository {
   findByEmail(email: string): Promise<User | null>
