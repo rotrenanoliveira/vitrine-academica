@@ -24,7 +24,7 @@ export async function registerUserRoute(app: FastifyInstance) {
               name: z.string(),
               email: z.email(),
               status: z.enum(['ACTIVE', 'INACTIVE', 'PENDING', 'BLOCKED', 'DELETED']),
-              createdAt: z.iso.datetime(),
+              accountId: z.string(),
             }),
           }),
           409: z.object({

@@ -1,5 +1,5 @@
 import type { FastifyReply } from 'fastify'
-import type { RegisterUserUseCase } from '@/domain/application/use-cases/user/register-user'
+import type { RegisterUserUseCase } from '@/domain/identity/application/use-cases/user/register-user'
 import { UserPresenter } from '../../presenters/user-presenter'
 
 interface RegisterUserBody {
@@ -20,7 +20,7 @@ export class RegisterUserController {
     }
 
     return reply.status(201).send({
-      user: UserPresenter.toHTTP(result.value.user),
+      user: UserPresenter.toHTTP(result.value.user, result.value.accountId),
     })
   }
 }
