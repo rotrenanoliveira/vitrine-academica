@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
-import type { UsersRepository } from '@/domain/application/repositories/users-repository'
-import type { User } from '@/domain/enterprise/entities/user'
+import type { UsersRepository } from '@/domain/identity/application/repositories/users-repository'
+import type { User } from '@/domain/identity/enterprise/entities/user'
 import type { DrizzleClient } from '../drizzle/client'
 import { DrizzleUserMapper } from '../drizzle/mappers/drizzle-user-mapper'
 import { users } from '../drizzle/schemas/users'

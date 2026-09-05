@@ -1,6 +1,6 @@
 const { faker } = require('@faker-js/faker/locale/pt_BR')
 
-import { User, type UserProps } from '@/domain/enterprise/entities/user'
+import { User, type UserProps } from '@/domain/identity/enterprise/entities/user'
 import { db } from '@/infra/database/drizzle/client'
 import { DrizzleUsersRepository } from '@/infra/database/repositories/drizzle-users-repository'
 

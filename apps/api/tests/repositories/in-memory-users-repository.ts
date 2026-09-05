@@ -1,5 +1,5 @@
-import type { UsersRepository } from '@/domain/application/repositories/users-repository'
-import type { User } from '@/domain/enterprise/entities/user'
+import type { UsersRepository } from '@/domain/identity/application/repositories/users-repository'
+import type { User } from '@/domain/identity/enterprise/entities/user'
 
 export class InMemoryUsersRepository implements UsersRepository {
   public items: User[] = []
