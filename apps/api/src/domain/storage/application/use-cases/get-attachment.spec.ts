@@ -1,5 +1,6 @@
 import { makeAttachment } from '@tests/factories/make-attachment'
 import { InMemoryAttachmentsRepository } from '@tests/repositories/in-memory-attachments-repository'
+import { env } from '@/environment-variables'
 import { Attachment } from '../../enterprise/entities/attachment'
 import { AttachmentNotFoundError } from '../_errors/attachment-not-found-error'
 import { GetAttachmentUseCase } from './get-attachment'
@@ -28,6 +29,7 @@ describe('(UC) - Get Attachment', () => {
     if (result.isRight()) {
       expect(result.value.attachment.id).toBe(attachment.id)
       expect(result.value.attachment.storageKey).toBe(attachmentStorageKey)
+      expect(result.value.attachmentUrl).toBe(`${env.CLOUDFLARE_R2_ASSETS_URL}/${attachmentStorageKey}`)
     }
   })
 

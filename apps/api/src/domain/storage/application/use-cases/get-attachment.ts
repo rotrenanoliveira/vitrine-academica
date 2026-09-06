@@ -1,4 +1,5 @@
 import { type Either, left, right } from '@/core/either'
+import { env } from '@/environment-variables'
 import type { Attachment } from '../../enterprise/entities/attachment'
 import { AttachmentNotFoundError } from '../_errors/attachment-not-found-error'
 import type { InvalidAttachmentError } from '../_errors/invalid-attachment-error'
@@ -8,7 +9,7 @@ interface GetAttachmentUseCaseRequest {
   attachmentId: string
 }
 
-type GetAttachmentUseCaseResponse = Either<InvalidAttachmentError, { attachment: Attachment }>
+type GetAttachmentUseCaseResponse = Either<InvalidAttachmentError, { attachment: Attachment; attachmentUrl: string }>
 
 export class GetAttachmentUseCase {
   constructor(private readonly attachmentsRepository: AttachmentsRepository) {}
@@ -20,6 +21,8 @@ export class GetAttachmentUseCase {
       return left(new AttachmentNotFoundError())
     }
 
-    return right({ attachment })
+    const attachmentUrl = `${env.CLOUDFLARE_R2_ASSETS_URL}/${attachment.storageKey}`
+
+    return right({ attachment, attachmentUrl })
   }
 }
