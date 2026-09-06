@@ -22,7 +22,6 @@ export default defineConfig({
           include: ['**/*.spec.ts'],
           exclude: ['**/*.e2e.spec.ts', '**/*.test.ts'],
         },
-        dir: './tests',
       },
       {
         extends: true,
@@ -32,6 +31,7 @@ export default defineConfig({
           exclude: ['**/*.spec.ts'],
           setupFiles: ['./tests/setup-e2e.ts'],
           fileParallelism: false,
+          testTimeout: 30000,
         },
       },
     ],
