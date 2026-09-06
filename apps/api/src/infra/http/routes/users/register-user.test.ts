@@ -14,8 +14,6 @@ describe('(E2E) - POST /api/v1/users', () => {
       email: user.email,
     })
 
-    console.log(response.body)
-
     expect(response.status).toBe(201)
     expect(response.body).toEqual({
       user: {
