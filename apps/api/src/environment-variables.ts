@@ -5,6 +5,7 @@ const schema = z.object({
   PORT: z.coerce.number().default(3000),
   //
   COOKIE_SECRET: z.string().min(1),
+  JWT_SECRET: z.string().min(1),
   // Database
   DATABASE_URL: z.url(),
   // Storage

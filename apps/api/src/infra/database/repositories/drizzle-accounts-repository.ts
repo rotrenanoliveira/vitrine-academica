@@ -21,4 +21,11 @@ export class DrizzleAccountsRepository implements AccountsRepository {
   async create(account: Account): Promise<void> {
     await this.db.insert(accounts).values(DrizzleAccountMapper.toPersistence(account))
   }
+
+  async save(account: Account): Promise<void> {
+    await this.db
+      .update(accounts)
+      .set(DrizzleAccountMapper.toPersistence(account))
+      .where(eq(accounts.id, account.id.toString()))
+  }
 }

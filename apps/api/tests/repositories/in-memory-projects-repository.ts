@@ -16,6 +16,16 @@ export class InMemoryProjectsRepository implements ProjectsRepository {
     return this.items.filter((project) => ids.includes(project.id.toString()))
   }
 
+  async findManyByAuthorId(authorId: string, status?: string): Promise<Project[]> {
+    return this.items
+      .filter((project) => {
+        if (project.author.toString() !== authorId) return false
+        if (status && project.status !== status) return false
+        return true
+      })
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+  }
+
   async create(project: Project): Promise<void> {
     this.items.push(project)
   }

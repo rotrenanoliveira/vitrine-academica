@@ -15,7 +15,7 @@ describe('(E2E) - GET /api/v1/users/:userId', () => {
 
     const response = await request(app.server).get(`/api/v1/users/${userId}`)
 
-    expect(response.status).toBe(201)
+    expect(response.status).toBe(200)
     expect(response.body).toEqual({
       user: {
         name: user.name,

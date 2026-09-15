@@ -31,4 +31,11 @@ export class DrizzleUsersRepository implements UsersRepository {
   async create(user: User): Promise<void> {
     await this.db.insert(users).values(DrizzleUserMapper.toPersistence(user))
   }
+
+  async save(user: User): Promise<void> {
+    await this.db
+      .update(users)
+      .set(DrizzleUserMapper.toPersistence(user))
+      .where(eq(users.id, user.id.toString()))
+  }
 }

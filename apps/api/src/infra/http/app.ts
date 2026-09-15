@@ -1,5 +1,6 @@
 import fastifyCookie from '@fastify/cookie'
 import fastifyCors from '@fastify/cors'
+import fastifyJwt from '@fastify/jwt'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUi from '@fastify/swagger-ui'
 import fastify from 'fastify'
@@ -26,6 +27,10 @@ app.register(fastifyCors)
 
 app.register(fastifyCookie, {
   secret: env.COOKIE_SECRET,
+})
+
+app.register(fastifyJwt, {
+  secret: env.JWT_SECRET,
 })
 
 // TODO: Setar Error Handler

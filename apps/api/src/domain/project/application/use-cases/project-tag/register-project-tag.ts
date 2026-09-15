@@ -1,12 +1,12 @@
 import { type Either, left, right } from '@/core/either'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
+import { ProjectNotFoundError } from '@/domain/project/application/_errors/project-not-found-error'
+import { ProjectTagAlreadyExistsError } from '@/domain/project/application/_errors/project-tag-already-exists-error'
+import type { ProjectTagsRepository } from '@/domain/project/application/repositories/project-tags-repository'
+import type { ProjectsRepository } from '@/domain/project/application/repositories/projects-repositories'
 import { ProjectTag } from '@/domain/project/enterprise/entities/project-tag'
 import { TagNotFoundError } from '@/domain/tag/application/_errors/tag-not-found-error'
 import type { TagsRepository } from '@/domain/tag/application/repositories/tags-repository'
-import { ProjectNotFoundError } from '../../_errors/project-not-found-error'
-import { ProjectTagAlreadyExistsError } from '../../_errors/project-tag-already-exists-error'
-import type { ProjectTagsRepository } from '../../repositories/project-tags-repository'
-import type { ProjectsRepository } from '../../repositories/projects-repositories'
 
 interface RegisterProjectTagUseCaseRequest {
   projectId: string
@@ -50,6 +50,10 @@ export class RegisterProjectTagUseCase {
     })
 
     await this.projectTagsRepository.create(projectTag)
+
+    const nextTags = project.tags.includes(tagId) ? project.tags : [...project.tags, tagId]
+    project.tags = nextTags
+    await this.projectsRepository.save(project)
 
     return right({ projectTag })
   }

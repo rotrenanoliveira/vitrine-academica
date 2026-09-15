@@ -39,7 +39,24 @@ describe('(UC) - Register Project Tag', () => {
       expect(result.value.projectTag.projectId.toString()).toBe(project.id.toString())
       expect(result.value.projectTag.tagId.toString()).toBe(tag.id.toString())
       expect(projectTagsRepository.items).toHaveLength(1)
+      expect(project.tags).toContain(tag.id.toString())
     }
+  })
+
+  it('sincroniza a coluna denormalizada project.tags ao vincular', async () => {
+    const { project } = makeProject()
+    const { tag } = makeTag()
+    projectsRepository.items.push(project)
+    tagsRepository.items.push(tag)
+
+    await sut.execute({
+      projectId: project.id.toString(),
+      tagId: tag.id.toString(),
+    })
+
+    const saved = projectsRepository.items.find((item) => item.id.toString() === project.id.toString())
+
+    expect(saved?.tags).toEqual([tag.id.toString()])
   })
 
   it('não pode registrar uma tag quando o projeto não existe', async () => {

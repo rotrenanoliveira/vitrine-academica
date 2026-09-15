@@ -15,4 +15,14 @@ export class InMemoryUsersRepository implements UsersRepository {
   async create(user: User): Promise<void> {
     this.items.push(user)
   }
+
+  async save(user: User): Promise<void> {
+    const index = this.items.findIndex((item) => item.id.toString() === user.id.toString())
+
+    if (index === -1) {
+      return
+    }
+
+    this.items[index] = user
+  }
 }
