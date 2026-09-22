@@ -15,7 +15,6 @@
     "dev": "pnpm env:load tsx --watch src/infra/http/server.ts",
     "env:load": "dotenv -e ../../.env --",
     "start": "pnpm env:load node dist/server.mjs",
-    "postinstall": "pnpm build",
     "build": "tsup",
     "postbuild": "pnpm db:generate && pnpm db:migrate && pnpm db:seed"
   },
