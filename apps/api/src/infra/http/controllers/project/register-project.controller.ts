@@ -6,6 +6,7 @@ interface RegisterProjectBody {
   title: string
   description: string
   authorId: string
+  sessionId: string
   attachments?: string[]
   tags?: string[]
 }
@@ -13,11 +14,15 @@ interface RegisterProjectBody {
 export class RegisterProjectController {
   constructor(private readonly registerProject: RegisterProjectUseCase) {}
 
-  async handle({ title, description, authorId, attachments, tags }: RegisterProjectBody, reply: FastifyReply) {
+  async handle(
+    { title, description, authorId, sessionId, attachments, tags }: RegisterProjectBody,
+    reply: FastifyReply,
+  ) {
     const result = await this.registerProject.execute({
       title,
       description,
       authorId,
+      sessionId,
       attachments,
       tags,
     })

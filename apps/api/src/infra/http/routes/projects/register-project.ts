@@ -51,6 +51,7 @@ export async function registerProjectRoute(app: FastifyInstance) {
         {
           ...request.body,
           authorId: request.user.sub,
+          sessionId: request.user.jti,
         },
         reply,
       )
