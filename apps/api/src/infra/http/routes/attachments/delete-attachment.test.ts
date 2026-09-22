@@ -9,12 +9,12 @@ describe('(E2E) - DELETE /api/v1/attachments/:attachmentId', () => {
   afterAll(async () => await app.close())
 
   it('should be able to delete an attachment', async () => {
-    const filePath = resolve(process.cwd(), 'tests/files/pintura.jpg')
+    const filePath = resolve(process.cwd(), 'tests/files/1-pintura.jpg')
     const fileBuffer = readFileSync(filePath)
     const { size } = statSync(filePath)
 
     const fileMimeType = 'image/jpeg'
-    const fileName = 'pintura.jpg'
+    const fileName = '1-pintura.jpg'
     const attachmentFolder = 'tests'
 
     const attachmentStorageKey = Attachment.generateStorageKey(fileName, attachmentFolder)

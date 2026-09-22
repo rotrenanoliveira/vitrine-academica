@@ -1,17 +1,17 @@
-import { appForTest as app } from '@tests/app'
 import { readFileSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { appForTest as app } from '@tests/app'
 import request from 'supertest'
 
 describe('(E2E) - POST /api/v1/attachments', () => {
   afterAll(async () => await app.close())
 
   it('should be able to register an attachment and upload the file to Cloudflare R2', async () => {
-    const filePath = resolve(process.cwd(), 'tests/files/pintura.jpg')
+    const filePath = resolve(process.cwd(), 'tests/files/1-pintura.jpg')
     const fileBuffer = readFileSync(filePath)
     const { size } = statSync(filePath)
     const mimeType = 'image/jpeg'
-    const name = 'pintura.jpg'
+    const name = '1-pintura.jpg'
     const attachmentFolder = 'tests'
 
     const response = await request(app.server).post('/api/v1/attachments').send({
@@ -25,7 +25,7 @@ describe('(E2E) - POST /api/v1/attachments', () => {
     expect(response.body).toEqual({
       attachment: {
         id: expect.any(String),
-        storageKey: expect.stringMatching(/^tests\/.+-pinturajpg$/),
+        storageKey: expect.stringMatching(/^tests\/.+-1-pinturajpg$/),
         mimeType,
         name,
         size,
@@ -46,9 +46,7 @@ describe('(E2E) - POST /api/v1/attachments', () => {
 
     expect(uploadResponse.status).toBe(200)
 
-    const deleteResponse = await request(app.server).delete(
-      `/api/v1/attachments/${response.body.attachment.id}`,
-    )
+    const deleteResponse = await request(app.server).delete(`/api/v1/attachments/${response.body.attachment.id}`)
 
     expect(deleteResponse.status).toBe(204)
   })
