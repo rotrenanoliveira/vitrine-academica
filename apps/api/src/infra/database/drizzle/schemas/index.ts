@@ -1,6 +1,7 @@
 export * from './access-codes'
 export * from './accounts'
 export * from './attachments'
+export * from './audit-log'
 export * from './institution-members'
 export * from './institution-membership-requests'
 export * from './institutions'
