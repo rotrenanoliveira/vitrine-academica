@@ -1,5 +1,7 @@
 import { type Either, left, right } from '@/core/either'
 import type { UniqueEntityId } from '@/core/entities/unique-entity-id'
+import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
+import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import { Account } from '@/domain/identity/enterprise/entities/account'
 import { User } from '@/domain/identity/enterprise/entities/user'
 import { UserAlreadyExistsError } from '../../_errors/user-already-exists-error'
@@ -17,6 +19,7 @@ export class RegisterUserUseCase {
   constructor(
     private readonly usersRepository: UsersRepository,
     private readonly accountsRepository: AccountsRepository,
+    private readonly registerLog: RegisterLogUseCase,
   ) {}
 
   async execute({ name, email }: RegisterUserUseCaseRequest): Promise<RegisterUserUseCaseResponse> {
@@ -36,6 +39,19 @@ export class RegisterUserUseCase {
 
     await this.usersRepository.create(user)
     await this.accountsRepository.create(account)
+
+    await this.registerLog.execute({
+      actorId: user.id.toString(),
+      sessionId: null,
+      action: AuditLogAction.CREATE,
+      resource: 'user',
+      resourceId: user.id.toString(),
+      diff: {
+        name: { old: null, new: name },
+        email: { old: null, new: email },
+      },
+      status: AuditLogStatus.SUCCESS,
+    })
 
     return right({ user, accountId: account.id })
   }
