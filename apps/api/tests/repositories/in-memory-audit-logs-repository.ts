@@ -17,7 +17,7 @@ export class InMemoryAuditLogsRepository implements AuditLogsRepository {
   }
 
   async findManyBySessionId(sessionId: string): Promise<AuditLog[]> {
-    return this.items.filter((auditLog) => auditLog.sessionId.toString() === sessionId)
+    return this.items.filter((auditLog) => auditLog.sessionId?.toString() === sessionId)
   }
 
   async create(auditLog: AuditLog): Promise<void> {

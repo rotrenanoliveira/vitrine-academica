@@ -33,7 +33,7 @@ describe('(UC) - Register Log', () => {
       expect(result.value.audit).toEqual(expect.any(String))
       expect(auditLogsRepository.items).toHaveLength(1)
       expect(auditLogsRepository.items[0].actorId.toString()).toBe(actorId)
-      expect(auditLogsRepository.items[0].sessionId.toString()).toBe(sessionId)
+      expect(auditLogsRepository.items[0].sessionId?.toString()).toBe(sessionId)
       expect(auditLogsRepository.items[0].action).toBe(AuditLogAction.CREATE)
       expect(auditLogsRepository.items[0].resource).toBe('project')
       expect(auditLogsRepository.items[0].resourceId.toString()).toBe(resourceId)

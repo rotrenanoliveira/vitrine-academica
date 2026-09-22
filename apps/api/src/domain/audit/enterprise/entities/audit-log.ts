@@ -18,7 +18,7 @@ export enum AuditLogStatus {
 export interface AuditLogProps {
   timestamp: Date
   actorId: UniqueEntityId
-  sessionId: UniqueEntityId
+  sessionId: UniqueEntityId | null
   action: AuditLogAction
   resource: string // domínio
   resourceId: UniqueEntityId
@@ -63,7 +63,7 @@ export class AuditLog extends Entity<AuditLogProps> {
     return new AuditLog(
       {
         ...props,
-        timestamp: new Date(),
+        timestamp: props.timestamp ?? new Date(),
       },
       id,
     )

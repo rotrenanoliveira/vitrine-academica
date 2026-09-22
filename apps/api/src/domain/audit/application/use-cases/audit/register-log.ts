@@ -5,7 +5,7 @@ import type { AuditLogsRepository } from '../../repositories/audit-logs-reposito
 
 interface RegisterLogUseCaseRequest {
   actorId: string
-  sessionId: string
+  sessionId?: string | null
   action: AuditLogAction
   resource: string
   resourceId: string
@@ -29,7 +29,7 @@ export class RegisterLogUseCase {
   }: RegisterLogUseCaseRequest): Promise<RegisterLogUseCaseResponse> {
     const auditLog = AuditLog.create({
       actorId: new UniqueEntityId(actorId),
-      sessionId: new UniqueEntityId(sessionId),
+      sessionId: sessionId ? new UniqueEntityId(sessionId) : null,
       resourceId: new UniqueEntityId(resourceId),
       action,
       resource,
