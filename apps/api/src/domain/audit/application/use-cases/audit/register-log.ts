@@ -1,0 +1,44 @@
+import { type Either, right } from '@/core/either'
+import { UniqueEntityId } from '@/core/entities/unique-entity-id'
+import { AuditLog, type AuditLogAction, type AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import type { AuditLogsRepository } from '../../repositories/audit-logs-repository'
+
+interface RegisterLogUseCaseRequest {
+  actorId: string
+  sessionId: string
+  action: AuditLogAction
+  resource: string
+  resourceId: string
+  diff: Record<string, { old: unknown; new: unknown }>
+  status: AuditLogStatus
+}
+
+type RegisterLogUseCaseResponse = Either<unknown, { audit: string }>
+
+export class RegisterLogUseCase {
+  constructor(private readonly auditLogsRepository: AuditLogsRepository) {}
+
+  async execute({
+    actorId,
+    sessionId,
+    action,
+    resource,
+    resourceId,
+    diff,
+    status,
+  }: RegisterLogUseCaseRequest): Promise<RegisterLogUseCaseResponse> {
+    const auditLog = AuditLog.create({
+      actorId: new UniqueEntityId(actorId),
+      sessionId: new UniqueEntityId(sessionId),
+      resourceId: new UniqueEntityId(resourceId),
+      action,
+      resource,
+      diff,
+      status,
+    })
+
+    await this.auditLogsRepository.create(auditLog)
+
+    return right({ audit: auditLog.id.toString() })
+  }
+}
