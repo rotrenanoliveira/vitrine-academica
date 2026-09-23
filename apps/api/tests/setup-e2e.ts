@@ -1,7 +1,14 @@
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { migrate } from 'drizzle-orm/node-postgres/migrator'
 import { Pool } from 'pg'
+
+const migrationsFolder = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '../src/infra/database/drizzle/migrations',
+)
 
 let pool: Pool
 let databaseForTest: ReturnType<typeof drizzle>
@@ -16,9 +23,7 @@ export async function setupDatabase() {
   pool = new Pool({ connectionString: databaseUrl })
   databaseForTest = drizzle({ client: pool })
 
-  await migrate(databaseForTest, {
-    migrationsFolder: './src/infra/database/drizzle/migrations',
-  })
+  await migrate(databaseForTest, { migrationsFolder })
 
   return { databaseForTest }
 }
@@ -29,7 +34,7 @@ export async function resetDatabase() {
   }
 
   await databaseForTest.execute(
-    sql`TRUNCATE TABLE "users", "attachments", "tags", "preference_tags", "projects", "project_tags", "project_scheduled", "access_codes", "sessions", "institutions", "institution_members", "institution_membership_requests" CASCADE`,
+    sql`TRUNCATE TABLE "users", "attachments", "tags", "preference_tags", "projects", "project_tags", "project_scheduled", "access_codes", "sessions", "institutions", "institution_members", "institution_membership_requests", "accounts", "audit_logs" CASCADE`,
   )
 }
 

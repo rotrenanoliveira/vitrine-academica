@@ -4,7 +4,8 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   oxc: false,
   test: {
-    // isolated: true,
+    // maxWorkers: 1,
+    isolated: true,
 
     coverage: {
       enabled: false,
@@ -29,7 +30,6 @@ export default defineConfig({
           name: 'e2e',
           include: ['**/*.e2e.spec.ts', '**/*.test.ts'],
           exclude: ['**/*.spec.ts'],
-          setupFiles: ['./tests/setup-e2e.ts'],
           fileParallelism: false,
           testTimeout: 30000,
         },
