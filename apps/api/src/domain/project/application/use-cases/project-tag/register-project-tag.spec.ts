@@ -1,9 +1,11 @@
 import { makeProject } from '@tests/factories/make-project'
 import { makeTag } from '@tests/factories/make-tag'
+import { InMemoryAuditLogsRepository } from '@tests/repositories/in-memory-audit-logs-repository'
 import { InMemoryProjectTagsRepository } from '@tests/repositories/in-memory-project-tags-repository'
 import { InMemoryProjectsRepository } from '@tests/repositories/in-memory-projects-repository'
 import { InMemoryTagsRepository } from '@tests/repositories/in-memory-tags-repository'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
+import { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
 import { TagNotFoundError } from '@/domain/tag/application/_errors/tag-not-found-error'
 import { ProjectNotFoundError } from '../../_errors/project-not-found-error'
 import { ProjectTagAlreadyExistsError } from '../../_errors/project-tag-already-exists-error'
@@ -12,6 +14,8 @@ import { RegisterProjectTagUseCase } from './register-project-tag'
 let projectTagsRepository: InMemoryProjectTagsRepository
 let projectsRepository: InMemoryProjectsRepository
 let tagsRepository: InMemoryTagsRepository
+let auditLogsRepository: InMemoryAuditLogsRepository
+let registerLog: RegisterLogUseCase
 let sut: RegisterProjectTagUseCase
 
 describe('(UC) - Register Project Tag', () => {
@@ -19,7 +23,10 @@ describe('(UC) - Register Project Tag', () => {
     projectTagsRepository = new InMemoryProjectTagsRepository()
     projectsRepository = new InMemoryProjectsRepository()
     tagsRepository = new InMemoryTagsRepository()
-    sut = new RegisterProjectTagUseCase(projectTagsRepository, projectsRepository, tagsRepository)
+    auditLogsRepository = new InMemoryAuditLogsRepository()
+    registerLog = new RegisterLogUseCase(auditLogsRepository)
+
+    sut = new RegisterProjectTagUseCase(projectTagsRepository, projectsRepository, tagsRepository, registerLog)
   })
 
   it('pode registrar uma tag em um projeto', async () => {
@@ -30,6 +37,7 @@ describe('(UC) - Register Project Tag', () => {
 
     const result = await sut.execute({
       projectId: project.id.toString(),
+      actorId: project.author.toString(),
       tagId: tag.id.toString(),
     })
 
@@ -51,6 +59,7 @@ describe('(UC) - Register Project Tag', () => {
 
     await sut.execute({
       projectId: project.id.toString(),
+      actorId: project.author.toString(),
       tagId: tag.id.toString(),
     })
 
@@ -62,9 +71,11 @@ describe('(UC) - Register Project Tag', () => {
   it('não pode registrar uma tag quando o projeto não existe', async () => {
     const { tag } = makeTag()
     tagsRepository.items.push(tag)
+    const actorId = new UniqueEntityId().toString()
 
     const result = await sut.execute({
       projectId: new UniqueEntityId().toString(),
+      actorId,
       tagId: tag.id.toString(),
     })
 
@@ -75,12 +86,13 @@ describe('(UC) - Register Project Tag', () => {
     }
   })
 
-  it('não pode registrar uma tag quando a taf não existe', async () => {
+  it('não pode registrar uma tag quando a tag não existe', async () => {
     const { project } = makeProject()
     projectsRepository.items.push(project)
 
     const result = await sut.execute({
       projectId: project.id.toString(),
+      actorId: project.author.toString(),
       tagId: new UniqueEntityId().toString(),
     })
 
@@ -99,11 +111,13 @@ describe('(UC) - Register Project Tag', () => {
 
     await sut.execute({
       projectId: project.id.toString(),
+      actorId: project.author.toString(),
       tagId: tag.id.toString(),
     })
 
     const result = await sut.execute({
       projectId: project.id.toString(),
+      actorId: project.author.toString(),
       tagId: tag.id.toString(),
     })
 

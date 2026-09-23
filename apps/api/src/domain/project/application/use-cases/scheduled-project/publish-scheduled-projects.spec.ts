@@ -1,19 +1,26 @@
 import { makeProject } from '@tests/factories/make-project'
 import { makeProjectScheduled } from '@tests/factories/make-project-scheduled'
+import { InMemoryAuditLogsRepository } from '@tests/repositories/in-memory-audit-logs-repository'
 import { InMemoryProjectScheduledRepository } from '@tests/repositories/in-memory-project-scheduled-repository'
 import { InMemoryProjectsRepository } from '@tests/repositories/in-memory-projects-repository'
+import { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
 import { ProjectStatus } from '../../../enterprise/entities/project'
 import { PublishScheduledProjectsUseCase } from './publish-scheduled-projects'
 
 let projectsRepository: InMemoryProjectsRepository
 let projectScheduledRepository: InMemoryProjectScheduledRepository
+let auditLogsRepository: InMemoryAuditLogsRepository
+let registerLog: RegisterLogUseCase
 let sut: PublishScheduledProjectsUseCase
 
 describe('(UC) - Publish Scheduled Projects', () => {
   beforeEach(() => {
     projectsRepository = new InMemoryProjectsRepository()
     projectScheduledRepository = new InMemoryProjectScheduledRepository()
-    sut = new PublishScheduledProjectsUseCase(projectsRepository, projectScheduledRepository)
+    auditLogsRepository = new InMemoryAuditLogsRepository()
+    registerLog = new RegisterLogUseCase(auditLogsRepository)
+
+    sut = new PublishScheduledProjectsUseCase(projectsRepository, projectScheduledRepository, registerLog)
   })
 
   it('should able to publish projects scheduled for the current day', async () => {

@@ -1,4 +1,6 @@
 import { type Either, right } from '@/core/either'
+import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
+import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import { type Project, ProjectStatus } from '../../../enterprise/entities/project'
 import type { ProjectScheduledRepository } from '../../repositories/project-scheduled-repository'
 import type { ProjectsRepository } from '../../repositories/projects-repositories'
@@ -13,6 +15,7 @@ export class PublishScheduledProjectsUseCase {
   constructor(
     private readonly projectsRepository: ProjectsRepository,
     private readonly projectScheduledRepository: ProjectScheduledRepository,
+    private readonly registerLog: RegisterLogUseCase,
   ) {}
 
   async execute({
@@ -36,6 +39,19 @@ export class PublishScheduledProjectsUseCase {
       await this.projectsRepository.save(project)
 
       publishedProjects.push(project)
+    }
+
+    for (const project of publishedProjects) {
+      await this.registerLog.execute({
+        actorId: 'internal-system',
+        sessionId: null,
+        action: AuditLogAction.CREATE,
+        resource: 'project.scheduled',
+        resourceId: project.id.toString(),
+        text: `Projeto ${project.id.toString()} publicado com sucesso.`,
+        status: AuditLogStatus.SUCCESS,
+        diff: null,
+      })
     }
 
     return right({ projects: publishedProjects })

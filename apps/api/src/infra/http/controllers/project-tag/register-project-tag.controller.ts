@@ -6,6 +6,7 @@ import { TagNotFoundError } from '@/domain/tag/application/_errors/tag-not-found
 import { ProjectTagPresenter } from '../../presenters/project-tag-presenter'
 
 interface RegisterProjectTagParams {
+  actorId: string
   projectId: string
 }
 
@@ -16,8 +17,12 @@ interface RegisterProjectTagBody {
 export class RegisterProjectTagController {
   constructor(private readonly registerProjectTag: RegisterProjectTagUseCase) {}
 
-  async handle({ projectId }: RegisterProjectTagParams, { tagId }: RegisterProjectTagBody, reply: FastifyReply) {
-    const result = await this.registerProjectTag.execute({ projectId, tagId })
+  async handle(
+    { actorId, projectId }: RegisterProjectTagParams,
+    { tagId }: RegisterProjectTagBody,
+    reply: FastifyReply,
+  ) {
+    const result = await this.registerProjectTag.execute({ actorId, projectId, tagId })
 
     if (result.isLeft()) {
       const error = result.value
