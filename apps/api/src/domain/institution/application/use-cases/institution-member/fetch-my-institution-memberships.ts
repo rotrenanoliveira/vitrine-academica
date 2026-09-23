@@ -6,10 +6,7 @@ interface FetchMyInstitutionMembershipsUseCaseRequest {
   userId: string
 }
 
-type FetchMyInstitutionMembershipsUseCaseResponse = Either<
-  never,
-  { members: InstitutionMember[] }
->
+type FetchMyInstitutionMembershipsUseCaseResponse = Either<never, { members: InstitutionMember[] }>
 
 export class FetchMyInstitutionMembershipsUseCase {
   constructor(private readonly institutionMembersRepository: InstitutionMembersRepository) {}

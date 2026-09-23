@@ -32,9 +32,7 @@ describe('(E2E) - GET /api/v1/projects/me', () => {
     await makeProjectOnDatabase({ author: user.id, title: 'Meu projeto' })
     await makeProjectOnDatabase({ author: other.id, title: 'Outro projeto' })
 
-    const response = await request(app.server)
-      .get('/api/v1/projects/me')
-      .set('Authorization', `Bearer ${accessToken}`)
+    const response = await request(app.server).get('/api/v1/projects/me').set('Authorization', `Bearer ${accessToken}`)
 
     expect(response.status).toBe(200)
     expect(response.body.projects).toHaveLength(1)

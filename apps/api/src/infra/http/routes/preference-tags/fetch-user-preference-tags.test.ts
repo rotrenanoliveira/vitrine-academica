@@ -23,9 +23,7 @@ describe('(E2E) - GET /api/v1/users/:userId/preference-tags', () => {
   })
 
   it('should not be able to fetch preference tags when user does not exist', async () => {
-    const response = await request(app.server).get(
-      `/api/v1/users/${new UniqueEntityId().toString()}/preference-tags`,
-    )
+    const response = await request(app.server).get(`/api/v1/users/${new UniqueEntityId().toString()}/preference-tags`)
 
     expect(response.status).toBe(404)
     expect(response.body).toEqual({

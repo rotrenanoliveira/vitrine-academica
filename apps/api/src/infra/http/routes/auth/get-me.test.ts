@@ -27,9 +27,7 @@ describe('(E2E) - GET /api/v1/auth/me', () => {
   it('should be able to get the authenticated user', async () => {
     const { accessToken, user, account } = await authenticateUser()
 
-    const response = await request(app.server)
-      .get('/api/v1/auth/me')
-      .set('Authorization', `Bearer ${accessToken}`)
+    const response = await request(app.server).get('/api/v1/auth/me').set('Authorization', `Bearer ${accessToken}`)
 
     expect(response.status).toBe(200)
     expect(response.body).toEqual({
@@ -53,9 +51,7 @@ describe('(E2E) - GET /api/v1/auth/me', () => {
   })
 
   it('should not be able to get the authenticated user with an invalid token', async () => {
-    const response = await request(app.server)
-      .get('/api/v1/auth/me')
-      .set('Authorization', 'Bearer invalid.token.here')
+    const response = await request(app.server).get('/api/v1/auth/me').set('Authorization', 'Bearer invalid.token.here')
 
     expect(response.status).toBe(401)
     expect(response.body).toEqual({

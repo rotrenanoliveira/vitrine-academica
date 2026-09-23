@@ -17,10 +17,7 @@ export function makeSession(override: Partial<SessionProps> = {}, id?: UniqueEnt
   return { session }
 }
 
-export async function makeSessionOnDatabase(
-  override: Partial<SessionProps> = {},
-  id?: UniqueEntityId,
-) {
+export async function makeSessionOnDatabase(override: Partial<SessionProps> = {}, id?: UniqueEntityId) {
   const { session } = makeSession(override, id)
 
   const sessionsRepository = new DrizzleSessionsRepository(db)

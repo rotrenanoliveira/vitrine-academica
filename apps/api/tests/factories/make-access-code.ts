@@ -1,8 +1,5 @@
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
-import {
-  AccessCode,
-  type AccessCodeProps,
-} from '@/domain/identity/enterprise/entities/access-code'
+import { AccessCode, type AccessCodeProps } from '@/domain/identity/enterprise/entities/access-code'
 import { BcryptHasher } from '@/infra/cryptography/bcrypt-hasher'
 import { db } from '@/infra/database/drizzle/client'
 import { DrizzleAccessCodesRepository } from '@/infra/database/repositories/drizzle-access-codes-repository'

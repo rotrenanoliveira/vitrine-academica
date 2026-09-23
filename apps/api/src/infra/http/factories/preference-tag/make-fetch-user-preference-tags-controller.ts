@@ -7,10 +7,7 @@ import { FetchUserPreferenceTagsController } from '../../controllers/preference-
 export function makeFetchUserPreferenceTagsController() {
   const preferenceTagsRepository = new DrizzlePreferenceTagsRepository(db)
   const usersRepository = new DrizzleUsersRepository(db)
-  const fetchUserPreferenceTagsUseCase = new FetchUserPreferenceTagsUseCase(
-    preferenceTagsRepository,
-    usersRepository,
-  )
+  const fetchUserPreferenceTagsUseCase = new FetchUserPreferenceTagsUseCase(preferenceTagsRepository, usersRepository)
 
   return new FetchUserPreferenceTagsController(fetchUserPreferenceTagsUseCase)
 }

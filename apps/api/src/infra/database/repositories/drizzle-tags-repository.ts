@@ -39,9 +39,6 @@ export class DrizzleTagsRepository implements TagsRepository {
   }
 
   async save(tag: Tag): Promise<void> {
-    await this.db
-      .update(tags)
-      .set(DrizzleTagMapper.toPersistence(tag))
-      .where(eq(tags.id, tag.id.toString()))
+    await this.db.update(tags).set(DrizzleTagMapper.toPersistence(tag)).where(eq(tags.id, tag.id.toString()))
   }
 }
