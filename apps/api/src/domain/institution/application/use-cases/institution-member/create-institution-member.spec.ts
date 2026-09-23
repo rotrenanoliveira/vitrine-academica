@@ -1,8 +1,11 @@
 import { makeInstitution } from '@tests/factories/make-institution'
 import { makeInstitutionMember } from '@tests/factories/make-institution-member'
+import { InMemoryAuditLogsRepository } from '@tests/repositories/in-memory-audit-logs-repository'
 import { InMemoryInstitutionMembersRepository } from '@tests/repositories/in-memory-institution-members-repository'
 import { InMemoryInstitutionsRepository } from '@tests/repositories/in-memory-institutions-repository'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
+import { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
+import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import { InstitutionMemberRole } from '../../../enterprise/entities/institution-member'
 import { InstitutionMemberAlreadyExistsError } from '../../_errors/institution-member-already-exists-error'
 import { InstitutionNotFoundError } from '../../_errors/institution-not-found-error'
@@ -11,13 +14,16 @@ import { CreateInstitutionMemberUseCase } from './create-institution-member'
 
 let institutionsRepository: InMemoryInstitutionsRepository
 let institutionMembersRepository: InMemoryInstitutionMembersRepository
+let auditLogsRepository: InMemoryAuditLogsRepository
 let sut: CreateInstitutionMemberUseCase
 
 describe('(UC) - Create Institution Member', () => {
   beforeEach(() => {
     institutionsRepository = new InMemoryInstitutionsRepository()
     institutionMembersRepository = new InMemoryInstitutionMembersRepository()
-    sut = new CreateInstitutionMemberUseCase(institutionsRepository, institutionMembersRepository)
+    auditLogsRepository = new InMemoryAuditLogsRepository()
+    const registerLog = new RegisterLogUseCase(auditLogsRepository)
+    sut = new CreateInstitutionMemberUseCase(institutionsRepository, institutionMembersRepository, registerLog)
   })
 
   it('should able to create an institution member as manager', async () => {
@@ -49,6 +55,30 @@ describe('(UC) - Create Institution Member', () => {
     }
   })
 
+  it('should register an audit log when an institution member is created', async () => {
+    const actorId = new UniqueEntityId().toString()
+    const { institution } = makeInstitution()
+    institutionsRepository.items.push(institution)
+
+    const { member: manager } = makeInstitutionMember({
+      institutionId: institution.id.toString(),
+      userId: actorId,
+      role: InstitutionMemberRole.MANAGER,
+    })
+    institutionMembersRepository.items.push(manager)
+
+    await sut.execute({
+      institutionId: institution.id.toString(),
+      actorId,
+      userId: new UniqueEntityId().toString(),
+      role: InstitutionMemberRole.STUDENT,
+    })
+
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].action).toBe(AuditLogAction.CREATE)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.SUCCESS)
+  })
+
   it('should not be able to create a member when not authorized', async () => {
     const { institution } = makeInstitution()
     institutionsRepository.items.push(institution)
@@ -61,6 +91,8 @@ describe('(UC) - Create Institution Member', () => {
     })
 
     expect(result.isLeft()).toBeTruthy()
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.FAILURE)
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(NotAllowedToManageInstitutionError)
     }
