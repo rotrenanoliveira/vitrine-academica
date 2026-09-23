@@ -26,6 +26,17 @@ export class RegisterUserUseCase {
     const userWithSameEmail = await this.usersRepository.findByEmail(email)
 
     if (userWithSameEmail) {
+      await this.registerLog.execute({
+        actorId: userWithSameEmail.id.toString(),
+        sessionId: null,
+        action: AuditLogAction.CREATE,
+        resource: 'identity.user',
+        resourceId: userWithSameEmail.id.toString(),
+        text: `Usuário com email ${email} já existe.`,
+        status: AuditLogStatus.FAILURE,
+        diff: null,
+      })
+
       return left(new UserAlreadyExistsError(email))
     }
 
@@ -44,13 +55,11 @@ export class RegisterUserUseCase {
       actorId: user.id.toString(),
       sessionId: null,
       action: AuditLogAction.CREATE,
-      resource: 'user',
+      resource: 'identity.user',
       resourceId: user.id.toString(),
-      diff: {
-        name: { old: null, new: name },
-        email: { old: null, new: email },
-      },
+      text: `Usuário criado com sucesso.`,
       status: AuditLogStatus.SUCCESS,
+      diff: null,
     })
 
     return right({ user, accountId: account.id })

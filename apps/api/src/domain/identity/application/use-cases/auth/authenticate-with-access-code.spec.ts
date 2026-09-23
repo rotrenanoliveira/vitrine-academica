@@ -4,9 +4,12 @@ import { makeAccount } from '@tests/factories/make-account'
 import { makeUser } from '@tests/factories/make-user'
 import { InMemoryAccessCodesRepository } from '@tests/repositories/in-memory-access-codes-repository'
 import { InMemoryAccountsRepository } from '@tests/repositories/in-memory-accounts-repository'
+import { InMemoryAuditLogsRepository } from '@tests/repositories/in-memory-audit-logs-repository'
 import { InMemorySessionsRepository } from '@tests/repositories/in-memory-sessions-repository'
 import { InMemoryUsersRepository } from '@tests/repositories/in-memory-users-repository'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
+import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import { UserStatus } from '../../../enterprise/entities/user'
 import { ExpiredAccessCodeError } from '../../_errors/expired-access-code-error'
 import { InvalidAccessCodeError } from '../../_errors/invalid-access-code-error'
@@ -18,7 +21,9 @@ let usersRepository: InMemoryUsersRepository
 let accountsRepository: InMemoryAccountsRepository
 let accessCodesRepository: InMemoryAccessCodesRepository
 let sessionsRepository: InMemorySessionsRepository
+let auditLogsRepository: InMemoryAuditLogsRepository
 let hasher: FakeHasher
+let registerLog: RegisterLogUseCase
 let sut: AuthenticateWithAccessCodeUseCase
 
 async function seedPendingUserWithCode(plainCode = '123456') {
@@ -43,6 +48,8 @@ describe('(UC) - Authenticate With Access Code', () => {
     accountsRepository = new InMemoryAccountsRepository()
     accessCodesRepository = new InMemoryAccessCodesRepository()
     sessionsRepository = new InMemorySessionsRepository()
+    auditLogsRepository = new InMemoryAuditLogsRepository()
+    registerLog = new RegisterLogUseCase(auditLogsRepository)
     hasher = new FakeHasher()
     sut = new AuthenticateWithAccessCodeUseCase(
       usersRepository,
@@ -50,6 +57,7 @@ describe('(UC) - Authenticate With Access Code', () => {
       accessCodesRepository,
       sessionsRepository,
       hasher,
+      registerLog,
     )
   })
 
@@ -65,6 +73,16 @@ describe('(UC) - Authenticate With Access Code', () => {
       expect(result.value.session.userId.toString()).toBe(user.id.toString())
       expect(result.value.session.isRevoked()).toBeFalsy()
     }
+  })
+
+  it('should register an audit log when authentication succeeds', async () => {
+    const { user, plainCode } = await seedPendingUserWithCode()
+
+    await sut.execute({ email: user.email, code: plainCode })
+
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].action).toBe(AuditLogAction.LOGIN)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.SUCCESS)
   })
 
   it('should be able to activate a pending user and set confirmationAt on first login', async () => {
@@ -84,6 +102,7 @@ describe('(UC) - Authenticate With Access Code', () => {
     const result = await sut.execute({ email: 'missing@example.com', code: '123456' })
 
     expect(result.isLeft()).toBeTruthy()
+    expect(auditLogsRepository.items).toHaveLength(0)
 
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(UserNotFoundError)
@@ -100,6 +119,8 @@ describe('(UC) - Authenticate With Access Code', () => {
     const result = await sut.execute({ email: user.email, code: '123456' })
 
     expect(result.isLeft()).toBeTruthy()
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.FAILURE)
 
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(UserUnavailableError)
@@ -112,6 +133,8 @@ describe('(UC) - Authenticate With Access Code', () => {
     const result = await sut.execute({ email: user.email, code: '000000' })
 
     expect(result.isLeft()).toBeTruthy()
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.FAILURE)
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(InvalidAccessCodeError)
     }

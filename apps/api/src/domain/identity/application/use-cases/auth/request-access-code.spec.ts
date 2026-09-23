@@ -4,9 +4,12 @@ import { makeAccount } from '@tests/factories/make-account'
 import { makeUser } from '@tests/factories/make-user'
 import { InMemoryAccessCodesRepository } from '@tests/repositories/in-memory-access-codes-repository'
 import { InMemoryAccountsRepository } from '@tests/repositories/in-memory-accounts-repository'
+import { InMemoryAuditLogsRepository } from '@tests/repositories/in-memory-audit-logs-repository'
 import { InMemoryMail } from '@tests/repositories/in-memory-mail'
 import { InMemoryUsersRepository } from '@tests/repositories/in-memory-users-repository'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
+import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import { UserStatus } from '../../../enterprise/entities/user'
 import { AccountNotFoundError } from '../../_errors/account-not-found-error'
 import { UserNotFoundError } from '../../_errors/user-not-found-error'
@@ -16,6 +19,8 @@ import { RequestAccessCodeUseCase } from './request-access-code'
 let usersRepository: InMemoryUsersRepository
 let accountsRepository: InMemoryAccountsRepository
 let accessCodesRepository: InMemoryAccessCodesRepository
+let auditLogsRepository: InMemoryAuditLogsRepository
+let registerLog: RegisterLogUseCase
 let hasher: FakeHasher
 let mail: InMemoryMail
 let sut: RequestAccessCodeUseCase
@@ -25,9 +30,19 @@ describe('(UC) - Request Access Code', () => {
     usersRepository = new InMemoryUsersRepository()
     accountsRepository = new InMemoryAccountsRepository()
     accessCodesRepository = new InMemoryAccessCodesRepository()
+    auditLogsRepository = new InMemoryAuditLogsRepository()
+    registerLog = new RegisterLogUseCase(auditLogsRepository)
     hasher = new FakeHasher()
     mail = new InMemoryMail()
-    sut = new RequestAccessCodeUseCase(usersRepository, accountsRepository, accessCodesRepository, hasher, mail)
+
+    sut = new RequestAccessCodeUseCase(
+      usersRepository,
+      accountsRepository,
+      accessCodesRepository,
+      hasher,
+      mail,
+      registerLog,
+    )
   })
 
   it('should be able to request an access code and send it by email', async () => {
@@ -48,6 +63,21 @@ describe('(UC) - Request Access Code', () => {
     if (result.isRight()) {
       expect(result.value.accessCodeId.toString()).toBe(accessCodesRepository.items[0].id.toString())
     }
+  })
+
+  it('should register an audit log when an access code is created', async () => {
+    const { user } = makeUser()
+    const { account } = makeAccount({ userId: user.id })
+
+    usersRepository.items.push(user)
+    accountsRepository.items.push(account)
+
+    await sut.execute({ email: user.email })
+
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].action).toBe(AuditLogAction.CREATE)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.SUCCESS)
+    expect(auditLogsRepository.items[0].resource).toBe('identity.access-code')
   })
 
   it('should be able to invalidate previous active access codes when requesting a new one', async () => {
@@ -71,6 +101,7 @@ describe('(UC) - Request Access Code', () => {
     const result = await sut.execute({ email: 'missing@example.com' })
 
     expect(result.isLeft()).toBeTruthy()
+    expect(auditLogsRepository.items).toHaveLength(0)
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(UserNotFoundError)
     }
@@ -83,6 +114,8 @@ describe('(UC) - Request Access Code', () => {
     const result = await sut.execute({ email: user.email })
 
     expect(result.isLeft()).toBeTruthy()
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.FAILURE)
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(AccountNotFoundError)
     }
@@ -98,6 +131,8 @@ describe('(UC) - Request Access Code', () => {
     const result = await sut.execute({ email: user.email })
 
     expect(result.isLeft()).toBeTruthy()
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.FAILURE)
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(UserUnavailableError)
     }
