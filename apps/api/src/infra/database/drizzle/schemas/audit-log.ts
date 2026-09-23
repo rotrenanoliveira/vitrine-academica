@@ -13,7 +13,8 @@ const auditLogsTable = pgTable('audit_logs', {
   action: auditLogActionEnum().notNull(),
   resource: text().notNull(),
   resourceId: text('resource_id').notNull(),
-  diff: jsonb().notNull(),
+  diff: jsonb(),
+  text: text(),
   status: auditLogStatusEnum().notNull(),
 })
 

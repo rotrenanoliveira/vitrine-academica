@@ -1,9 +1,5 @@
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
-import {
-  AuditLog,
-  type AuditLogAction,
-  type AuditLogStatus,
-} from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLog, type AuditLogAction, type AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import type { auditLogs } from '../schemas/audit-log'
 
 type DrizzleAuditLog = typeof auditLogs.$inferSelect
@@ -19,7 +15,8 @@ export class DrizzleAuditLogMapper {
         action: row.action as AuditLogAction,
         resource: row.resource,
         resourceId: new UniqueEntityId(row.resourceId),
-        diff: row.diff as Record<string, { old: unknown; new: unknown }>,
+        diff: row.diff as Record<string, { old: unknown; new: unknown }> | null,
+        text: row.text,
         status: row.status as AuditLogStatus,
       },
       new UniqueEntityId(row.id),
@@ -36,6 +33,7 @@ export class DrizzleAuditLogMapper {
       resource: auditLog.resource,
       resourceId: auditLog.resourceId.toString(),
       diff: auditLog.diff,
+      text: auditLog.text,
       status: auditLog.status,
     }
   }
