@@ -27,17 +27,12 @@ describe('(E2E) - GET /api/v1/users/:userId/projects-of-interest', () => {
     })
     await makeProjectTagOnDatabase({ projectId: unrelatedProject.id, tagId: otherTag.id })
 
-    const response = await request(app.server).get(
-      `/api/v1/users/${user.id.toString()}/projects-of-interest`,
-    )
+    const response = await request(app.server).get(`/api/v1/users/${user.id.toString()}/projects-of-interest`)
 
     expect(response.status).toBe(200)
     expect(response.body.projects).toHaveLength(2)
     expect(response.body.projects.map((project: { id: string }) => project.id)).toEqual(
-      expect.arrayContaining([
-        interestingProject.id.toString(),
-        anotherInterestingProject.id.toString(),
-      ]),
+      expect.arrayContaining([interestingProject.id.toString(), anotherInterestingProject.id.toString()]),
     )
   })
 

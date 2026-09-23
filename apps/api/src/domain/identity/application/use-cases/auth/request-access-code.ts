@@ -1,6 +1,8 @@
 import { customAlphabet } from 'nanoid'
 import { type Either, left, right } from '@/core/either'
 import type { UniqueEntityId } from '@/core/entities/unique-entity-id'
+import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
+import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import type { Mail } from '@/domain/mail/application/mail/mail'
 import { accessCodeMail } from '@/domain/mail/application/mail/messages/access-code-mail'
 import { AccessCode } from '../../../enterprise/entities/access-code'
@@ -21,6 +23,13 @@ interface RequestAccessCodeUseCaseRequest {
   email: string
 }
 
+type LogParams = {
+  actorId: string
+  resourceId: string
+  text: string
+  status: AuditLogStatus
+}
+
 type RequestAccessCodeUseCaseResponse = Either<
   UserNotFoundError | AccountNotFoundError | UserUnavailableError,
   { accessCodeId: UniqueEntityId }
@@ -33,10 +42,24 @@ export class RequestAccessCodeUseCase {
     private readonly accessCodesRepository: AccessCodesRepository,
     private readonly hasher: Hasher,
     private readonly mail: Mail,
+    private readonly registerLog: RegisterLogUseCase,
   ) {}
 
   private generateAccessCode(size: number = 12): string {
     return customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', size).call(null)
+  }
+
+  private async log({ actorId, resourceId, text, status }: LogParams) {
+    await this.registerLog.execute({
+      actorId,
+      sessionId: null,
+      action: AuditLogAction.CREATE,
+      resource: 'identity.access-code',
+      resourceId,
+      diff: null,
+      text,
+      status,
+    })
   }
 
   async execute({ email }: RequestAccessCodeUseCaseRequest): Promise<RequestAccessCodeUseCaseResponse> {
@@ -48,13 +71,27 @@ export class RequestAccessCodeUseCase {
       return left(new UserNotFoundError())
     }
 
+    const actorId = user.id.toString()
+
     if (UNAVAILABLE_STATUSES.has(user.status)) {
+      await this.log({
+        actorId,
+        resourceId: actorId,
+        text: `Usuário com status ${user.status}.`,
+        status: AuditLogStatus.FAILURE,
+      })
       return left(new UserUnavailableError())
     }
 
     const account = await this.accountsRepository.findByUserId(user.id.toString())
 
     if (!account) {
+      await this.log({
+        actorId,
+        resourceId: actorId,
+        text: `Conta não encontrada para o usuário ${actorId}.`,
+        status: AuditLogStatus.FAILURE,
+      })
       return left(new AccountNotFoundError())
     }
 
@@ -87,6 +124,13 @@ export class RequestAccessCodeUseCase {
         expiresIn: ACCESS_CODE_EXPIRES_IN_MINUTES,
       }),
     )
+
+    await this.log({
+      actorId,
+      resourceId: accessCode.id.toString(),
+      text: `Código de acesso criado para a conta ${account.id.toString()}.`,
+      status: AuditLogStatus.SUCCESS,
+    })
 
     return right({ accessCodeId: accessCode.id })
   }

@@ -1,8 +1,5 @@
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
-import {
-  PreferenceTag,
-  type PreferenceTagStatus,
-} from '@/domain/tag/enterprise/entities/preference-tag'
+import { PreferenceTag, type PreferenceTagStatus } from '@/domain/tag/enterprise/entities/preference-tag'
 import type { preferenceTags } from '../schemas/preference-tags'
 
 type DrizzlePreferenceTag = typeof preferenceTags.$inferSelect

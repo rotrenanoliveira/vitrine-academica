@@ -16,10 +16,7 @@ export function makeProjectTag(override: Partial<ProjectTagProps> = {}, id?: Uni
   return { projectTag }
 }
 
-export async function makeProjectTagOnDatabase(
-  override: Partial<ProjectTagProps> = {},
-  id?: UniqueEntityId,
-) {
+export async function makeProjectTagOnDatabase(override: Partial<ProjectTagProps> = {}, id?: UniqueEntityId) {
   const { projectTag } = makeProjectTag(override, id)
 
   const projectTagsRepository = new DrizzleProjectTagsRepository(db)

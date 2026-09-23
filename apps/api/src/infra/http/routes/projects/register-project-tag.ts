@@ -1,14 +1,17 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
+import { makeAuthenticateMiddleware } from '../../factories/auth/make-authenticate-middleware'
 import { makeRegisterProjectTagController } from '../../factories/project-tag/make-register-project-tag-controller'
 
 export async function registerProjectTagRoute(app: FastifyInstance) {
   const registerProjectTagController = makeRegisterProjectTagController()
+  const authenticate = makeAuthenticateMiddleware()
 
   app.withTypeProvider<ZodTypeProvider>().post(
     '/projects/:projectId/tags',
     {
+      onRequest: [authenticate],
       schema: {
         tags: ['project-tags'],
         summary: 'Cadastrar uma tag em um projeto',
@@ -40,7 +43,11 @@ export async function registerProjectTagRoute(app: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      return registerProjectTagController.handle(request.params, request.body, reply)
+      return registerProjectTagController.handle(
+        { actorId: request.user.sub, projectId: request.params.projectId },
+        request.body,
+        reply,
+      )
     },
   )
 }

@@ -1,0 +1,1 @@
+CREATE DATABASE vitrine_academica_test;

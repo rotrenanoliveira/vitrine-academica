@@ -1,8 +1,11 @@
 import { makeProject } from '@tests/factories/make-project'
 import { makeProjectScheduled } from '@tests/factories/make-project-scheduled'
+import { InMemoryAuditLogsRepository } from '@tests/repositories/in-memory-audit-logs-repository'
 import { InMemoryProjectScheduledRepository } from '@tests/repositories/in-memory-project-scheduled-repository'
 import { InMemoryProjectsRepository } from '@tests/repositories/in-memory-projects-repository'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
+import { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
+import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import { ProjectStatus } from '../../../enterprise/entities/project'
 import { InvalidProjectStatusError } from '../../_errors/invalid-project-status-error'
 import { NotProjectOwnerError } from '../../_errors/not-project-owner-error'
@@ -12,13 +15,18 @@ import { ScheduleProjectUseCase } from './schedule-project'
 
 let projectsRepository: InMemoryProjectsRepository
 let projectScheduledRepository: InMemoryProjectScheduledRepository
+let auditLogsRepository: InMemoryAuditLogsRepository
+let registerLog: RegisterLogUseCase
 let sut: ScheduleProjectUseCase
 
 describe('(UC) - Schedule Project', () => {
   beforeEach(() => {
     projectsRepository = new InMemoryProjectsRepository()
     projectScheduledRepository = new InMemoryProjectScheduledRepository()
-    sut = new ScheduleProjectUseCase(projectsRepository, projectScheduledRepository)
+    auditLogsRepository = new InMemoryAuditLogsRepository()
+    registerLog = new RegisterLogUseCase(auditLogsRepository)
+
+    sut = new ScheduleProjectUseCase(projectsRepository, projectScheduledRepository, registerLog)
   })
 
   it('should able to schedule a project', async () => {
@@ -43,6 +51,22 @@ describe('(UC) - Schedule Project', () => {
     }
   })
 
+  it('should register an audit log when a project is scheduled', async () => {
+    const { project } = makeProject()
+    projectsRepository.items.push(project)
+
+    await sut.execute({
+      projectId: project.id.toString(),
+      authorId: project.author.toString(),
+      publishedIn: new Date(),
+    })
+
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].action).toBe(AuditLogAction.CREATE)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.SUCCESS)
+    expect(auditLogsRepository.items[0].resource).toBe('project.scheduled')
+  })
+
   it('should not be able to schedule a project that does not exist', async () => {
     const result = await sut.execute({
       projectId: 'non-existent-project',
@@ -51,6 +75,8 @@ describe('(UC) - Schedule Project', () => {
     })
 
     expect(result.isLeft()).toBeTruthy()
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.FAILURE)
 
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(ProjectNotFoundError)
@@ -68,6 +94,8 @@ describe('(UC) - Schedule Project', () => {
     })
 
     expect(result.isLeft()).toBeTruthy()
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.FAILURE)
 
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(NotProjectOwnerError)
@@ -85,6 +113,8 @@ describe('(UC) - Schedule Project', () => {
     })
 
     expect(result.isLeft()).toBeTruthy()
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.FAILURE)
 
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(InvalidProjectStatusError)
@@ -105,6 +135,8 @@ describe('(UC) - Schedule Project', () => {
     })
 
     expect(result.isLeft()).toBeTruthy()
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.FAILURE)
 
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(ProjectAlreadyScheduledError)

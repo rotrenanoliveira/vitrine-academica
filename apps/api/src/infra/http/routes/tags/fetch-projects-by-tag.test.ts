@@ -29,9 +29,7 @@ describe('(E2E) - GET /api/v1/tags/:tagId/projects', () => {
   })
 
   it('should not be able to fetch projects when tag does not exist', async () => {
-    const response = await request(app.server).get(
-      `/api/v1/tags/${new UniqueEntityId().toString()}/projects`,
-    )
+    const response = await request(app.server).get(`/api/v1/tags/${new UniqueEntityId().toString()}/projects`)
 
     expect(response.status).toBe(404)
     expect(response.body).toEqual({

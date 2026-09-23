@@ -17,10 +17,7 @@ const sessionsTable = pgTable(
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').$onUpdate(() => new Date()),
   },
-  (table) => [
-    index('sessions_account_id_idx').on(table.accountId),
-    index('sessions_user_id_idx').on(table.userId),
-  ],
+  (table) => [index('sessions_account_id_idx').on(table.accountId), index('sessions_user_id_idx').on(table.userId)],
 )
 
 export const sessions = sessionsTable

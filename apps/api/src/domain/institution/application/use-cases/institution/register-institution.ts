@@ -1,6 +1,8 @@
 import { type Either, left, right } from '@/core/either'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { Slug } from '@/core/entities/value-objects/slug'
+import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
+import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import { InstitutionMember, InstitutionMemberRole } from '../../../enterprise/entities/institution-member'
 import { Institution, InstitutionOrigin, type InstitutionType } from '../../../enterprise/entities/institutions'
 import { InstitutionAlreadyExistsError } from '../../_errors/institution-already-exists-error'
@@ -26,6 +28,7 @@ export class RegisterInstitutionUseCase {
   constructor(
     private readonly institutionsRepository: InstitutionsRepository,
     private readonly institutionMembersRepository: InstitutionMembersRepository,
+    private readonly registerLog: RegisterLogUseCase,
   ) {}
 
   async execute({
@@ -42,6 +45,15 @@ export class RegisterInstitutionUseCase {
     const institutionWithSameSlug = await this.institutionsRepository.findBySlug(slug.value)
 
     if (institutionWithSameSlug) {
+      await this.registerLog.execute({
+        actorId: registerBy,
+        sessionId: null,
+        action: AuditLogAction.CREATE,
+        resource: 'institution',
+        resourceId: institutionWithSameSlug.id.toString(),
+        diff: null,
+        status: AuditLogStatus.FAILURE,
+      })
       return left(new InstitutionAlreadyExistsError())
     }
 
@@ -65,6 +77,17 @@ export class RegisterInstitutionUseCase {
 
     await this.institutionsRepository.create(institution)
     await this.institutionMembersRepository.create(member)
+
+    await this.registerLog.execute({
+      actorId: registerBy,
+      sessionId: null,
+      action: AuditLogAction.CREATE,
+      resource: 'institution',
+      resourceId: institution.id.toString(),
+      status: AuditLogStatus.SUCCESS,
+      text: `Instituição criada com sucesso.`,
+      diff: null,
+    })
 
     return right({ institution, member })
   }

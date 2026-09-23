@@ -1,10 +1,13 @@
 import { makeInstitution } from '@tests/factories/make-institution'
 import { makeInstitutionMember } from '@tests/factories/make-institution-member'
 import { makeInstitutionMembershipRequest } from '@tests/factories/make-institution-membership-request'
+import { InMemoryAuditLogsRepository } from '@tests/repositories/in-memory-audit-logs-repository'
 import { InMemoryInstitutionMembersRepository } from '@tests/repositories/in-memory-institution-members-repository'
 import { InMemoryInstitutionMembershipRequestsRepository } from '@tests/repositories/in-memory-institution-membership-requests-repository'
 import { InMemoryInstitutionsRepository } from '@tests/repositories/in-memory-institutions-repository'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
+import { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
+import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import { InstitutionMembershipRequestRole } from '../../../enterprise/entities/institution-membership-request'
 import { InstitutionMemberAlreadyExistsError } from '../../_errors/institution-member-already-exists-error'
 import { InstitutionMembershipRequestAlreadyExistsError } from '../../_errors/institution-membership-request-already-exists-error'
@@ -15,6 +18,7 @@ import { RequestInstitutionMembershipUseCase } from './request-institution-membe
 let institutionsRepository: InMemoryInstitutionsRepository
 let institutionMembersRepository: InMemoryInstitutionMembersRepository
 let institutionMembershipRequestsRepository: InMemoryInstitutionMembershipRequestsRepository
+let auditLogsRepository: InMemoryAuditLogsRepository
 let sut: RequestInstitutionMembershipUseCase
 
 describe('(UC) - Request Institution Membership', () => {
@@ -22,10 +26,13 @@ describe('(UC) - Request Institution Membership', () => {
     institutionsRepository = new InMemoryInstitutionsRepository()
     institutionMembersRepository = new InMemoryInstitutionMembersRepository()
     institutionMembershipRequestsRepository = new InMemoryInstitutionMembershipRequestsRepository()
+    auditLogsRepository = new InMemoryAuditLogsRepository()
+    const registerLog = new RegisterLogUseCase(auditLogsRepository)
     sut = new RequestInstitutionMembershipUseCase(
       institutionsRepository,
       institutionMembersRepository,
       institutionMembershipRequestsRepository,
+      registerLog,
     )
   })
 
@@ -44,6 +51,21 @@ describe('(UC) - Request Institution Membership', () => {
       expect(result.value.request.role).toBe(InstitutionMembershipRequestRole.STUDENT)
       expect(institutionMembershipRequestsRepository.items).toHaveLength(1)
     }
+  })
+
+  it('should register an audit log when membership is requested', async () => {
+    const { institution } = makeInstitution({ shouldProof: false })
+    institutionsRepository.items.push(institution)
+
+    await sut.execute({
+      institutionId: institution.id.toString(),
+      userId: new UniqueEntityId().toString(),
+      role: InstitutionMembershipRequestRole.STUDENT,
+    })
+
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].action).toBe(AuditLogAction.CREATE)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.SUCCESS)
   })
 
   it('should able to request institution membership with proof', async () => {
@@ -76,6 +98,8 @@ describe('(UC) - Request Institution Membership', () => {
     })
 
     expect(result.isLeft()).toBeTruthy()
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.FAILURE)
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(MembershipProofRequiredError)
     }

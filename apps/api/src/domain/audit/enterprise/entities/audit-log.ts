@@ -22,7 +22,8 @@ export interface AuditLogProps {
   action: AuditLogAction
   resource: string // domínio
   resourceId: UniqueEntityId
-  diff: Record<string, { old: unknown; new: unknown }>
+  diff: Record<string, { old: unknown; new: unknown }> | null
+  text: string | null
   status: AuditLogStatus
 }
 
@@ -55,15 +56,20 @@ export class AuditLog extends Entity<AuditLogProps> {
     return this.props.diff
   }
 
+  get text() {
+    return this.props.text
+  }
+
   get status() {
     return this.props.status
   }
 
-  static create(props: Optional<AuditLogProps, 'timestamp'>, id?: UniqueEntityId) {
+  static create(props: Optional<AuditLogProps, 'timestamp' | 'text'>, id?: UniqueEntityId) {
     return new AuditLog(
       {
         ...props,
         timestamp: props.timestamp ?? new Date(),
+        text: props.text ?? null,
       },
       id,
     )

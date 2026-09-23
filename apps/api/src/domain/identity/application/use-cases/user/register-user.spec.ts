@@ -5,6 +5,7 @@ import { InMemoryUsersRepository } from '@tests/repositories/in-memory-users-rep
 import { beforeEach, describe, expect, it } from 'vitest'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
+import { AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import { UserAlreadyExistsError } from '../../_errors/user-already-exists-error'
 import { RegisterUserUseCase } from './register-user'
 
@@ -46,6 +47,7 @@ describe('(UC) - Register User', () => {
 
     expect(result.isRight()).toBeTruthy()
     expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.SUCCESS)
   })
 
   it('should be able to register the consent of user at registration', async () => {
@@ -79,7 +81,7 @@ describe('(UC) - Register User', () => {
     }
   })
 
-  it('should not register an audit log when registration fails', async () => {
+  it('should register a failure audit log when registration fails', async () => {
     await sut.execute({ name: 'John Doe', email: 'john.doe@example.com' })
 
     const result = await sut.execute({
@@ -88,6 +90,7 @@ describe('(UC) - Register User', () => {
     })
 
     expect(result.isLeft()).toBeTruthy()
-    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items).toHaveLength(2)
+    expect(auditLogsRepository.items[1].status).toBe(AuditLogStatus.FAILURE)
   })
 })

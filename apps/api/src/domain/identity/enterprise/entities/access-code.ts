@@ -53,10 +53,7 @@ export class AccessCode extends Entity<AccessCodeProps> {
     this.props.updatedAt = new Date()
   }
 
-  static create(
-    props: Optional<AccessCodeProps, 'createdAt' | 'consumedAt'>,
-    id?: UniqueEntityId,
-  ) {
+  static create(props: Optional<AccessCodeProps, 'createdAt' | 'consumedAt'>, id?: UniqueEntityId) {
     return new AccessCode(
       {
         ...props,

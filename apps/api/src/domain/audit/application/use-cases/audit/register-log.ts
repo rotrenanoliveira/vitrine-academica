@@ -9,7 +9,8 @@ interface RegisterLogUseCaseRequest {
   action: AuditLogAction
   resource: string
   resourceId: string
-  diff: Record<string, { old: unknown; new: unknown }>
+  diff: Record<string, { old: unknown; new: unknown }> | null
+  text?: string | null
   status: AuditLogStatus
 }
 
@@ -25,6 +26,7 @@ export class RegisterLogUseCase {
     resource,
     resourceId,
     diff,
+    text,
     status,
   }: RegisterLogUseCaseRequest): Promise<RegisterLogUseCaseResponse> {
     const auditLog = AuditLog.create({
@@ -34,6 +36,7 @@ export class RegisterLogUseCase {
       action,
       resource,
       diff,
+      text,
       status,
     })
 

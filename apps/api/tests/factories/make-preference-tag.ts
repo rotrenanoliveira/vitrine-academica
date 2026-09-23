@@ -16,10 +16,7 @@ export function makePreferenceTag(override: Partial<PreferenceTagProps> = {}, id
   return { preferenceTag }
 }
 
-export async function makePreferenceTagOnDatabase(
-  override: Partial<PreferenceTagProps> = {},
-  id?: UniqueEntityId,
-) {
+export async function makePreferenceTagOnDatabase(override: Partial<PreferenceTagProps> = {}, id?: UniqueEntityId) {
   const { preferenceTag } = makePreferenceTag(override, id)
 
   const preferenceTagsRepository = new DrizzlePreferenceTagsRepository(db)
