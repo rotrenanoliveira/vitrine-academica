@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { LogoutButton } from '@/components/auth/logout-button'
 import { FormRegisterPreferenceTags } from '@/components/preference-tag/form-register-preference-tags'
 import { Button } from '@/components/ui/button'
+import { ExportUserDataButton } from '@/components/user/export-user-data-button'
 import { requireUser } from '@/server/auth/require-user'
 import { getCachedUserPreferenceTags } from '@/server/http/routes/preference-tags/fetch-user-preference-tags'
 import { getCachedTags } from '@/server/http/routes/tags/fetch-tags'
@@ -50,6 +51,14 @@ export default async function AccountPage() {
         <section className="space-y-4 border-t border-border pt-6">
           <h2 className="font-heading text-xl font-semibold">Tags preferidas</h2>
           <FormRegisterPreferenceTags tags={tags} selectedTagIds={selectedTagIds} />
+        </section>
+
+        <section className="space-y-4 border-t border-border pt-6">
+          <h2 className="font-heading text-xl font-semibold">Privacidade e Dados (LGPD)</h2>
+          <p className="text-sm text-muted-foreground">
+            Você pode baixar uma cópia completa dos seus dados cadastrais, preferências e projetos em formato JSON.
+          </p>
+          <ExportUserDataButton />
         </section>
       </div>
     </div>
