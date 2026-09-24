@@ -21,7 +21,17 @@ export default function RegisterUserPage() {
         <CardContent>
           <FormRegisterUser />
         </CardContent>
-        <CardFooter className="px-2">
+        <CardFooter className="flex items-center justify-between px-6 pb-6 pt-0">
+          <Link
+            href="/termos-de-uso"
+            target="_blank"
+            className={cn(
+              buttonVariants({ variant: 'link' }),
+              'px-0 text-xs text-muted-foreground hover:text-foreground',
+            )}
+          >
+            Termos de Uso
+          </Link>
           <Link href="/sign-in" className={cn(buttonVariants({ variant: 'link' }))}>
             Já tem conta? Entrar
           </Link>
