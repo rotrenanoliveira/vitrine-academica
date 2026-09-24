@@ -7,6 +7,19 @@ export interface ExportUserDataResponse {
     email: string
     status: string
   }
+  account: {
+    id: string
+    avatarId: string | null
+    createdAt: string
+    confirmationAt: string | null
+    consentedAt: string | null
+    updatedAt: string | null
+  } | null
+  sessions: Array<{
+    id: string
+    expiresAt: string
+    revokedAt: string | null
+  }>
   institutions: Array<{
     institutionId: string
     role: string
