@@ -1,12 +1,16 @@
 import { makeUser } from '@tests/factories/make-user'
+import { InMemoryAccountsRepository } from '@tests/repositories/in-memory-accounts-repository'
 import { InMemoryInstitutionMembersRepository } from '@tests/repositories/in-memory-institution-members-repository'
 import { InMemoryPreferenceTagsRepository } from '@tests/repositories/in-memory-preference-tags-repository'
 import { InMemoryProjectsRepository } from '@tests/repositories/in-memory-projects-repository'
+import { InMemorySessionsRepository } from '@tests/repositories/in-memory-sessions-repository'
 import { InMemoryUsersRepository } from '@tests/repositories/in-memory-users-repository'
 import { UserNotFoundError } from '../../_errors/user-not-found-error'
 import { ExportUserDataUseCase } from './export-user-data'
 
 let inMemoryUsersRepository: InMemoryUsersRepository
+let inMemoryAccountsRepository: InMemoryAccountsRepository
+let inMemorySessionsRepository: InMemorySessionsRepository
 let inMemoryInstitutionMembersRepository: InMemoryInstitutionMembersRepository
 let inMemoryPreferenceTagsRepository: InMemoryPreferenceTagsRepository
 let inMemoryProjectsRepository: InMemoryProjectsRepository
@@ -15,12 +19,16 @@ let sut: ExportUserDataUseCase
 describe('Export User Data Use Case', () => {
   beforeEach(() => {
     inMemoryUsersRepository = new InMemoryUsersRepository()
+    inMemoryAccountsRepository = new InMemoryAccountsRepository()
+    inMemorySessionsRepository = new InMemorySessionsRepository()
     inMemoryInstitutionMembersRepository = new InMemoryInstitutionMembersRepository()
     inMemoryPreferenceTagsRepository = new InMemoryPreferenceTagsRepository()
     inMemoryProjectsRepository = new InMemoryProjectsRepository()
 
     sut = new ExportUserDataUseCase(
       inMemoryUsersRepository,
+      inMemoryAccountsRepository,
+      inMemorySessionsRepository,
       inMemoryInstitutionMembersRepository,
       inMemoryPreferenceTagsRepository,
       inMemoryProjectsRepository,
