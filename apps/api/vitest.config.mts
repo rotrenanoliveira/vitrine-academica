@@ -5,7 +5,7 @@ export default defineConfig({
   oxc: false,
   test: {
     // maxWorkers: 1,
-    isolated: true,
+    // isolated: true,
 
     coverage: {
       enabled: false,
