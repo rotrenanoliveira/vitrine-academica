@@ -12,6 +12,7 @@ import {
 } from 'fastify-type-provider-zod'
 import { env } from '@/environment-variables'
 import { routes } from './routes'
+import { fastifyErrorHandler } from './routes/fastify-error-handler'
 
 const app = fastify({
   logger:
@@ -33,15 +34,14 @@ app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
 })
 
-// TODO: Setar Error Handler
+app.setErrorHandler(fastifyErrorHandler)
 
 // Swagger
 app.register(fastifySwagger, {
   openapi: {
     info: {
-      // TODO: Setar o titulo e a descrição da API
-      title: 'API do Projeto',
-      description: 'API do Projeto',
+      title: 'API - Vitrine Acadêmica',
+      description: 'API da aplicação Vitrine Acadêmica',
       version: '1.0.0',
     },
   },
