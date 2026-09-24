@@ -18,6 +18,12 @@ export class DrizzleSessionsRepository implements SessionsRepository {
     return DrizzleSessionMapper.toDomain(row)
   }
 
+  async findManyByUserId(userId: string): Promise<Session[]> {
+    const rawSessions = await this.db.select().from(sessions).where(eq(sessions.userId, userId))
+
+    return rawSessions.map(DrizzleSessionMapper.toDomain)
+  }
+
   async create(session: Session): Promise<void> {
     await this.db.insert(sessions).values(DrizzleSessionMapper.toPersistence(session))
   }
