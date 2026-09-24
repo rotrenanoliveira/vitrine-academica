@@ -7,6 +7,6 @@ services:
     environment:
       POSTGRES_USER: vitrine
       POSTGRES_PASSWORD: VACAD28
-      POSTGRES_DB: vitrine-academica
+      POSTGRES_DB: vitrine_academica
     volumes:
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
