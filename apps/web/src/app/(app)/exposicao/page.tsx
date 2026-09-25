@@ -9,7 +9,9 @@ export const metadata: Metadata = {
   description: 'Projetos acadêmicos lançados no dia atual',
 }
 
-export default function TodayProjectsPage() {
+export const dynamic = 'force-dynamic'
+
+export default async function TodayProjectsPage() {
   return (
     <Suspense fallback={<p className="text-sm text-muted-foreground">Carregando projetos…</p>}>
       <TodayProjectsList />
