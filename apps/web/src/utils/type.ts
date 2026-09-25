@@ -37,6 +37,16 @@ export const projectScheduledSchema = z.object({
 
 export type ProjectScheduled = z.infer<typeof projectScheduledSchema>
 
+export const externalProjectSchema = z.object({
+  title: z.string(),
+  authors: z.array(z.string()),
+  externalUrl: z.string(),
+  publishedIn: z.string(),
+  abstract: z.string().optional(),
+})
+
+export type ExternalProject = z.infer<typeof externalProjectSchema>
+
 export const tagSchema = z.object({
   id: z.string(),
   name: z.string(),

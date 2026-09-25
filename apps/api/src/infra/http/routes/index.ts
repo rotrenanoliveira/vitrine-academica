@@ -33,6 +33,7 @@ import { publishScheduledProjectsRoute } from './projects/publish-scheduled-proj
 import { registerProjectRoute } from './projects/register-project'
 import { registerProjectTagRoute } from './projects/register-project-tag'
 import { scheduleProjectRoute } from './projects/schedule-project'
+import { searchExternalProjectsRoute } from './projects/search-external-projects'
 import { updateProjectRoute } from './projects/update-project'
 import { fetchProjectsByTagRoute } from './tags/fetch-projects-by-tag'
 import { fetchTagsRoute } from './tags/fetch-tags'
@@ -145,4 +146,6 @@ export async function routes(app: FastifyInstance) {
   await app.register(rejectInstitutionMembershipRequestRoute)
   /** GET /institutions/:institutionId/membership-requests */
   await app.register(fetchInstitutionMembershipRequestsRoute)
+
+  await app.register(searchExternalProjectsRoute)
 }
