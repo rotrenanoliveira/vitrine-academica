@@ -8,6 +8,10 @@ export class InMemorySessionsRepository implements SessionsRepository {
     this.items.push(session)
   }
 
+  async findManyByUserId(userId: string): Promise<Session[]> {
+    return this.items.filter((session) => session.userId.toString() === userId)
+  }
+
   async save(session: Session): Promise<void> {
     const index = this.items.findIndex((item) => item.id.toString() === session.id.toString())
     if (index === -1) {
