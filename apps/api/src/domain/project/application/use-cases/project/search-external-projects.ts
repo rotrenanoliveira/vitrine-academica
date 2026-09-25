@@ -1,6 +1,6 @@
-import { type Either, left, right } from '@/core/either'
+import { type Either, right } from '@/core/either'
 import type { OpenAlexService } from '@/infra/external/openalex.service'
-import { ExternalServiceError } from '../../_errors/external-service-error'
+import type { ExternalServiceError } from '../../_errors/external-service-error'
 import type { AcademicProjectDto } from '../../dtos/academic-project-dto'
 
 interface SearchExternalProjectsRequest {
@@ -13,12 +13,8 @@ export class SearchExternalProjectsUseCase {
   constructor(private openAlexService: OpenAlexService) {}
 
   async execute({ query }: SearchExternalProjectsRequest): Promise<SearchExternalProjectsResponse> {
-    try {
-      const projects = await this.openAlexService.search(query)
+    const projects = await this.openAlexService.search(query)
 
-      return right({ projects })
-    } catch (error) {
-      return left(new ExternalServiceError(error))
-    }
+    return right({ projects })
   }
 }
