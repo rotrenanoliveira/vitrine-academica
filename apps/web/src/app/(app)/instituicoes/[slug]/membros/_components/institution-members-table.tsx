@@ -1,5 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { InstitutionMember } from '@/utils/type'
+import { UpdateMemberRoleButton } from './update-member-role-button'
 import { UpdateMemberStatusButton } from './update-member-status-button'
 
 const roleLabels: Record<InstitutionMember['role'], string> = {
@@ -34,6 +35,7 @@ export function InstitutionMembersTable({ data, institutionId, institutionSlug }
           <TableHead>Papel</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Criado em</TableHead>
+          <TableHead className="text-right">Atualizar cargo</TableHead>
           <TableHead className="text-right">Atualizar status</TableHead>
         </TableRow>
       </TableHeader>
@@ -46,6 +48,14 @@ export function InstitutionMembersTable({ data, institutionId, institutionSlug }
               <TableCell>{statusLabels[member.status]}</TableCell>
               <TableCell>{new Date(member.createdAt).toLocaleString('pt-BR')}</TableCell>
               <TableCell>
+                <UpdateMemberRoleButton
+                  institutionId={institutionId}
+                  institutionSlug={institutionSlug}
+                  memberId={member.id}
+                  currentRole={member.role}
+                />
+              </TableCell>
+              <TableCell>
                 <UpdateMemberStatusButton
                   institutionId={institutionId}
                   institutionSlug={institutionSlug}
@@ -57,7 +67,7 @@ export function InstitutionMembersTable({ data, institutionId, institutionSlug }
           ))
         ) : (
           <TableRow>
-            <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+            <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
               Nenhum membro encontrado.
             </TableCell>
           </TableRow>
