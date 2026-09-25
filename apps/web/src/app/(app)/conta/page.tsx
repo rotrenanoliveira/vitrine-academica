@@ -60,6 +60,16 @@ export default async function AccountPage() {
             Você pode baixar uma cópia completa dos seus dados cadastrais, preferências e projetos em formato JSON.
           </p>
           <ExportUserDataButton />
+          <div>
+            <Button
+              nativeButton={false}
+              variant="outline"
+              render={<Link href="/termos-e-privacidade" target="_blank" />}
+            >
+              Termos e Privacidade
+            </Button>
+          </div>
+          <DeleteUserAccountButton />
         </section>
       </div>
     </div>
