@@ -41,6 +41,11 @@ export class InstitutionMember extends Entity<InstitutionMemberProps> {
     return this.props.role
   }
 
+  set role(role: InstitutionMemberRole) {
+    this.props.role = role
+    this.touch()
+  }
+
   get status() {
     return this.props.status
   }
