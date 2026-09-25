@@ -20,7 +20,7 @@ export class Account extends Entity<AccountProps> {
     return this.props.avatarId
   }
 
-  set avatarId(avatarId: UniqueEntityId) {
+  set avatarId(avatarId: UniqueEntityId | null) {
     this.props.avatarId = avatarId
     this.touch()
   }

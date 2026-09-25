@@ -36,6 +36,7 @@ import { updateProjectRoute } from './projects/update-project'
 import { fetchProjectsByTagRoute } from './tags/fetch-projects-by-tag'
 import { fetchTagsRoute } from './tags/fetch-tags'
 import { registerTagRoute } from './tags/register-tag'
+import { deleteUserAccountRoute } from './users/delete-user-account'
 import { exportUserDataRoute } from './users/export-user-data'
 import { findUserByIdRoute } from './users/find-user-by-id'
 import { registerUserRoute } from './users/register-user'
@@ -69,6 +70,8 @@ export async function routes(app: FastifyInstance) {
   await app.register(findUserByIdRoute)
   /** GET /users/me/export */
   await app.register(exportUserDataRoute)
+  /** DELETE /users/me */
+  await app.register(deleteUserAccountRoute)
 
   /** Tags routes */
   /** POST /tags */
