@@ -1,4 +1,6 @@
 import { type Either, left, right } from '@/core/either'
+import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
+import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import type { InstitutionMembersRepository } from '@/domain/institution/application/repositories/institution-members-repository'
 import type { ProjectsRepository } from '@/domain/project/application/repositories/projects-repositories'
 import type { PreferenceTagsRepository } from '@/domain/tag/application/repositories/preference-tags-repository'
@@ -56,6 +58,7 @@ export class ExportUserDataUseCase {
     private readonly institutionMembersRepository: InstitutionMembersRepository,
     private readonly preferenceTagsRepository: PreferenceTagsRepository,
     private readonly projectsRepository: ProjectsRepository,
+    private readonly registerLog: RegisterLogUseCase,
   ) {}
 
   async execute({ userId }: ExportUserDataUseCaseRequest): Promise<ExportUserDataUseCaseResponse> {
@@ -109,6 +112,17 @@ export class ExportUserDataUseCase {
         status: project.status,
       })),
     }
+
+    await this.registerLog.execute({
+      actorId: userId,
+      sessionId: null,
+      action: AuditLogAction.EXPORT,
+      resource: 'identity.user',
+      resourceId: userId,
+      diff: null,
+      text: `Dados do usuário ${userId} exportados.`,
+      status: AuditLogStatus.SUCCESS,
+    })
 
     return right({ userData })
   }

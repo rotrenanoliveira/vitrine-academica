@@ -8,6 +8,7 @@ export enum AuditLogAction {
   DELETE = 'DELETE',
   LOGIN = 'LOGIN',
   LOGOUT = 'LOGOUT',
+  EXPORT = 'EXPORT',
 }
 
 export enum AuditLogStatus {

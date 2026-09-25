@@ -1,7 +1,14 @@
 import { jsonb, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { sessions } from './sessions'
 
-export const auditLogActionEnum = pgEnum('audit_log_action_enum', ['CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT'])
+export const auditLogActionEnum = pgEnum('audit_log_action_enum', [
+  'CREATE',
+  'UPDATE',
+  'DELETE',
+  'LOGIN',
+  'LOGOUT',
+  'EXPORT',
+])
 
 export const auditLogStatusEnum = pgEnum('audit_log_status_enum', ['SUCCESS', 'FAILURE'])
 
