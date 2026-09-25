@@ -4,6 +4,18 @@ Plataforma para exibir projetos acadêmicos vinculados a instituições (univers
 
 Monorepo com API (`apps/api`) e frontend (`apps/web`).
 
+# Entrega 28/09 - LGPD, Auditoria e Integração com API Externa
+
+Publicação dos documentos de conformidade e reforço de rastreabilidade e descoberta científica:
+
+- **Termos de Uso** e **Política de Privacidade**: páginas públicas com regras de acesso/perfis, inventário de dados, hipóteses legais da LGPD e direitos dos titulares.
+  - [Termos de Uso](https://vitrineacademica.com/termos-de-uso)
+  - [Política de Privacidade](https://vitrineacademica.com/politica-de-privacidade)
+- **Logs e auditoria**: trilha imutável de ações sensíveis (`CREATE`, `UPDATE`, `DELETE`, `LOGIN`, `LOGOUT`, `EXPORT`) com ator, sessão, recurso e status, alinhada à LGPD.
+- **OpenAlex API**: busca de trabalhos científicos externos na página [Pesquisas científicas](https://vitrineacademica.com/pesquisas-cientificas), via integração com a API pública OpenAlex. 
+- **Veja a nossa documentação desta implementação em:** [OpenAlex API](./docs/2-open-alex-api.md)
+
+
 ## Stack
 
 - **Monorepo:** pnpm + Turbo
