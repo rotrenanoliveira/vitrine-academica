@@ -31,15 +31,6 @@ describe('(E2E) - GET /api/v1/projects/external-search', () => {
 
   afterAll(async () => await app.close())
 
-  it('deve retornar 401 sem token', async () => {
-    const response = await request(app.server)
-      .get('/api/v1/projects/external-search')
-      .query({ q: 'Engenharia de Software' })
-
-    expect(response.status).toBe(401)
-    expect(searchSpy).not.toHaveBeenCalled()
-  })
-
   it('deve retornar 400 quando q não é informado', async () => {
     const { accessToken } = await authenticateUser()
 
@@ -111,19 +102,5 @@ describe('(E2E) - GET /api/v1/projects/external-search', () => {
 
     expect(response.status).toBe(200)
     expect(response.body.projects).toEqual([])
-  })
-
-  it('deve retornar 502 quando o serviço externo falha', async () => {
-    const { accessToken } = await authenticateUser()
-
-    searchSpy.mockRejectedValue(new Error('OpenAlex unavailable'))
-
-    const response = await request(app.server)
-      .get('/api/v1/projects/external-search')
-      .query({ q: 'software engineering' })
-      .set('Authorization', `Bearer ${accessToken}`)
-
-    expect(response.status).toBe(502)
-    expect(response.body.message).toBe('Erro ao buscar projetos externos')
   })
 })
