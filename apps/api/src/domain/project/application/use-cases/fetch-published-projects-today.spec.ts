@@ -47,9 +47,11 @@ describe('(UC) - Fetch Published Projects Today', () => {
       projectId: scheduledAnotherDay.id,
       publishedIn: yesterday,
     })
+    const futureDay = new Date('2026-09-12T10:00:00.000Z')
+
     const { projectScheduled: pendingSchedule } = makeProjectScheduled({
       projectId: stillScheduled.id,
-      publishedIn: today,
+      publishedIn: futureDay,
     })
 
     projectScheduledRepository.items.push(todaySchedule, anotherDaySchedule, pendingSchedule)
