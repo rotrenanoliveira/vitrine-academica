@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_VitrineAcademica" targetNamespace="https://github.com/rotrenanoliveira/vitrine-academica">
+  <bpmn:process id="Process_VitrineAcademica" name="Vitrine Acadêmica" isExecutable="false">
+    <bpmn:startEvent id="Start_Acesso" name="Usuário acessa a plataforma" />
+    <bpmn:task id="Task_Autenticacao" name="Autenticar usuário" />
+    <bpmn:exclusiveGateway id="Gateway_Autenticado" name="Autenticado?" />
+    <bpmn:endEvent id="End_AcessoNegado" name="Acesso negado" />
+    <bpmn:exclusiveGateway id="Gateway_Fluxo" name="Seleciona operação" />
+
+    <bpmn:task id="Task_BuscarProjetos" name="Buscar projetos acadêmicos" />
+    <bpmn:task id="Task_FiltrarProjetos" name="Filtrar por instituição ou tag" />
+    <bpmn:task id="Task_ExibirProjetos" name="Exibir projetos" />
+
+    <bpmn:task id="Task_BuscaExterna" name="Informar termo de busca OpenAlex" />
+    <bpmn:task id="Task_ValidarBusca" name="Validar parâmetros da busca" />
+    <bpmn:task id="Task_ChamarOpenAlex" name="Consultar API OpenAlex" />
+    <bpmn:exclusiveGateway id="Gateway_OpenAlex" name="Consulta realizada?" />
+    <bpmn:task id="Task_MapearDTO" name="Mapear resposta para DTO interno" />
+    <bpmn:task id="Task_ExibirResultados" name="Exibir resultados externos" />
+    <bpmn:endEvent id="End_ErroOpenAlex" name="Informar falha na integração" />
+
+    <bpmn:task id="Task_OperacaoProjeto" name="Criar, atualizar ou excluir projeto" />
+    <bpmn:task id="Task_ExecutarOperacao" name="Persistir alteração" />
+    <bpmn:task id="Task_RegistrarAuditoria" name="Registrar auditoria da operação" />
+
+    <bpmn:task id="Task_Termos" name="Consultar termos e política de privacidade" />
+    <bpmn:task id="Task_ExportarDados" name="Solicitar exportação de dados pessoais" />
+    <bpmn:task id="Task_Logout" name="Encerrar sessão" />
+    <bpmn:endEvent id="End_Sucesso" name="Fluxo concluído" />
+
+    <bpmn:sequenceFlow id="Flow_01" sourceRef="Start_Acesso" targetRef="Task_Autenticacao" />
+    <bpmn:sequenceFlow id="Flow_02" sourceRef="Task_Autenticacao" targetRef="Gateway_Autenticado" />
+    <bpmn:sequenceFlow id="Flow_03" name="Não" sourceRef="Gateway_Autenticado" targetRef="End_AcessoNegado" />
+    <bpmn:sequenceFlow id="Flow_04" name="Sim" sourceRef="Gateway_Autenticado" targetRef="Gateway_Fluxo" />
+
+    <bpmn:sequenceFlow id="Flow_05" name="Projetos internos" sourceRef="Gateway_Fluxo" targetRef="Task_BuscarProjetos" />
+    <bpmn:sequenceFlow id="Flow_06" sourceRef="Task_BuscarProjetos" targetRef="Task_FiltrarProjetos" />
+    <bpmn:sequenceFlow id="Flow_07" sourceRef="Task_FiltrarProjetos" targetRef="Task_ExibirProjetos" />
+    <bpmn:sequenceFlow id="Flow_08" sourceRef="Task_ExibirProjetos" targetRef="Task_Termos" />
+
+    <bpmn:sequenceFlow id="Flow_09" name="Busca externa" sourceRef="Gateway_Fluxo" targetRef="Task_BuscaExterna" />
+    <bpmn:sequenceFlow id="Flow_10" sourceRef="Task_BuscaExterna" targetRef="Task_ValidarBusca" />
+    <bpmn:sequenceFlow id="Flow_11" sourceRef="Task_ValidarBusca" targetRef="Task_ChamarOpenAlex" />
+    <bpmn:sequenceFlow id="Flow_12" sourceRef="Task_ChamarOpenAlex" targetRef="Gateway_OpenAlex" />
+    <bpmn:sequenceFlow id="Flow_13" name="Não" sourceRef="Gateway_OpenAlex" targetRef="End_ErroOpenAlex" />
+    <bpmn:sequenceFlow id="Flow_14" name="Sim" sourceRef="Gateway_OpenAlex" targetRef="Task_MapearDTO" />
+    <bpmn:sequenceFlow id="Flow_15" sourceRef="Task_MapearDTO" targetRef="Task_ExibirResultados" />
+    <bpmn:sequenceFlow id="Flow_16" sourceRef="Task_ExibirResultados" targetRef="Task_Termos" />
+
+    <bpmn:sequenceFlow id="Flow_17" name="Gestão de projeto" sourceRef="Gateway_Fluxo" targetRef="Task_OperacaoProjeto" />
+    <bpmn:sequenceFlow id="Flow_18" sourceRef="Task_OperacaoProjeto" targetRef="Task_ExecutarOperacao" />
+    <bpmn:sequenceFlow id="Flow_19" sourceRef="Task_ExecutarOperacao" targetRef="Task_RegistrarAuditoria" />
+    <bpmn:sequenceFlow id="Flow_20" sourceRef="Task_RegistrarAuditoria" targetRef="Task_Termos" />
+
+    <bpmn:sequenceFlow id="Flow_21" sourceRef="Task_Termos" targetRef="Task_ExportarDados" />
+    <bpmn:sequenceFlow id="Flow_22" sourceRef="Task_ExportarDados" targetRef="Task_Logout" />
+    <bpmn:sequenceFlow id="Flow_23" sourceRef="Task_Logout" targetRef="End_Sucesso" />
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="Diagram_VitrineAcademica">
+    <bpmndi:BPMNPlane id="Plane_VitrineAcademica" bpmnElement="Process_VitrineAcademica">
+      <bpmndi:BPMNShape id="Shape_Start_Acesso" bpmnElement="Start_Acesso"><dc:Bounds x="40" y="280" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Autenticacao" bpmnElement="Task_Autenticacao"><dc:Bounds x="120" y="260" width="120" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_Autenticado" bpmnElement="Gateway_Autenticado" isMarkerVisible="true"><dc:Bounds x="290" y="275" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_AcessoNegado" bpmnElement="End_AcessoNegado"><dc:Bounds x="380" y="120" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_Fluxo" bpmnElement="Gateway_Fluxo" isMarkerVisible="true"><dc:Bounds x="390" y="275" width="50" height="50" /></bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_BuscarProjetos" bpmnElement="Task_BuscarProjetos"><dc:Bounds x="500" y="40" width="130" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_FiltrarProjetos" bpmnElement="Task_FiltrarProjetos"><dc:Bounds x="680" y="40" width="130" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_ExibirProjetos" bpmnElement="Task_ExibirProjetos"><dc:Bounds x="860" y="40" width="130" height="70" /></bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_BuscaExterna" bpmnElement="Task_BuscaExterna"><dc:Bounds x="500" y="180" width="130" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_ValidarBusca" bpmnElement="Task_ValidarBusca"><dc:Bounds x="680" y="180" width="130" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_ChamarOpenAlex" bpmnElement="Task_ChamarOpenAlex"><dc:Bounds x="860" y="180" width="130" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_OpenAlex" bpmnElement="Gateway_OpenAlex" isMarkerVisible="true"><dc:Bounds x="1030" y="190" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_ErroOpenAlex" bpmnElement="End_ErroOpenAlex"><dc:Bounds x="1130" y="120" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_MapearDTO" bpmnElement="Task_MapearDTO"><dc:Bounds x="1130" y="230" width="130" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_ExibirResultados" bpmnElement="Task_ExibirResultados"><dc:Bounds x="1310" y="230" width="130" height="70" /></bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_OperacaoProjeto" bpmnElement="Task_OperacaoProjeto"><dc:Bounds x="500" y="340" width="130" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_ExecutarOperacao" bpmnElement="Task_ExecutarOperacao"><dc:Bounds x="680" y="340" width="130" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_RegistrarAuditoria" bpmnElement="Task_RegistrarAuditoria"><dc:Bounds x="860" y="340" width="130" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Termos" bpmnElement="Task_Termos"><dc:Bounds x="1040" y="420" width="130" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_ExportarDados" bpmnElement="Task_ExportarDados"><dc:Bounds x="1220" y="420" width="130" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Logout" bpmnElement="Task_Logout"><dc:Bounds x="1400" y="420" width="130" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_Sucesso" bpmnElement="End_Sucesso"><dc:Bounds x="1580" y="437" width="36" height="36" /></bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Edge_Flow_01" bpmnElement="Flow_01"><di:waypoint x="76" y="298" /><di:waypoint x="120" y="300" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_02" bpmnElement="Flow_02"><di:waypoint x="240" y="300" /><di:waypoint x="290" y="300" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_03" bpmnElement="Flow_03"><di:waypoint x="315" y="275" /><di:waypoint x="315" y="138" /><di:waypoint x="380" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_04" bpmnElement="Flow_04"><di:waypoint x="340" y="300" /><di:waypoint x="390" y="300" /></bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Flow_05" bpmnElement="Flow_05"><di:waypoint x="415" y="275" /><di:waypoint x="415" y="75" /><di:waypoint x="500" y="75" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_06" bpmnElement="Flow_06"><di:waypoint x="630" y="75" /><di:waypoint x="680" y="75" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_07" bpmnElement="Flow_07"><di:waypoint x="810" y="75" /><di:waypoint x="860" y="75" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_08" bpmnElement="Flow_08"><di:waypoint x="925" y="110" /><di:waypoint x="925" y="455" /><di:waypoint x="1040" y="455" /></bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Flow_09" bpmnElement="Flow_09"><di:waypoint x="440" y="300" /><di:waypoint x="470" y="300" /><di:waypoint x="470" y="215" /><di:waypoint x="500" y="215" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_10" bpmnElement="Flow_10"><di:waypoint x="630" y="215" /><di:waypoint x="680" y="215" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_11" bpmnElement="Flow_11"><di:waypoint x="810" y="215" /><di:waypoint x="860" y="215" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_12" bpmnElement="Flow_12"><di:waypoint x="990" y="215" /><di:waypoint x="1030" y="215" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_13" bpmnElement="Flow_13"><di:waypoint x="1055" y="190" /><di:waypoint x="1055" y="138" /><di:waypoint x="1130" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_14" bpmnElement="Flow_14"><di:waypoint x="1055" y="240" /><di:waypoint x="1055" y="265" /><di:waypoint x="1130" y="265" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_15" bpmnElement="Flow_15"><di:waypoint x="1260" y="265" /><di:waypoint x="1310" y="265" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_16" bpmnElement="Flow_16"><di:waypoint x="1375" y="300" /><di:waypoint x="1375" y="455" /><di:waypoint x="1040" y="455" /></bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Flow_17" bpmnElement="Flow_17"><di:waypoint x="415" y="325" /><di:waypoint x="415" y="375" /><di:waypoint x="500" y="375" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_18" bpmnElement="Flow_18"><di:waypoint x="630" y="375" /><di:waypoint x="680" y="375" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_19" bpmnElement="Flow_19"><di:waypoint x="810" y="375" /><di:waypoint x="860" y="375" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_20" bpmnElement="Flow_20"><di:waypoint x="925" y="410" /><di:waypoint x="925" y="455" /><di:waypoint x="1040" y="455" /></bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Flow_21" bpmnElement="Flow_21"><di:waypoint x="1170" y="455" /><di:waypoint x="1220" y="455" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_22" bpmnElement="Flow_22"><di:waypoint x="1350" y="455" /><di:waypoint x="1400" y="455" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_23" bpmnElement="Flow_23"><di:waypoint x="1530" y="455" /><di:waypoint x="1580" y="455" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
