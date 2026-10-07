@@ -1,0 +1,1 @@
+ALTER TYPE "audit_log_action_enum" ADD VALUE 'EXPORT';

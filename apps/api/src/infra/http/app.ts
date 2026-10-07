@@ -1,0 +1,63 @@
+import fastifyCookie from '@fastify/cookie'
+import fastifyCors from '@fastify/cors'
+import fastifyJwt from '@fastify/jwt'
+import fastifySwagger from '@fastify/swagger'
+import fastifySwaggerUi from '@fastify/swagger-ui'
+import fastify from 'fastify'
+import {
+  jsonSchemaTransform,
+  serializerCompiler,
+  validatorCompiler,
+  type ZodTypeProvider,
+} from 'fastify-type-provider-zod'
+import { env } from '@/environment-variables'
+import { routes } from './routes'
+import { fastifyErrorHandler } from './routes/fastify-error-handler'
+
+const app = fastify({
+  logger:
+    process.env.NODE_ENV === 'test'
+      ? undefined
+      : { transport: { target: 'pino-pretty', options: { translateTime: 'HH:MM:ss Z', ignore: 'pid,hostname' } } },
+}).withTypeProvider<ZodTypeProvider>()
+
+app.setValidatorCompiler(validatorCompiler)
+app.setSerializerCompiler(serializerCompiler)
+
+app.register(fastifyCors)
+
+app.register(fastifyCookie, {
+  secret: env.COOKIE_SECRET,
+})
+
+app.register(fastifyJwt, {
+  secret: env.JWT_SECRET,
+})
+
+app.setErrorHandler(fastifyErrorHandler)
+
+// Swagger
+app.register(fastifySwagger, {
+  openapi: {
+    info: {
+      title: 'API - Vitrine Acadêmica',
+      description: 'API da aplicação Vitrine Acadêmica',
+      version: '1.0.0',
+    },
+  },
+  transform: jsonSchemaTransform,
+})
+
+// Swagger UI
+app.register(fastifySwaggerUi, {
+  routePrefix: '/docs',
+})
+
+// Routes
+app.get('/health', (_, reply) => {
+  return reply.status(200).send({ status: 'ok' })
+})
+
+app.register(routes, { prefix: '/api/v1' })
+
+export { app }
