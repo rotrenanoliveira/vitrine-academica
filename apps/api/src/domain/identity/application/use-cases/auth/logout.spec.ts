@@ -55,6 +55,7 @@ describe('(UC) - Logout', () => {
 
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(SessionNotFoundError)
+      expect(result.value.message).toContain('Sessão não encontrada')
     }
   })
 
@@ -70,6 +71,7 @@ describe('(UC) - Logout', () => {
 
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(SessionAlreadyRevokedError)
+      expect(result.value.message).toContain('Sessão já revogada')
     }
   })
 })
