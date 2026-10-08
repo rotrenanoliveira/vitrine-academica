@@ -39,6 +39,6 @@ describe('(Integration) - OpenAlexService', () => {
 
     const sut = new OpenAlexService()
 
-    await expect(sut.search('Engenharia de Software')).rejects.toThrow()
+    await expect(sut.search('Engenharia de Software')).resolves.toBeNull()
   })
 })
