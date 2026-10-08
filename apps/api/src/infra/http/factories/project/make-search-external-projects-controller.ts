@@ -3,8 +3,8 @@ import { OpenAlexService } from '@/infra/external/openalex.service'
 import { SearchExternalProjectsController } from '@/infra/http/controllers/project/search-external-projects.controller'
 
 export function makeSearchExternalProjectsController() {
-  const openAlexService = new OpenAlexService()
-  const searchExternalProjectsUseCase = new SearchExternalProjectsUseCase(openAlexService)
+  const externalProjectsSearch = new OpenAlexService()
+  const searchExternalProjectsUseCase = new SearchExternalProjectsUseCase(externalProjectsSearch)
 
   return new SearchExternalProjectsController(searchExternalProjectsUseCase)
 }
