@@ -192,17 +192,17 @@ pnpm test:e2e:run
 
 ## 8. Decisões e dificuldades
 
-- **O que foi mockado e por quê:** [texto]
-- **Bugs encontrados pelos testes (se houver):** [texto ou "nenhum"]
-- **Dificuldades:** [texto]
+- **O que foi mockado e por quê:** O serviço de teste unitário e a API OpenAlex foi mockada para que os testes sejam feitos ponta a ponta de forma confiável, sem depender de conexão com internet, indisponibilidade de serviços de terceiros ou chave de API.
+- **Bugs encontrados pelos testes (se houver):** Bug de conexão/tratamento de falha na API, identificado e corrigido durante a execução da suíte de testes de integração, a estrutura de erro com left foi colocada no Caso de Uso, mas havia sido esquecida em um dos arquivos e a URL da API externa não estava correta ou padronizada em todas as chamadas necessárias.
+- **Dificuldades:** Resolver avisos e erros de tipo que apareceram ao ligar o servidor de testes do MSW e garantir a separação das camadas do sistema, fazendo a regra de negócio usar uma interface simples em vez de chamar direto a classe da OpenAlex
 
 
 
 ## 9. Checklist de entrega
 
-- [ ] Todos os testes passam localmente com o comando da seção 6
-- [ ] Cada cenário listado nas seções 3 e 4 existe no código
-- [ ] Cada arquivo de teste alterado ou criado está listado na seção 5
-- [ ] Mínimos do exercício atendidos (10 unitários em 3 classes; 4 de integração)
-- [ ] Nenhum teste com @Disabled, sem asserção ou com Thread.sleep
+- [X] Todos os testes passam localmente com o comando da seção 6
+- [X] Cada cenário listado nas seções 3 e 4 existe no código
+- [X] Cada arquivo de teste alterado ou criado está listado na seção 5
+- [X] Mínimos do exercício atendidos (10 unitários em 3 classes; 4 de integração)
+- [X] Nenhum teste com @Disabled, sem asserção ou com Thread.sleep
 - [ ] Professor adicionado como reviewer
