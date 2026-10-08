@@ -172,8 +172,21 @@ pnpm test:e2e:run
 
 ## 7. Evidências
 
-- **Resultado da execução:** [cole o trecho "Tests run: X, Failures: 0, Errors: 0"]
-- **Link do CI (se houver):** [URL ou "não se aplica"]
+- **Resultado da execução:** UNIT
+```bash
+   Test Files  49 passed (49)
+   Tests  167 passed (167)
+   Start at  20:16:53
+   Duration  23.14s (import 90%, transform 7%, tests 2%, worker 1%)
+```
+- **Resultado da execução:** E2E
+```bash
+   Test Files  43 passed (43)
+   Tests  114 passed (114)
+   Start at  20:23:59
+   Duration  89.70s (import 54%, tests 44%, transform 1%)
+```
+- **Link do CI (se houver):** NA
 
 
 
