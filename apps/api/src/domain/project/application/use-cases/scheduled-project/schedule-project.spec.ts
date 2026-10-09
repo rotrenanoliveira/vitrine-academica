@@ -99,6 +99,7 @@ describe('(UC) - Schedule Project', () => {
 
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(NotProjectOwnerError)
+      expect(result.value.message).toContain('Você não é o autor deste projeto.')
     }
   })
 

@@ -45,54 +45,40 @@ describe('(UC) - Upload Storage', () => {
     expect(result.value.attachment.storageKey).toMatch(/^profile\/.+-minha-imagem-de-perfil-de-coracao-1\.?png$/)
   })
 
-  it('should not be able to save an attachment with invalid size', async () => {
-    const result = await sut.execute({
-      name: 'profile.png',
-      mimeType: 'image/png',
-      size: 0,
-      attachmentFolder: 'profile',
-    })
+  it.each([
+    {
+      scenario: 'invalid size (zero)',
+      input: { name: 'profile.png', mimeType: 'image/png', size: 0, attachmentFolder: 'profile' },
+      expectedMessage: 'Arquivo inválido.',
+    },
+    {
+      scenario: 'size higher than allowed',
+      input: {
+        name: 'profile.png',
+        mimeType: 'image/png',
+        size: 6 * 1024 * 1024,
+        attachmentFolder: 'profile',
+      },
+      expectedMessage: 'Tamanho de arquivo inválido',
+    },
+    {
+      scenario: 'type not allowed',
+      input: {
+        name: 'profile.gif',
+        mimeType: 'image/gif',
+        size: 1024,
+        attachmentFolder: 'profile',
+      },
+      expectedMessage: 'Tipo de arquivo não permitido: image/gif.',
+    },
+  ])('should not be able to save an attachment with $scenario', async ({ input, expectedMessage }) => {
+    const result = await sut.execute(input)
 
     expect(result.isLeft()).toBeTruthy()
 
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(InvalidAttachmentError)
-    }
-
-    expect(attachmentsRepository.items).toHaveLength(0)
-    expect(storage.items).toHaveLength(0)
-  })
-
-  it('should not be able to save an attachment with size higher than allowed', async () => {
-    const result = await sut.execute({
-      name: 'profile.png',
-      mimeType: 'image/png',
-      size: 6 * 1024 * 1024, // 6MB
-      attachmentFolder: 'profile',
-    })
-
-    expect(result.isLeft()).toBeTruthy()
-
-    if (result.isLeft()) {
-      expect(result.value).toBeInstanceOf(InvalidAttachmentError)
-    }
-
-    expect(attachmentsRepository.items).toHaveLength(0)
-    expect(storage.items).toHaveLength(0)
-  })
-
-  it('should not be able to save an attachment with type not allowed', async () => {
-    const result = await sut.execute({
-      name: 'profile.gif',
-      mimeType: 'image/gif',
-      size: 1024,
-      attachmentFolder: 'profile',
-    })
-
-    expect(result.isLeft()).toBeTruthy()
-
-    if (result.isLeft()) {
-      expect(result.value).toBeInstanceOf(InvalidAttachmentError)
+      expect(result.value.message).toContain(expectedMessage)
     }
 
     expect(attachmentsRepository.items).toHaveLength(0)
