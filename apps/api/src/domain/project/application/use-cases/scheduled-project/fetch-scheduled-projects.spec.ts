@@ -3,11 +3,11 @@ import { makeProjectScheduled } from '@tests/factories/make-project-scheduled'
 import { InMemoryProjectScheduledRepository } from '@tests/repositories/in-memory-project-scheduled-repository'
 import { InMemoryProjectsRepository } from '@tests/repositories/in-memory-projects-repository'
 import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
-import { FetchUpcomingScheduledProjectsUseCase } from './fetch-upcoming-scheduled-projects'
+import { FetchScheduledProjectsUseCase } from './fetch-scheduled-projects'
 
 let projectsRepository: InMemoryProjectsRepository
 let projectScheduledRepository: InMemoryProjectScheduledRepository
-let sut: FetchUpcomingScheduledProjectsUseCase
+let sut: FetchScheduledProjectsUseCase
 
 const now = new Date('2026-09-11T10:00:00.000Z')
 const daysFromNow = (days: number) => new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
@@ -22,11 +22,11 @@ function scheduleProject(status: ProjectStatus, publishedIn: Date) {
   return project
 }
 
-describe('(UC) - Fetch Upcoming Scheduled Projects', () => {
+describe('(UC) - Fetch Scheduled Projects', () => {
   beforeEach(() => {
     projectsRepository = new InMemoryProjectsRepository()
     projectScheduledRepository = new InMemoryProjectScheduledRepository()
-    sut = new FetchUpcomingScheduledProjectsUseCase(projectsRepository, projectScheduledRepository)
+    sut = new FetchScheduledProjectsUseCase(projectsRepository, projectScheduledRepository)
   })
 
   it('deve listar os projetos agendados para os próximos 7 dias, do mais próximo ao mais distante', async () => {

@@ -3,21 +3,21 @@ import { type Project, ProjectStatus } from '../../../enterprise/entities/projec
 import type { ProjectScheduledRepository } from '../../repositories/project-scheduled-repository'
 import type { ProjectsRepository } from '../../repositories/projects-repositories'
 
-const UPCOMING_WINDOW_IN_DAYS = 7
+const SCHEDULED_WINDOW_IN_DAYS = 7
 const DAY_IN_MS = 24 * 60 * 60 * 1000
 
-interface FetchUpcomingScheduledProjectsUseCaseRequest {
+interface FetchScheduledProjectsUseCaseRequest {
   date?: Date
 }
 
-export interface UpcomingScheduledProject {
+export interface FetchScheduledProject {
   project: Project
   publishedIn: Date
 }
 
-type FetchUpcomingScheduledProjectsUseCaseResponse = Either<never, { scheduledProjects: UpcomingScheduledProject[] }>
+type FetchScheduledProjectsUseCaseResponse = Either<never, { scheduledProjects: FetchScheduledProject[] }>
 
-export class FetchUpcomingScheduledProjectsUseCase {
+export class FetchScheduledProjectsUseCase {
   constructor(
     private readonly projectsRepository: ProjectsRepository,
     private readonly projectScheduledRepository: ProjectScheduledRepository,
@@ -25,8 +25,8 @@ export class FetchUpcomingScheduledProjectsUseCase {
 
   async execute({
     date = new Date(),
-  }: FetchUpcomingScheduledProjectsUseCaseRequest = {}): Promise<FetchUpcomingScheduledProjectsUseCaseResponse> {
-    const limit = new Date(date.getTime() + UPCOMING_WINDOW_IN_DAYS * DAY_IN_MS)
+  }: FetchScheduledProjectsUseCaseRequest = {}): Promise<FetchScheduledProjectsUseCaseResponse> {
+    const limit = new Date(date.getTime() + SCHEDULED_WINDOW_IN_DAYS * DAY_IN_MS)
 
     const schedules = await this.projectScheduledRepository.findManyScheduledBetween(date, limit)
 
