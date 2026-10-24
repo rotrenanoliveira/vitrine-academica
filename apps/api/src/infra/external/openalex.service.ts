@@ -1,5 +1,6 @@
 import ky from 'ky'
 import type { AcademicProjectDto } from '@/domain/project/application/dtos/academic-project-dto'
+import type { ExternalProjectsSearch } from '@/domain/project/application/external/external-projects-search'
 
 interface OpenAlexWork {
   id: string
@@ -17,30 +18,45 @@ interface OpenAlexResponse {
   results: OpenAlexWork[]
 }
 
-export class OpenAlexService {
-  private api = ky.create({ prefix: 'https://api.openalex.org' }) // trocar pelo `fetch` dps
+type OpenAlexWorkWithTitle = OpenAlexWork & { title: string }
 
-  async search(query: string): Promise<AcademicProjectDto[]> {
-    const response: OpenAlexResponse = await this.api
-      .get('works', {
-        searchParams: {
-          search: query,
-          'per-page': 10,
-          select: 'id,doi,title,authorships,primary_location,abstract_inverted_index',
-          api_key: process.env.OPENALEX_API_KEY ?? '',
-        },
-      })
-      .json<OpenAlexResponse>()
+export class OpenAlexService implements ExternalProjectsSearch {
+  private readonly api = ky.create({
+    prefix: 'https://api.openalex.org',
+  })
 
-    return response.results
-      .filter((project) => project.title)
-      .map((project) => ({
-        title: project.title as string,
-        authors: project.authorships.map((a) => a.author.display_name),
-        externalUrl: project.primary_location?.landing_page_url ?? project.doi ?? project.id,
-        publishedIn: project.primary_location?.source?.display_name ?? '',
-        abstract: this.rebuildAbstract(project.abstract_inverted_index),
-      }))
+  async search(query: string): Promise<AcademicProjectDto[] | null> {
+    const apiKey = process.env.OPENALEX_API_KEY
+
+    try {
+      const response = await this.api
+        .get('works', {
+          searchParams: {
+            search: query,
+            'per-page': 10,
+            select: 'id,doi,title,authorships,primary_location,abstract_inverted_index',
+            ...(apiKey && { api_key: apiKey }),
+          },
+        })
+        .json<OpenAlexResponse>()
+
+      return response.results
+        .filter((work): work is OpenAlexWorkWithTitle => Boolean(work.title))
+        .map((work) => this.toDto(work))
+    } catch (error) {
+      console.error(error)
+      return null
+    }
+  }
+
+  private toDto(work: OpenAlexWorkWithTitle): AcademicProjectDto {
+    return {
+      title: work.title,
+      authors: work.authorships.map((a) => a.author.display_name),
+      externalUrl: work.primary_location?.landing_page_url ?? work.doi ?? work.id,
+      publishedIn: work.primary_location?.source?.display_name ?? '',
+      abstract: this.rebuildAbstract(work.abstract_inverted_index),
+    }
   }
 
   private rebuildAbstract(index: Record<string, number[]> | null): string | undefined {
@@ -48,7 +64,7 @@ export class OpenAlexService {
 
     return Object.entries(index)
       .flatMap(([word, positions]) => positions.map((pos) => [pos, word] as const))
-      .sort((a, b) => a[0] - b[0])
+      .sort(([a], [b]) => a - b)
       .map(([, word]) => word)
       .join(' ')
   }

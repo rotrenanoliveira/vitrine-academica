@@ -1,46 +1,24 @@
 import { appForTest as app } from '@tests/app'
-import { makeAccessCodeOnDatabase } from '@tests/factories/make-access-code'
-import { makeAccountOnDatabase } from '@tests/factories/make-account'
 import { makeInstitutionOnDatabase } from '@tests/factories/make-institution'
 import { makeInstitutionMemberOnDatabase } from '@tests/factories/make-institution-member'
 import { makeUserOnDatabase } from '@tests/factories/make-user'
+import { authenticateUser, setupManagerWithInstitution } from '@tests/factories/setup-manager-institution'
 import request from 'supertest'
 import {
   InstitutionMemberRole,
   InstitutionMemberStatus,
 } from '@/domain/institution/enterprise/entities/institution-member'
 
-async function authenticateUser() {
-  const { user } = await makeUserOnDatabase()
-  const { account } = await makeAccountOnDatabase({ userId: user.id })
-  const { plainCode } = await makeAccessCodeOnDatabase({ accountId: account.id })
-
-  const loginResponse = await request(app.server).post('/api/v1/auth/sessions').send({
-    email: user.email,
-    code: plainCode,
-  })
-
-  return {
-    accessToken: loginResponse.body.accessToken as string,
-    user,
-  }
-}
-
 describe('(E2E) - POST /api/v1/institutions/:institutionId/members/:memberId/role', () => {
   afterAll(async () => await app.close())
 
   it('should be able to promote a member to manager', async () => {
-    const { accessToken, user } = await authenticateUser()
-    const { institution } = await makeInstitutionOnDatabase({ registerBy: user.id })
-
-    await makeInstitutionMemberOnDatabase({
-      institutionId: institution.id.toString(),
-      userId: user.id.toString(),
-      role: InstitutionMemberRole.MANAGER,
-    })
+    const { accessToken, institution } = await setupManagerWithInstitution()
+    const { user: studentUser } = await makeUserOnDatabase()
 
     const { member: student } = await makeInstitutionMemberOnDatabase({
       institutionId: institution.id.toString(),
+      userId: studentUser.id.toString(),
       role: InstitutionMemberRole.STUDENT,
     })
 
@@ -56,9 +34,11 @@ describe('(E2E) - POST /api/v1/institutions/:institutionId/members/:memberId/rol
   it('should not be able to update role without authentication', async () => {
     const { user } = await makeUserOnDatabase()
     const { institution } = await makeInstitutionOnDatabase({ registerBy: user.id })
+    const { user: memberUser } = await makeUserOnDatabase()
 
     const { member } = await makeInstitutionMemberOnDatabase({
       institutionId: institution.id.toString(),
+      userId: memberUser.id.toString(),
       role: InstitutionMemberRole.STUDENT,
     })
 
@@ -72,9 +52,17 @@ describe('(E2E) - POST /api/v1/institutions/:institutionId/members/:memberId/rol
   it('should not be able to update role without management permission', async () => {
     const { accessToken, user } = await authenticateUser()
     const { institution } = await makeInstitutionOnDatabase({ registerBy: user.id })
+    const { user: memberUser } = await makeUserOnDatabase()
+
+    await makeInstitutionMemberOnDatabase({
+      institutionId: institution.id.toString(),
+      userId: user.id.toString(),
+      role: InstitutionMemberRole.STUDENT,
+    })
 
     const { member } = await makeInstitutionMemberOnDatabase({
       institutionId: institution.id.toString(),
+      userId: memberUser.id.toString(),
       role: InstitutionMemberRole.STUDENT,
     })
 
@@ -108,6 +96,7 @@ describe('(E2E) - POST /api/v1/institutions/:institutionId/members/:memberId/rol
   it('should be able to demote a manager when there is another active manager', async () => {
     const { accessToken, user } = await authenticateUser()
     const { institution } = await makeInstitutionOnDatabase({ registerBy: user.id })
+    const { user: otherManagerUser } = await makeUserOnDatabase()
 
     const { member: manager } = await makeInstitutionMemberOnDatabase({
       institutionId: institution.id.toString(),
@@ -117,6 +106,7 @@ describe('(E2E) - POST /api/v1/institutions/:institutionId/members/:memberId/rol
 
     await makeInstitutionMemberOnDatabase({
       institutionId: institution.id.toString(),
+      userId: otherManagerUser.id.toString(),
       role: InstitutionMemberRole.MANAGER,
       status: InstitutionMemberStatus.ACTIVE,
     })
