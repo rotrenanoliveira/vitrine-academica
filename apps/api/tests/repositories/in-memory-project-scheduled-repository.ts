@@ -20,6 +20,12 @@ export class InMemoryProjectScheduledRepository implements ProjectScheduledRepos
     return this.items.filter((item) => isSameUTCDay(item.publishedIn, date))
   }
 
+  async findManyScheduledBetween(from: Date, to: Date): Promise<ProjectScheduled[]> {
+    return this.items
+      .filter((item) => item.publishedIn > from && item.publishedIn <= to)
+      .sort((a, b) => a.publishedIn.getTime() - b.publishedIn.getTime())
+  }
+
   async create(projectScheduled: ProjectScheduled): Promise<void> {
     this.items.push(projectScheduled)
   }
