@@ -30,6 +30,7 @@ import { fetchPublishedProjectsRoute } from './projects/fetch-published-projects
 import { fetchPublishedProjectsTodayRoute } from './projects/fetch-published-projects-today'
 import { fetchScheduledProjectsRoute } from './projects/fetch-scheduled-projects'
 import { getProjectByIdRoute } from './projects/get-project-by-id'
+import { publishProjectRoute } from './projects/publish-project'
 import { publishScheduledProjectsRoute } from './projects/publish-scheduled-projects'
 import { registerProjectRoute } from './projects/register-project'
 import { registerProjectTagRoute } from './projects/register-project-tag'
@@ -103,6 +104,8 @@ export async function routes(app: FastifyInstance) {
   await app.register(fetchPublishedProjectsTodayRoute)
   /** POST /projects/:projectId/schedule */
   await app.register(scheduleProjectRoute)
+  /** POST /projects/:projectId/publish-now */
+  await app.register(publishProjectRoute)
   /** PUT /projects/:projectId */
   await app.register(updateProjectRoute)
   /** GET /projects/:projectId */
