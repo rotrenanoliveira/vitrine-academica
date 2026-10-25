@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { FormPublishProject } from '@/components/project/form-publish-project'
 import { FormScheduleProject } from '@/components/project/form-schedule-project'
 import {
   Breadcrumb,
@@ -36,6 +37,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   const isOwner = user.id === project.authorId
   const canEdit = isOwner
   const canSchedule = isOwner && project.status === 'SKETCH'
+  const canPublish = isOwner && (project.status === 'SKETCH' || project.status === 'SCHEDULED')
 
   return (
     <div className="flex flex-1 flex-col">
@@ -74,6 +76,12 @@ export default async function ProjectDetailPage({ params }: PageProps) {
         {canSchedule && (
           <div className="border border-border p-4">
             <FormScheduleProject projectId={project.id} />
+          </div>
+        )}
+
+        {canPublish && (
+          <div className="border border-border p-4">
+            <FormPublishProject projectId={project.id} />
           </div>
         )}
       </div>
