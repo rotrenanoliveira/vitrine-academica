@@ -8,9 +8,10 @@ import { api } from '../../api-client'
 export async function fetchPublishedProjects() {
   const [response, responseError] = await fetcher(
     api.get<{ projects: Project[] }>('api/v1/projects/published', { cache: 'no-store' }).json(),
+    { notFound: false },
   )
 
-  if (responseError) throw new Error(responseError.message)
+  if (responseError) return { projects: [] }
 
   return response
 }
