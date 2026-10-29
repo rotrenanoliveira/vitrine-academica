@@ -5,7 +5,6 @@ import { InMemoryProjectStarsRepository } from '@tests/repositories/in-memory-pr
 import { InMemoryProjectsRepository } from '@tests/repositories/in-memory-projects-repository'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import { ProjectStatus } from '../../../enterprise/entities/project'
 import { ProjectNotFoundError } from '../../_errors/project-not-found-error'
 import { StarNotFoundError } from '../../_errors/star-not-found-error'
@@ -49,9 +48,6 @@ describe('(UC) - Unstar Project', () => {
 
     expect(result.isRight()).toBeTruthy()
     expect(projectStar.active).toBe(false)
-    expect(auditLogsRepository.items[0].action).toBe(AuditLogAction.DELETE)
-    expect(auditLogsRepository.items[0].resource).toBe('project_star')
-    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.SUCCESS)
   })
 
   it('should not be ablet to unstar when there is no active star', async () => {

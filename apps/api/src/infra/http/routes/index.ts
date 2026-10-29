@@ -44,6 +44,8 @@ import { exportUserDataRoute } from './users/export-user-data'
 import { findUserByIdRoute } from './users/find-user-by-id'
 import { registerUserRoute } from './users/register-user'
 import { unstarProjectRoute } from './projects/unstar-project'
+import { getMyStarOnProjectRoute } from './projects/get-my-star-on-project'
+import { listMyStarredProjectsRoute } from './projects/list-my-starred-projects'
 
 /**
  * Routes prefix: /api/v1
@@ -112,6 +114,10 @@ export async function routes(app: FastifyInstance) {
   await app.register(starProjectRoute)
   /** DELETE /projects/:projectId/stars */
   await app.register(unstarProjectRoute)
+  /** GET /projects/:projectId/stars/me */
+  await app.register(getMyStarOnProjectRoute)
+  /** GET /me/starred-projects */
+  await app.register(listMyStarredProjectsRoute)
 
   /** Project tags routes */
   /** POST /projects/:projectId/tags */
