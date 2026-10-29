@@ -43,6 +43,7 @@ import { deleteUserAccountRoute } from './users/delete-user-account'
 import { exportUserDataRoute } from './users/export-user-data'
 import { findUserByIdRoute } from './users/find-user-by-id'
 import { registerUserRoute } from './users/register-user'
+import { unstarProjectRoute } from './projects/unstar-project'
 
 /**
  * Routes prefix: /api/v1
@@ -109,6 +110,8 @@ export async function routes(app: FastifyInstance) {
   await app.register(getProjectByIdRoute)
   /** POST /projects/:projectId/stars */
   await app.register(starProjectRoute)
+  /** DELETE /projects/:projectId/stars */
+  await app.register(unstarProjectRoute)
 
   /** Project tags routes */
   /** POST /projects/:projectId/tags */
