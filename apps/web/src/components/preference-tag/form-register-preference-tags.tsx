@@ -18,7 +18,6 @@ type FormRegisterPreferenceTagsProps = {
 export function FormRegisterPreferenceTags({ tags, selectedTagIds }: FormRegisterPreferenceTagsProps) {
   const router = useRouter()
   const selectedSet = new Set(selectedTagIds)
-  const availableTags = tags.filter((tag) => !selectedSet.has(tag.id))
 
   const [_, handleSubmit, isPending] = useFormState(actionRegisterPreferenceTags, {
     onSuccess: (message) => {
@@ -34,38 +33,24 @@ export function FormRegisterPreferenceTags({ tags, selectedTagIds }: FormRegiste
     return <p className="text-sm text-muted-foreground">Nenhuma tag cadastrada no sistema.</p>
   }
 
-  if (availableTags.length === 0) {
-    return <p className="text-sm text-muted-foreground">Preferências já cadastradas.</p>
-  }
-
   return (
-    <form className="space-y-4" onSubmit={handleSubmit}>
+    <form key={[...selectedTagIds].sort().join(',')} className="space-y-4" onSubmit={handleSubmit}>
       <div className="space-y-3">
-        <p className="text-sm text-muted-foreground">Selecione os assuntos de interesse.</p>
+        <p className="text-sm text-muted-foreground">Marque ou desmarque os assuntos de interesse.</p>
         <ul className="space-y-2">
-          {tags.map((tag) => {
-            const alreadySelected = selectedSet.has(tag.id)
-
-            return (
-              <li key={tag.id} className="flex items-center gap-2">
-                <input
-                  id={`preference-tag-${tag.id}`}
-                  type="checkbox"
-                  name="tag-id"
-                  value={tag.id}
-                  defaultChecked={alreadySelected}
-                  disabled={alreadySelected}
-                  className="size-4 border border-input accent-primary"
-                />
-                <Label
-                  htmlFor={`preference-tag-${tag.id}`}
-                  className={alreadySelected ? 'text-muted-foreground' : undefined}
-                >
-                  {tag.name}
-                </Label>
-              </li>
-            )
-          })}
+          {tags.map((tag) => (
+            <li key={tag.id} className="flex items-center gap-2">
+              <input
+                id={`preference-tag-${tag.id}`}
+                type="checkbox"
+                name="tag-id"
+                value={tag.id}
+                defaultChecked={selectedSet.has(tag.id)}
+                className="size-4 border border-input accent-primary"
+              />
+              <Label htmlFor={`preference-tag-${tag.id}`}>{tag.name}</Label>
+            </li>
+          ))}
         </ul>
       </div>
 
