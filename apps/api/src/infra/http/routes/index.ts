@@ -34,6 +34,7 @@ import { registerProjectRoute } from './projects/register-project'
 import { registerProjectTagRoute } from './projects/register-project-tag'
 import { scheduleProjectRoute } from './projects/schedule-project'
 import { searchExternalProjectsRoute } from './projects/search-external-projects'
+import { starProjectRoute } from './projects/star-project'
 import { updateProjectRoute } from './projects/update-project'
 import { fetchProjectsByTagRoute } from './tags/fetch-projects-by-tag'
 import { fetchTagsRoute } from './tags/fetch-tags'
@@ -106,6 +107,8 @@ export async function routes(app: FastifyInstance) {
   await app.register(updateProjectRoute)
   /** GET /projects/:projectId */
   await app.register(getProjectByIdRoute)
+  /** POST /projects/:projectId/stars */
+  await app.register(starProjectRoute)
 
   /** Project tags routes */
   /** POST /projects/:projectId/tags */
