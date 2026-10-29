@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { FormRelateProjectTags } from '@/components/project/form-relate-project-tags'
+import { FormScheduleProject } from '@/components/project/form-schedule-project'
 import { FormUpdateProject } from '@/components/project/form-update-project'
 import {
   Breadcrumb,
@@ -32,6 +33,8 @@ export default async function EditProjectPage({ params }: PageProps) {
     notFound()
   }
 
+  const canSchedule = project.status === 'SKETCH'
+
   return (
     <div className="flex flex-1 flex-col">
       <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border px-4">
@@ -42,7 +45,7 @@ export default async function EditProjectPage({ params }: PageProps) {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link href={`/projetos/${project.id}`} />}>Detalhe</BreadcrumbLink>
+              <BreadcrumbLink render={<Link href={`/projetos/${project.id}`} />}>Vitrine</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -60,6 +63,11 @@ export default async function EditProjectPage({ params }: PageProps) {
           <div className="border border-border p-6">
             <FormRelateProjectTags project={project} tags={tags} />
           </div>
+          {canSchedule && (
+            <div className="border border-border p-6">
+              <FormScheduleProject projectId={project.id} />
+            </div>
+          )}
         </div>
       </div>
     </div>

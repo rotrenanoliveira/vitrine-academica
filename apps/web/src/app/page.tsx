@@ -7,6 +7,7 @@ import { getCurrentUser } from '@/server/auth/require-user'
 import { getCachedUserPreferenceTags } from '@/server/http/routes/preference-tags/fetch-user-preference-tags'
 import { getCachedProjectsOfInterest } from '@/server/http/routes/projects/fetch-projects-of-interest'
 import { getCachedPublishedProjects } from '@/server/http/routes/projects/fetch-published-projects'
+import { loadStarredProjectIds } from '@/server/projects/load-starred-project-ids'
 import { resolveProjectsWithCover } from '@/server/projects/resolve-project-cover-url'
 import type { Project } from '@/utils/type'
 
@@ -40,7 +41,10 @@ async function loadHomeProjects(userId?: string): Promise<{
 
 export default async function HomePage() {
   const user = await getCurrentUser()
-  const { projects, showPreferencesBanner, personalized } = await loadHomeProjects(user?.id)
+  const [{ projects, showPreferencesBanner, personalized }, starredProjectIds] = await Promise.all([
+    loadHomeProjects(user?.id),
+    loadStarredProjectIds(Boolean(user)),
+  ])
   const projectsWithCover = await resolveProjectsWithCover(projects)
 
   return (
@@ -63,7 +67,12 @@ export default async function HomePage() {
 
       <main className="space-y-4">
         {showPreferencesBanner ? <HomePreferencesBanner /> : null}
-        <HomeProjectsList projects={projectsWithCover} />
+        <HomeProjectsList
+          projects={projectsWithCover}
+          starredProjectIds={starredProjectIds}
+          currentUserId={user?.id}
+          authenticated={Boolean(user)}
+        />
       </main>
     </div>
   )

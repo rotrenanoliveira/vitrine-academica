@@ -37,6 +37,42 @@ export const projectScheduledSchema = z.object({
 
 export type ProjectScheduled = z.infer<typeof projectScheduledSchema>
 
+export const projectStarSchema = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  userId: z.string(),
+  weight: z.number().int(),
+  active: z.boolean(),
+  ratedAt: z.string(),
+  createdAt: z.string(),
+})
+
+export type ProjectStar = z.infer<typeof projectStarSchema>
+
+export const projectRatingSchema = z.object({
+  projectId: z.string(),
+  starsCount: z.number().int(),
+  starsWeightedScore: z.number().int(),
+  teacherEvaluationsCount: z.number().int(),
+  teacherAverage: z.number().nullable(),
+  teacherScoresByCriterion: z.array(
+    z.object({
+      criterionId: z.string(),
+      criterionName: z.string(),
+      average: z.number(),
+    }),
+  ),
+})
+
+export type ProjectRating = z.infer<typeof projectRatingSchema>
+
+export const starredProjectItemSchema = z.object({
+  project: projectSchema,
+  star: projectStarSchema,
+})
+
+export type StarredProjectItem = z.infer<typeof starredProjectItemSchema>
+
 export const externalProjectSchema = z.object({
   title: z.string(),
   authors: z.array(z.string()),
