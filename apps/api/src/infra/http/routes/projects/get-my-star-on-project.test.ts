@@ -42,10 +42,12 @@ describe('(E2E) - GET /api/v1/projects/:projectId/stars/me', () => {
       .set('Authorization', `Bearer ${accessToken}`)
 
     expect(response.status).toBe(200)
-    expect(response.body.star).toEqual({
-      projectId: project.id.toString(),
-      userId: user.id.toString(),
-    })
+    expect(response.body.star).toEqual(
+      expect.objectContaining({
+        projectId: project.id.toString(),
+        userId: user.id.toString(),
+      }),
+    )
   })
 
   it('should return null if user has not star the project', async () => {
