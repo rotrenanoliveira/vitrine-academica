@@ -28,13 +28,17 @@ import { fetchMyProjectsRoute } from './projects/fetch-my-projects'
 import { fetchProjectsOfInterestRoute } from './projects/fetch-projects-of-interest'
 import { fetchPublishedProjectsRoute } from './projects/fetch-published-projects'
 import { fetchPublishedProjectsTodayRoute } from './projects/fetch-published-projects-today'
+import { getMyStarOnProjectRoute } from './projects/get-my-star-on-project'
 import { getProjectByIdRoute } from './projects/get-project-by-id'
+import { getProjectRatingsRoute } from './projects/get-project-ratings'
+import { listMyStarredProjectsRoute } from './projects/list-my-starred-projects'
 import { publishScheduledProjectsRoute } from './projects/publish-scheduled-projects'
 import { registerProjectRoute } from './projects/register-project'
 import { registerProjectTagRoute } from './projects/register-project-tag'
 import { scheduleProjectRoute } from './projects/schedule-project'
 import { searchExternalProjectsRoute } from './projects/search-external-projects'
 import { starProjectRoute } from './projects/star-project'
+import { unstarProjectRoute } from './projects/unstar-project'
 import { updateProjectRoute } from './projects/update-project'
 import { fetchProjectsByTagRoute } from './tags/fetch-projects-by-tag'
 import { fetchTagsRoute } from './tags/fetch-tags'
@@ -43,9 +47,6 @@ import { deleteUserAccountRoute } from './users/delete-user-account'
 import { exportUserDataRoute } from './users/export-user-data'
 import { findUserByIdRoute } from './users/find-user-by-id'
 import { registerUserRoute } from './users/register-user'
-import { unstarProjectRoute } from './projects/unstar-project'
-import { getMyStarOnProjectRoute } from './projects/get-my-star-on-project'
-import { listMyStarredProjectsRoute } from './projects/list-my-starred-projects'
 
 /**
  * Routes prefix: /api/v1
@@ -116,6 +117,8 @@ export async function routes(app: FastifyInstance) {
   await app.register(unstarProjectRoute)
   /** GET /projects/:projectId/stars/me */
   await app.register(getMyStarOnProjectRoute)
+  /** GET /projects/:projectId/ratings */
+  await app.register(getProjectRatingsRoute)
   /** GET /me/starred-projects */
   await app.register(listMyStarredProjectsRoute)
 

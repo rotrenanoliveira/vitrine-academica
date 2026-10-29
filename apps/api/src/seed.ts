@@ -148,7 +148,7 @@ const REQUEST_STATUSES = [
 async function resetDatabase() {
   console.log('Limpando tabelas...')
   await db.execute(
-    sql`TRUNCATE TABLE "users", "accounts", "attachments", "tags", "preference_tags", "projects", "project_tags", "project_scheduled", "access_codes", "sessions", "institutions", "institution_members", "institution_membership_requests" CASCADE`,
+    sql`TRUNCATE TABLE "users", "accounts", "attachments", "tags", "preference_tags", "projects", "project_tags", "project_scheduled", "project_stars", "access_codes", "sessions", "institutions", "institution_members", "institution_membership_requests" CASCADE`,
   )
 }
 
