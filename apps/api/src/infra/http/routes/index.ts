@@ -22,6 +22,7 @@ import { rejectInstitutionMembershipRequestRoute } from './institutions-membersh
 import { requestInstitutionMembershipRoute } from './institutions-membership/request-institution-membership'
 import { updateInstitutionMemberRoleRoute } from './institutions-membership/update-institution-member-role'
 import { updateInstitutionMemberStatusRoute } from './institutions-membership/update-institution-member-status'
+import { deactivatePreferenceTagRoute } from './preference-tags/deactivate-preference-tag'
 import { fetchUserPreferenceTagsRoute } from './preference-tags/fetch-user-preference-tags'
 import { registerPreferenceTagRoute } from './preference-tags/register-preference-tag'
 import { fetchMyProjectsRoute } from './projects/fetch-my-projects'
@@ -86,6 +87,8 @@ export async function routes(app: FastifyInstance) {
   /** Preference tags routes */
   /** POST /preference-tags */
   await app.register(registerPreferenceTagRoute)
+  /** POST /preference-tags/:tagId/deactivate */
+  await app.register(deactivatePreferenceTagRoute)
   /** GET /users/:userId/preference-tags */
   await app.register(fetchUserPreferenceTagsRoute)
 
