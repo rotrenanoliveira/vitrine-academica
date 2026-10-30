@@ -10,7 +10,7 @@ export interface ProjectRatingProps {
   projectId: UniqueEntityId
   starsCount: number
   starsWeightedScore: number
-  teacherEvaluationsCount: number
+  teacherRatingsCount: number
   teacherAverage: number | null
   teacherScoresByCriterion: ProjectRatingCriterionAverage[]
 }
@@ -30,8 +30,8 @@ export class ProjectRating {
     return this.props.starsWeightedScore
   }
 
-  get teacherEvaluationsCount() {
-    return this.props.teacherEvaluationsCount
+  get teacherRatingsCount() {
+    return this.props.teacherRatingsCount
   }
 
   get teacherAverage() {
