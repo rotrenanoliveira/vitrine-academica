@@ -6,7 +6,9 @@ import { InMemoryProjectsRepository } from '@tests/repositories/in-memory-projec
 import { InMemoryTagsRepository } from '@tests/repositories/in-memory-tags-repository'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
+import { AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import { TagNotFoundError } from '@/domain/tag/application/_errors/tag-not-found-error'
+import { NotProjectOwnerError } from '../../_errors/not-project-owner-error'
 import { ProjectNotFoundError } from '../../_errors/project-not-found-error'
 import { ProjectTagAlreadyExistsError } from '../../_errors/project-tag-already-exists-error'
 import { RegisterProjectTagUseCase } from './register-project-tag'
@@ -126,5 +128,47 @@ describe('(UC) - Register Project Tag', () => {
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(ProjectTagAlreadyExistsError)
     }
+  })
+
+  it('não pode registrar uma tag em um projeto de outro autor', async () => {
+    const { project } = makeProject()
+    const { tag } = makeTag()
+    projectsRepository.items.push(project)
+    tagsRepository.items.push(tag)
+
+    const result = await sut.execute({
+      projectId: project.id.toString(),
+      actorId: new UniqueEntityId().toString(),
+      tagId: tag.id.toString(),
+    })
+
+    expect(result.isLeft()).toBeTruthy()
+    expect(projectTagsRepository.items).toHaveLength(0)
+    expect(project.tags).toEqual([])
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.FAILURE)
+
+    if (result.isLeft()) {
+      expect(result.value).toBeInstanceOf(NotProjectOwnerError)
+    }
+  })
+
+  it('registra no log de auditoria as tags antes e depois da alteração', async () => {
+    const { project } = makeProject()
+    const { tag } = makeTag()
+    projectsRepository.items.push(project)
+    tagsRepository.items.push(tag)
+
+    await sut.execute({
+      projectId: project.id.toString(),
+      actorId: project.author.toString(),
+      tagId: tag.id.toString(),
+    })
+
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.SUCCESS)
+    expect(auditLogsRepository.items[0].diff).toEqual({
+      tags: { old: [], new: [tag.id.toString()] },
+    })
   })
 })
