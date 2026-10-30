@@ -106,4 +106,23 @@ describe('(E2E) - POST /api/v1/projects/:projectId/tags', () => {
       message: expect.any(String),
     })
   })
+
+  it('should not be able to register a tag on a project of another author', async () => {
+    const { accessToken } = await authenticateUser()
+    const { user: otherUser } = await makeUserOnDatabase()
+    const { project } = await makeProjectOnDatabase({ author: otherUser.id })
+    const { tag } = await makeTagOnDatabase()
+
+    const response = await request(app.server)
+      .post(`/api/v1/projects/${project.id.toString()}/tags`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        tagId: tag.id.toString(),
+      })
+
+    expect(response.status).toBe(403)
+    expect(response.body).toEqual({
+      message: expect.any(String),
+    })
+  })
 })
