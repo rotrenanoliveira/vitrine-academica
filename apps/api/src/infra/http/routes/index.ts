@@ -35,6 +35,7 @@ import { publishProjectRoute } from './projects/publish-project'
 import { publishScheduledProjectsRoute } from './projects/publish-scheduled-projects'
 import { registerProjectRoute } from './projects/register-project'
 import { registerProjectTagRoute } from './projects/register-project-tag'
+import { removeProjectTagRoute } from './projects/remove-project-tag'
 import { scheduleProjectRoute } from './projects/schedule-project'
 import { searchExternalProjectsRoute } from './projects/search-external-projects'
 import { updateProjectRoute } from './projects/update-project'
@@ -121,6 +122,8 @@ export async function routes(app: FastifyInstance) {
   /** Project tags routes */
   /** POST /projects/:projectId/tags */
   await app.register(registerProjectTagRoute)
+  /** DELETE /projects/:projectId/tags/:tagId */
+  await app.register(removeProjectTagRoute)
   /** GET /users/:userId/projects-of-interest */
   await app.register(fetchProjectsOfInterestRoute)
 
