@@ -3,6 +3,7 @@ import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { ProjectRating } from '../../../enterprise/entities/project-rating'
 import { ProjectNotFoundError } from '../../_errors/project-not-found-error'
 import type { ProjectStarsRepository } from '../../repositories/project-stars-repository'
+import type { ProjectTeacherRatingsRepository } from '../../repositories/project-teacher-ratings-repository'
 import type { ProjectsRepository } from '../../repositories/projects-repositories'
 
 interface GetProjectRatingsUseCaseRequest {
@@ -15,6 +16,7 @@ export class GetProjectRatingsUseCase {
   constructor(
     private readonly projectsRepository: ProjectsRepository,
     private readonly projectStarsRepository: ProjectStarsRepository,
+    private readonly projectTeacherRatingsRepository: ProjectTeacherRatingsRepository,
   ) {}
 
   async execute({ projectId }: GetProjectRatingsUseCaseRequest): Promise<GetProjectRatingsUseCaseResponse> {
@@ -24,18 +26,22 @@ export class GetProjectRatingsUseCase {
       return left(new ProjectNotFoundError())
     }
 
-    const [starsCount, starsWeightedScore] = await Promise.all([
-      this.projectStarsRepository.countActiveByProjectId(projectId),
-      this.projectStarsRepository.sumWeightByProjectId(projectId),
-    ])
+    const [starsCount, starsWeightedScore, teacherRatingsCount, teacherAverage, teacherScoresByCriterion] =
+      await Promise.all([
+        this.projectStarsRepository.countActiveByProjectId(projectId),
+        this.projectStarsRepository.sumWeightByProjectId(projectId),
+        this.projectTeacherRatingsRepository.countByProjectId(projectId),
+        this.projectTeacherRatingsRepository.averageOverallByProjectId(projectId),
+        this.projectTeacherRatingsRepository.averagesByCriterionForProject(projectId),
+      ])
 
     const rating = ProjectRating.create({
       projectId: new UniqueEntityId(projectId),
       starsCount,
       starsWeightedScore,
-      teacherEvaluationsCount: 0,
-      teacherAverage: null,
-      teacherScoresByCriterion: [],
+      teacherRatingsCount,
+      teacherAverage,
+      teacherScoresByCriterion,
     })
 
     return right({ rating })

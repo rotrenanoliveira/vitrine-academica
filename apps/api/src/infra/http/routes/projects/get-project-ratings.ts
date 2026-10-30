@@ -7,7 +7,7 @@ const projectRatingSchema = z.object({
   projectId: z.string(),
   starsCount: z.number().int(),
   starsWeightedScore: z.number().int(),
-  teacherEvaluationsCount: z.number().int(),
+  teacherRatingsCount: z.number().int(),
   teacherAverage: z.number().nullable(),
   teacherScoresByCriterion: z.array(
     z.object({

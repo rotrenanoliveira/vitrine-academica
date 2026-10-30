@@ -6,7 +6,7 @@ export class ProjectRatingPresenter {
       projectId: rating.projectId.toString(),
       starsCount: rating.starsCount,
       starsWeightedScore: rating.starsWeightedScore,
-      teacherEvaluationsCount: rating.teacherEvaluationsCount,
+      teacherRatingsCount: rating.teacherRatingsCount,
       teacherAverage: rating.teacherAverage,
       teacherScoresByCriterion: rating.teacherScoresByCriterion,
     }
