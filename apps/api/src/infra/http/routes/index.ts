@@ -29,10 +29,15 @@ import { fetchProjectsOfInterestRoute } from './projects/fetch-projects-of-inter
 import { fetchPublishedProjectsRoute } from './projects/fetch-published-projects'
 import { fetchPublishedProjectsTodayRoute } from './projects/fetch-published-projects-today'
 import { getMyStarOnProjectRoute } from './projects/get-my-star-on-project'
+import { getMyTeacherRatingOnProjectRoute } from './projects/get-my-teacher-rating-on-project'
 import { getProjectByIdRoute } from './projects/get-project-by-id'
 import { getProjectRatingsRoute } from './projects/get-project-ratings'
+import { listActiveRatingCriteriaRoute } from './projects/list-active-rating-criteria'
 import { listMyStarredProjectsRoute } from './projects/list-my-starred-projects'
+import { listMyTeacherRatingsRoute } from './projects/list-my-teacher-ratings'
+import { listProjectTeacherRatingsRoute } from './projects/list-project-teacher-ratings'
 import { publishScheduledProjectsRoute } from './projects/publish-scheduled-projects'
+import { rateProjectByCriteriaRoute } from './projects/rate-project-by-criteria'
 import { registerProjectRoute } from './projects/register-project'
 import { registerProjectTagRoute } from './projects/register-project-tag'
 import { scheduleProjectRoute } from './projects/schedule-project'
@@ -119,8 +124,18 @@ export async function routes(app: FastifyInstance) {
   await app.register(getMyStarOnProjectRoute)
   /** GET /projects/:projectId/ratings */
   await app.register(getProjectRatingsRoute)
+  /** PUT /projects/:projectId/teacher-ratings */
+  await app.register(rateProjectByCriteriaRoute)
+  /** GET /projects/:projectId/teacher-ratings/me */
+  await app.register(getMyTeacherRatingOnProjectRoute)
+  /** GET /projects/:projectId/teacher-ratings */
+  await app.register(listProjectTeacherRatingsRoute)
+  /** GET /rating-criteria */
+  await app.register(listActiveRatingCriteriaRoute)
   /** GET /me/starred-projects */
   await app.register(listMyStarredProjectsRoute)
+  /** GET /me/teacher-ratings */
+  await app.register(listMyTeacherRatingsRoute)
 
   /** Project tags routes */
   /** POST /projects/:projectId/tags */
