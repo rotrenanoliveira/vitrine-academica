@@ -41,6 +41,9 @@ export default async function ProjectsPage({ searchParams }: PageProps) {
             <Button variant="outline" nativeButton={false} render={<Link href="/projetos/apoiados" />}>
               Projetos que apoiei
             </Button>
+            <Button variant="outline" nativeButton={false} render={<Link href="/projetos/avaliados" />}>
+              Projetos que avaliei
+            </Button>
             <Button nativeButton={false} render={<Link href="/projetos/novo" />}>
               Novo projeto
             </Button>

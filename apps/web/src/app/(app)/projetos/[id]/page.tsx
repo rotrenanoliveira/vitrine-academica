@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ProjectStarButton } from '@/components/project/project-star-button'
+import { ProjectTeacherRatingForm } from '@/components/project/project-teacher-rating-form'
+import { ProjectTeacherVotesTable } from '@/components/project/project-teacher-votes-table'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,11 +15,16 @@ import {
 import { Button } from '@/components/ui/button'
 import { requireUser } from '@/server/auth/require-user'
 import { getAttachment } from '@/server/http/routes/attachments/get-attachment'
+import { getCachedMyInstitutionMemberships } from '@/server/http/routes/institutions/get-my-institution-memberships'
 import { getMyStarOnProject } from '@/server/http/routes/projects/get-my-star-on-project'
+import { getMyTeacherRatingOnProject } from '@/server/http/routes/projects/get-my-teacher-rating-on-project'
 import { getProject } from '@/server/http/routes/projects/get-project'
 import { getProjectRatings } from '@/server/http/routes/projects/get-project-ratings'
+import { listActiveRatingCriteria } from '@/server/http/routes/projects/list-active-rating-criteria'
+import { listProjectTeacherRatings } from '@/server/http/routes/projects/list-project-teacher-ratings'
 import { getCachedTags } from '@/server/http/routes/tags/fetch-tags'
 import { resolveProjectCoverUrl } from '@/server/projects/resolve-project-cover-url'
+import { canRateAsTeacher } from '@/utils/can-rate-as-teacher'
 
 export const metadata: Metadata = {
   title: 'Projeto',
@@ -38,30 +45,38 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   const { id } = await params
   const user = await requireUser()
 
-  const [{ project }, { rating }, { tags: allTags }] = await Promise.all([
+  const [{ project }, { rating }, { tags: allTags }, { members }] = await Promise.all([
     getProject(id),
     getProjectRatings(id),
     getCachedTags(),
+    getCachedMyInstitutionMemberships(user.id),
   ])
 
   const isOwner = user.id === project.authorId
   const canStar = project.status === 'PUBLISHED' && !isOwner
+  const canRate = project.status === 'PUBLISHED' && !isOwner && canRateAsTeacher(members)
 
-  const [coverUrl, myStarResult, attachmentEntries] = await Promise.all([
-    resolveProjectCoverUrl(project),
-    canStar || project.status === 'PUBLISHED' ? getMyStarOnProject(id) : Promise.resolve({ star: null }),
-    Promise.all(
-      project.attachments.map(async (attachmentId) => {
-        const [result] = await getAttachment(attachmentId)
-        if (!result) return null
-        return { id: attachmentId, ...result }
-      }),
-    ),
-  ])
+  const [coverUrl, myStarResult, attachmentEntries, votesResult, criteriaForForm, myTeacherRatingResult] =
+    await Promise.all([
+      resolveProjectCoverUrl(project),
+      canStar || project.status === 'PUBLISHED' ? getMyStarOnProject(id) : Promise.resolve({ star: null }),
+      Promise.all(
+        project.attachments.map(async (attachmentId) => {
+          const [result] = await getAttachment(attachmentId)
+          if (!result) return null
+          return { id: attachmentId, ...result }
+        }),
+      ),
+      project.status === 'PUBLISHED' ? listProjectTeacherRatings(id) : Promise.resolve({ criteria: [], items: [] }),
+      canRate ? listActiveRatingCriteria() : Promise.resolve({ criteria: [] }),
+      canRate ? getMyTeacherRatingOnProject(id) : Promise.resolve({ teacherRating: null }),
+    ])
 
   const projectTags = allTags.filter((tag) => project.tags.includes(tag.id))
   const attachments = attachmentEntries.filter((item): item is NonNullable<typeof item> => item !== null)
   const starred = Boolean(myStarResult.star)
+  const myTeacherRating = myTeacherRatingResult.teacherRating
+  const voteCriteria = votesResult.criteria.length > 0 ? votesResult.criteria : criteriaForForm.criteria
 
   return (
     <div className="flex flex-1 flex-col">
@@ -106,6 +121,12 @@ export default async function ProjectDetailPage({ params }: PageProps) {
                 disabled={isOwner}
                 variant="detail"
               />
+              {rating.teacherAverage !== null && (
+                <p className="text-sm text-muted-foreground">
+                  Overall docente{' '}
+                  <span className="font-semibold tabular-nums text-foreground">{rating.teacherAverage.toFixed(2)}</span>
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -168,27 +189,32 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           </div>
         )}
 
-        {isOwner && (
-          <>
-            {project.status === 'PUBLISHED' && (
-              <div className="flex flex-wrap gap-6 border border-border p-4 text-sm">
-                <div>
-                  <p className="text-xs tracking-wider text-muted-foreground uppercase">Apoios</p>
-                  <p className="font-heading text-xl font-semibold tabular-nums">{rating.starsCount}</p>
-                </div>
-                <div>
-                  <p className="text-xs tracking-wider text-muted-foreground uppercase">Score ponderado</p>
-                  <p className="font-heading text-xl font-semibold tabular-nums">{rating.starsWeightedScore}</p>
-                </div>
-              </div>
-            )}
+        {project.status === 'PUBLISHED' && (
+          <div className="space-y-6">
+            <ProjectTeacherVotesTable
+              criteria={voteCriteria}
+              items={votesResult.items}
+              teacherAverage={rating.teacherAverage}
+              ratingsCount={rating.teacherRatingsCount}
+            />
 
-            <div>
-              <Button nativeButton={false} variant="outline" render={<Link href={`/projetos/${project.id}/editar`} />}>
-                Gerenciar / Editar
-              </Button>
-            </div>
-          </>
+            {canRate && criteriaForForm.criteria.length > 0 && (
+              <ProjectTeacherRatingForm
+                projectId={project.id}
+                criteria={criteriaForForm.criteria}
+                initialRating={myTeacherRating}
+                teacherName={user.name}
+              />
+            )}
+          </div>
+        )}
+
+        {isOwner && (
+          <div>
+            <Button nativeButton={false} variant="outline" render={<Link href={`/projetos/${project.id}/editar`} />}>
+              Gerenciar / Editar
+            </Button>
+          </div>
         )}
       </div>
     </div>
