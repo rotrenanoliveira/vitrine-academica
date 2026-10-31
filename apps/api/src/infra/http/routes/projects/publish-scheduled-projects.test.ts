@@ -8,7 +8,7 @@ import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
 describe('(E2E) - POST /api/v1/projects/publish-scheduled', () => {
   afterAll(async () => await app.close())
 
-  it('deve ser possivel publicar projetos agendados', async () => {
+  it('publicar agendados: com agendamento do dia, deve retornar 200 com projetos publicados', async () => {
     // Esta rota sera usada internamente pelo sistema para publicar projetos agendados para a data informada
     const { user } = await makeUserOnDatabase()
     const publishedIn = new Date('2030-06-10T10:00:00.000Z')

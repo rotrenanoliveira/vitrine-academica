@@ -10,14 +10,14 @@ const daysFromNow = (days: number) => new Date(Date.now() + days * 24 * 60 * 60 
 describe('(E2E) - GET /api/v1/projects/scheduled/soon', () => {
   afterAll(async () => await app.close())
 
-  it('deve devolver uma lista vazia quando não há projetos agendados', async () => {
+  it('listar em breve: sem projetos agendados, deve retornar 200 com lista vazia', async () => {
     const response = await request(app.server).get('/api/v1/projects/scheduled/soon')
 
     expect(response.status).toBe(200)
     expect(response.body.scheduledProjects).toEqual([])
   })
 
-  it('deve ser possível listar os projetos agendados para os próximos 7 dias', async () => {
+  it('listar em breve: com projetos na janela de 7 dias, deve retornar 200 ordenados por data', async () => {
     const { user } = await makeUserOnDatabase()
 
     const scheduleOnDatabase = async (publishedIn: Date) => {
