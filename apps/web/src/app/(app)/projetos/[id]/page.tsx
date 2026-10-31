@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { ProjectStarButton } from '@/components/project/project-star-button'
 import { ProjectTeacherRatingForm } from '@/components/project/project-teacher-rating-form'
 import { ProjectTeacherVotesTable } from '@/components/project/project-teacher-votes-table'
+import { FormPublishProject } from '@/components/project/form-publish-project'
+import { FormScheduleProject } from '@/components/project/form-schedule-project'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -77,6 +79,9 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   const starred = Boolean(myStarResult.star)
   const myTeacherRating = myTeacherRatingResult.teacherRating
   const voteCriteria = votesResult.criteria.length > 0 ? votesResult.criteria : criteriaForForm.criteria
+  const canEdit = isOwner
+  const canSchedule = isOwner && project.status === 'SKETCH'
+  const canPublish = isOwner && (project.status === 'SKETCH' || project.status === 'SCHEDULED')
 
   return (
     <div className="flex flex-1 flex-col">
@@ -214,6 +219,12 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             <Button nativeButton={false} variant="outline" render={<Link href={`/projetos/${project.id}/editar`} />}>
               Gerenciar / Editar
             </Button>
+          </div>
+        )}
+
+        {canPublish && (
+          <div className="border border-border p-4">
+            <FormPublishProject projectId={project.id} />
           </div>
         )}
       </div>

@@ -1,3 +1,4 @@
+import { makePreferenceTag } from '@tests/factories/make-preference-tag'
 import { makeTag } from '@tests/factories/make-tag'
 import { makeUser } from '@tests/factories/make-user'
 import { InMemoryAuditLogsRepository } from '@tests/repositories/in-memory-audit-logs-repository'
@@ -8,6 +9,7 @@ import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
 import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import { UserNotFoundError } from '@/domain/identity/application/_errors/user-not-found-error'
+import { PreferenceTagStatus } from '@/domain/tag/enterprise/entities/preference-tag'
 import { PreferenceTagAlreadyExistsError } from '../../_errors/preference-tag-already-exists-error'
 import { TagNotFoundError } from '../../_errors/tag-not-found-error'
 import { RegisterPreferenceTagUseCase } from './register-preference-tag'
@@ -126,5 +128,31 @@ describe('(UC) - Register Preference Tag', () => {
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(PreferenceTagAlreadyExistsError)
     }
+  })
+
+  it('reativa uma preferência de tag que estava inativa', async () => {
+    const { user } = makeUser()
+    const { tag } = makeTag()
+    usersRepository.items.push(user)
+    tagsRepository.items.push(tag)
+
+    const { preferenceTag } = makePreferenceTag({
+      userId: user.id,
+      tagId: tag.id,
+      status: PreferenceTagStatus.INACTIVE,
+    })
+    preferenceTagsRepository.items.push(preferenceTag)
+
+    const result = await sut.execute({
+      userId: user.id.toString(),
+      tagId: tag.id.toString(),
+    })
+
+    expect(result.isRight()).toBeTruthy()
+    expect(preferenceTagsRepository.items).toHaveLength(1)
+    expect(preferenceTagsRepository.items[0].status).toBe(PreferenceTagStatus.ACTIVE)
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].action).toBe(AuditLogAction.UPDATE)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.SUCCESS)
   })
 })

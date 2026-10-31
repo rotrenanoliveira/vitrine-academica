@@ -22,6 +22,7 @@ import { rejectInstitutionMembershipRequestRoute } from './institutions-membersh
 import { requestInstitutionMembershipRoute } from './institutions-membership/request-institution-membership'
 import { updateInstitutionMemberRoleRoute } from './institutions-membership/update-institution-member-role'
 import { updateInstitutionMemberStatusRoute } from './institutions-membership/update-institution-member-status'
+import { deactivatePreferenceTagRoute } from './preference-tags/deactivate-preference-tag'
 import { fetchUserPreferenceTagsRoute } from './preference-tags/fetch-user-preference-tags'
 import { registerPreferenceTagRoute } from './preference-tags/register-preference-tag'
 import { fetchMyProjectsRoute } from './projects/fetch-my-projects'
@@ -36,6 +37,9 @@ import { listActiveRatingCriteriaRoute } from './projects/list-active-rating-cri
 import { listMyStarredProjectsRoute } from './projects/list-my-starred-projects'
 import { listMyTeacherRatingsRoute } from './projects/list-my-teacher-ratings'
 import { listProjectTeacherRatingsRoute } from './projects/list-project-teacher-ratings'
+import { fetchScheduledProjectsRoute } from './projects/fetch-scheduled-projects'
+import { getProjectByIdRoute } from './projects/get-project-by-id'
+import { publishProjectRoute } from './projects/publish-project'
 import { publishScheduledProjectsRoute } from './projects/publish-scheduled-projects'
 import { rateProjectByCriteriaRoute } from './projects/rate-project-by-criteria'
 import { registerProjectRoute } from './projects/register-project'
@@ -96,6 +100,8 @@ export async function routes(app: FastifyInstance) {
   /** Preference tags routes */
   /** POST /preference-tags */
   await app.register(registerPreferenceTagRoute)
+  /** POST /preference-tags/:tagId/deactivate */
+  await app.register(deactivatePreferenceTagRoute)
   /** GET /users/:userId/preference-tags */
   await app.register(fetchUserPreferenceTagsRoute)
 
@@ -112,6 +118,8 @@ export async function routes(app: FastifyInstance) {
   await app.register(fetchPublishedProjectsTodayRoute)
   /** POST /projects/:projectId/schedule */
   await app.register(scheduleProjectRoute)
+  /** POST /projects/:projectId/publish-now */
+  await app.register(publishProjectRoute)
   /** PUT /projects/:projectId */
   await app.register(updateProjectRoute)
   /** GET /projects/:projectId */
@@ -136,6 +144,10 @@ export async function routes(app: FastifyInstance) {
   await app.register(listMyStarredProjectsRoute)
   /** GET /me/teacher-ratings */
   await app.register(listMyTeacherRatingsRoute)
+  /** GET /projects/external-search */
+  await app.register(searchExternalProjectsRoute)
+  /** GET /projects/scheduled/soon */
+  await app.register(fetchScheduledProjectsRoute)
 
   /** Project tags routes */
   /** POST /projects/:projectId/tags */
@@ -176,6 +188,4 @@ export async function routes(app: FastifyInstance) {
   await app.register(rejectInstitutionMembershipRequestRoute)
   /** GET /institutions/:institutionId/membership-requests */
   await app.register(fetchInstitutionMembershipRequestsRoute)
-
-  await app.register(searchExternalProjectsRoute)
 }
