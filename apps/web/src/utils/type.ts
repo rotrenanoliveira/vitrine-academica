@@ -37,6 +37,80 @@ export const projectScheduledSchema = z.object({
 
 export type ProjectScheduled = z.infer<typeof projectScheduledSchema>
 
+export const projectStarSchema = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  userId: z.string(),
+  weight: z.number().int(),
+  active: z.boolean(),
+  ratedAt: z.string(),
+  createdAt: z.string(),
+})
+
+export type ProjectStar = z.infer<typeof projectStarSchema>
+
+export const projectRatingSchema = z.object({
+  projectId: z.string(),
+  starsCount: z.number().int(),
+  starsWeightedScore: z.number().int(),
+  teacherRatingsCount: z.number().int(),
+  teacherAverage: z.number().nullable(),
+  teacherScoresByCriterion: z.array(
+    z.object({
+      criterionId: z.string(),
+      criterionName: z.string(),
+      average: z.number(),
+    }),
+  ),
+})
+
+export type ProjectRating = z.infer<typeof projectRatingSchema>
+
+export const starredProjectItemSchema = z.object({
+  project: projectSchema,
+  star: projectStarSchema,
+})
+
+export type StarredProjectItem = z.infer<typeof starredProjectItemSchema>
+
+export const ratingCriterionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  weight: z.number(),
+  active: z.boolean(),
+  validFrom: z.string(),
+  validUntil: z.string().nullable(),
+  createdAt: z.string(),
+})
+
+export type RatingCriterion = z.infer<typeof ratingCriterionSchema>
+
+export const teacherRatingItemSchema = z.object({
+  id: z.string(),
+  criterionId: z.string(),
+  score: z.number(),
+})
+
+export const projectTeacherRatingSchema = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  teacherId: z.string(),
+  overallScore: z.number(),
+  ratedAt: z.string(),
+  createdAt: z.string(),
+  items: z.array(teacherRatingItemSchema),
+})
+
+export type ProjectTeacherRating = z.infer<typeof projectTeacherRatingSchema>
+
+export const teacherRatedProjectItemSchema = z.object({
+  project: projectSchema,
+  rating: projectTeacherRatingSchema,
+})
+
+export type TeacherRatedProjectItem = z.infer<typeof teacherRatedProjectItemSchema>
+
 export const externalProjectSchema = z.object({
   title: z.string(),
   authors: z.array(z.string()),

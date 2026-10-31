@@ -37,9 +37,17 @@ export default async function ProjectsPage({ searchParams }: PageProps) {
       <div className="flex flex-1 flex-col gap-4 p-4">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <ProjectsFilters />
-          <Button nativeButton={false} render={<Link href="/projetos/novo" />}>
-            Novo projeto
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" nativeButton={false} render={<Link href="/projetos/apoiados" />}>
+              Projetos que apoiei
+            </Button>
+            <Button variant="outline" nativeButton={false} render={<Link href="/projetos/avaliados" />}>
+              Projetos que avaliei
+            </Button>
+            <Button nativeButton={false} render={<Link href="/projetos/novo" />}>
+              Novo projeto
+            </Button>
+          </div>
         </div>
         <Separator />
         <Suspense fallback={<p className="text-sm text-muted-foreground">Carregando projetos…</p>}>

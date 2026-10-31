@@ -11,6 +11,7 @@ import { makePreferenceTagOnDatabase } from '@tests/factories/make-preference-ta
 import { makeProjectOnDatabase } from '@tests/factories/make-project'
 import { makeProjectScheduledOnDatabase } from '@tests/factories/make-project-scheduled'
 import { makeProjectTagOnDatabase } from '@tests/factories/make-project-tag'
+import { makeRatingCriterionOnDatabase } from '@tests/factories/make-rating-criterion'
 import { makeSessionOnDatabase } from '@tests/factories/make-session'
 import { makeTagOnDatabase } from '@tests/factories/make-tag'
 import { makeUserOnDatabase } from '@tests/factories/make-user'
@@ -148,8 +149,55 @@ const REQUEST_STATUSES = [
 async function resetDatabase() {
   console.log('Limpando tabelas...')
   await db.execute(
-    sql`TRUNCATE TABLE "users", "accounts", "attachments", "tags", "preference_tags", "projects", "project_tags", "project_scheduled", "access_codes", "sessions", "institutions", "institution_members", "institution_membership_requests" CASCADE`,
+    sql`TRUNCATE TABLE "users", "accounts", "attachments", "tags", "preference_tags", "projects", "project_tags", "project_scheduled", "project_stars", "project_teacher_ratings", "teacher_rating_items", "rating_criteria", "access_codes", "sessions", "institutions", "institution_members", "institution_membership_requests" CASCADE`,
   )
+}
+
+/** 4 critérios canônicos (FEATURE-AVALIACAO §2.3) — pesos iguais; notas 0–10. */
+const RATING_CRITERIA_SEED = [
+  {
+    name: 'Originalidade e inovação',
+    description:
+      'Grau de contribuição nova, diferenciação frente a soluções conhecidas e avanço em relação ao estado da arte. Âncoras: 0–3 repetição; 4–6 adaptação; 7–8 contribuição clara; 9–10 inovação marcante.',
+    weight: 1,
+    active: true,
+  },
+  {
+    name: 'Rigor metodológico e qualidade técnica',
+    description:
+      'Coerência do método, fundamentação, correção técnica, reproducibilidade e solidez dos resultados. Âncoras: 0–3 falhas graves; 4–6 parcial; 7–8 sólido; 9–10 exemplar.',
+    weight: 1,
+    active: true,
+  },
+  {
+    name: 'Clareza e organização da apresentação',
+    description:
+      'Estrutura do material na vitrine, linguagem, organização lógica e facilidade de compreensão. Âncoras: 0–3 confuso; 4–6 com esforço; 7–8 bem organizado; 9–10 exemplar.',
+    weight: 1,
+    active: true,
+  },
+  {
+    name: 'Relevância e impacto',
+    description:
+      'Pertinência do problema, aplicabilidade acadêmica/social/tecnológica e potencial de uso. Âncoras: 0–3 pouco pertinente; 4–6 limitada; 7–8 impacto claro; 9–10 alto potencial.',
+    weight: 1,
+    active: true,
+  },
+] as const
+
+async function seedRatingCriteria() {
+  console.log('Criando critérios de avaliação docente (4 categorias canônicas)...')
+
+  for (const [index, criterionSeed] of RATING_CRITERIA_SEED.entries()) {
+    const { criterion } = await makeRatingCriterionOnDatabase({
+      name: criterionSeed.name,
+      description: criterionSeed.description,
+      weight: criterionSeed.weight,
+      active: criterionSeed.active,
+    })
+
+    console.log(`  ✓ ${index + 1}/${RATING_CRITERIA_SEED.length} ${criterion.name}`)
+  }
 }
 
 async function seedAttachments() {
@@ -183,6 +231,8 @@ async function seed() {
   console.log('Iniciando seed...\n')
 
   await resetDatabase()
+
+  await seedRatingCriteria()
 
   const attachments = await seedAttachments()
 
