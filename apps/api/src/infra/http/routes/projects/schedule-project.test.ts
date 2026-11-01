@@ -27,7 +27,7 @@ async function authenticateUser() {
 describe('(E2E) - POST /api/v1/projects/:projectId/schedule', () => {
   afterAll(async () => await app.close())
 
-  it('deve ser possivel agendar um projeto', async () => {
+  it('agendar: com projeto em rascunho, deve retornar 201 com o agendamento', async () => {
     const { accessToken, user } = await authenticateUser()
     const { project } = await makeProjectOnDatabase({ author: user.id })
     const publishedIn = new Date('2030-01-15T12:00:00.000Z')
@@ -50,7 +50,7 @@ describe('(E2E) - POST /api/v1/projects/:projectId/schedule', () => {
     })
   })
 
-  it('should not be able to schedule a project when it does not exist', async () => {
+  it('agendar: com projeto inexistente, deve retornar 404 com mensagem', async () => {
     const { accessToken } = await authenticateUser()
 
     const response = await request(app.server)
@@ -66,7 +66,7 @@ describe('(E2E) - POST /api/v1/projects/:projectId/schedule', () => {
     })
   })
 
-  it('should not be able to schedule a project of another user', async () => {
+  it('agendar: com projeto de outro usuário, deve retornar 403', async () => {
     const { accessToken } = await authenticateUser()
     const { user: owner } = await makeUserOnDatabase()
     const { project } = await makeProjectOnDatabase({ author: owner.id })
@@ -81,7 +81,7 @@ describe('(E2E) - POST /api/v1/projects/:projectId/schedule', () => {
     expect(response.status).toBe(403)
   })
 
-  it('should not be able to schedule a project when it is already scheduled', async () => {
+  it('agendar: com projeto já agendado, deve retornar 409 com mensagem', async () => {
     const { accessToken, user } = await authenticateUser()
     const { project } = await makeProjectOnDatabase({ author: user.id })
 
@@ -103,7 +103,7 @@ describe('(E2E) - POST /api/v1/projects/:projectId/schedule', () => {
     })
   })
 
-  it('should not be able to schedule a project when status is not sketch', async () => {
+  it('agendar: com projeto fora de rascunho, deve retornar 400 com mensagem', async () => {
     const { accessToken, user } = await authenticateUser()
     const { project } = await makeProjectOnDatabase({
       author: user.id,

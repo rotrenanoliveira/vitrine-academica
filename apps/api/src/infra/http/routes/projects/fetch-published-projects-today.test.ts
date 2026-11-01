@@ -8,7 +8,7 @@ import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
 describe('(E2E) - GET /api/v1/projects/published/today', () => {
   afterAll(async () => await app.close())
 
-  it('deve ser possivel buscar os projetos publicados com agendamento no dia atual', async () => {
+  it('listar hoje: com projetos lançados hoje, deve retornar 200 com os projetos', async () => {
     const { user } = await makeUserOnDatabase()
     const today = new Date()
     const yesterday = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 1, 12))
