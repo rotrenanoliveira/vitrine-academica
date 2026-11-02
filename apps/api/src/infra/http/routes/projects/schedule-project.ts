@@ -4,6 +4,8 @@ import { z } from 'zod'
 import { makeAuthenticateMiddleware } from '../../factories/auth/make-authenticate-middleware'
 import { makeScheduleProjectController } from '../../factories/project/make-schedule-project-controller'
 
+const MAX_PUBLISHED_IN = new Date('9999-12-31T23:59:59.999Z')
+
 export async function scheduleProjectRoute(app: FastifyInstance) {
   const scheduleProjectController = makeScheduleProjectController()
   const authenticate = makeAuthenticateMiddleware()
@@ -20,7 +22,10 @@ export async function scheduleProjectRoute(app: FastifyInstance) {
           projectId: z.uuid().describe('O ID do projeto'),
         }),
         body: z.object({
-          publishedIn: z.coerce.date().describe('A data de publicação agendada'),
+          publishedIn: z.coerce
+            .date()
+            .max(MAX_PUBLISHED_IN, 'A data de publicação deve ser anterior ao ano 10000')
+            .describe('A data de publicação agendada'),
         }),
         response: {
           201: z.object({

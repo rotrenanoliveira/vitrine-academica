@@ -23,12 +23,7 @@ export async function publishScheduledProjectsRoute(app: FastifyInstance) {
       schema: {
         tags: ['projects'],
         summary: 'Publicar projetos agendados',
-        description: 'Publica os projetos cujo agendamento corresponde à data informada',
-        body: z
-          .object({
-            date: z.coerce.date().optional().describe('A data de referência para publicação'),
-          })
-          .optional(),
+        description: 'Publica os projetos agendados cujo horário já chegou, sempre pelo relógio do servidor',
         response: {
           200: z.object({
             projects: z.array(projectSchema),
@@ -39,8 +34,8 @@ export async function publishScheduledProjectsRoute(app: FastifyInstance) {
         },
       },
     },
-    async (request, reply) => {
-      return publishScheduledProjectsController.handle(request.body ?? {}, reply)
+    async (_request, reply) => {
+      return publishScheduledProjectsController.handle(reply)
     },
   )
 }

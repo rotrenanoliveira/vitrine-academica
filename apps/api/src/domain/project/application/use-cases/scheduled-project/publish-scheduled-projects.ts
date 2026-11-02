@@ -21,7 +21,7 @@ export class PublishScheduledProjectsUseCase {
   async execute({
     date = new Date(),
   }: PublishScheduledProjectsUseCaseRequest = {}): Promise<PublishScheduledProjectsUseCaseResponse> {
-    const schedules = await this.projectScheduledRepository.findManyReadyToPublish(date)
+    const schedules = await this.projectScheduledRepository.findManyDueToPublish(date)
     const publishedProjects: Project[] = []
 
     for (const schedule of schedules) {

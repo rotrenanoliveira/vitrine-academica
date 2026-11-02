@@ -20,7 +20,13 @@ export async function actionScheduleProject(data: FormData) {
   }
 
   const projectId = formResult.data['project-id']
-  const publishedIn = new Date(formResult.data['published-in']).toISOString()
+  const publishedInDate = new Date(formResult.data['published-in'])
+
+  if (Number.isNaN(publishedInDate.getTime())) {
+    return { success: false, message: 'Informe uma data de publicação válida.' }
+  }
+
+  const publishedIn = publishedInDate.toISOString()
 
   const [_, responseError] = await scheduleProject({
     projectId,
