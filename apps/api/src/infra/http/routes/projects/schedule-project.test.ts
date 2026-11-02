@@ -122,4 +122,31 @@ describe('(E2E) - POST /api/v1/projects/:projectId/schedule', () => {
       message: expect.any(String),
     })
   })
+
+  it('agendar: com data no passado, deve retornar 400 com mensagem', async () => {
+    const { accessToken, user } = await authenticateUser()
+    const { project } = await makeProjectOnDatabase({ author: user.id, status: ProjectStatus.SKETCH })
+
+    const response = await request(app.server)
+      .post(`/api/v1/projects/${project.id.toString()}/schedule`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        publishedIn: new Date('2020-01-15T12:00:00.000Z').toISOString(),
+      })
+
+    expect(response.status).toBe(400)
+    expect(response.body.message).toBe('A data de publicação deve estar no futuro')
+  })
+
+  it('agendar: com ano de seis dígitos, deve retornar 400', async () => {
+    const { accessToken, user } = await authenticateUser()
+    const { project } = await makeProjectOnDatabase({ author: user.id, status: ProjectStatus.SKETCH })
+
+    const response = await request(app.server)
+      .post(`/api/v1/projects/${project.id.toString()}/schedule`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ publishedIn: '+202600-01-01T00:00:00.000Z' })
+
+    expect(response.status).toBe(400)
+  })
 })

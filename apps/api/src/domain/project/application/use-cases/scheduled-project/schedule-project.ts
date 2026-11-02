@@ -5,6 +5,7 @@ import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entiti
 import { ProjectStatus } from '../../../enterprise/entities/project'
 import { ProjectScheduled } from '../../../enterprise/entities/project-scheduled'
 import { InvalidProjectStatusError } from '../../_errors/invalid-project-status-error'
+import { InvalidScheduleDateError } from '../../_errors/invalid-schedule-date-error'
 import { NotProjectOwnerError } from '../../_errors/not-project-owner-error'
 import { ProjectAlreadyScheduledError } from '../../_errors/project-already-scheduled-error'
 import { ProjectNotFoundError } from '../../_errors/project-not-found-error'
@@ -15,6 +16,7 @@ interface ScheduleProjectUseCaseRequest {
   projectId: string
   authorId: string
   publishedIn: Date
+  now?: Date
 }
 
 type LogParams = {
@@ -26,7 +28,11 @@ type LogParams = {
 }
 
 type ScheduleProjectUseCaseResponse = Either<
-  ProjectNotFoundError | NotProjectOwnerError | ProjectAlreadyScheduledError | InvalidProjectStatusError,
+  | ProjectNotFoundError
+  | NotProjectOwnerError
+  | ProjectAlreadyScheduledError
+  | InvalidProjectStatusError
+  | InvalidScheduleDateError,
   { projectScheduled: ProjectScheduled }
 >
 
@@ -54,6 +60,7 @@ export class ScheduleProjectUseCase {
     projectId,
     authorId,
     publishedIn,
+    now = new Date(),
   }: ScheduleProjectUseCaseRequest): Promise<ScheduleProjectUseCaseResponse> {
     const project = await this.projectsRepository.findById(projectId)
 
@@ -101,6 +108,17 @@ export class ScheduleProjectUseCase {
       })
 
       return left(new ProjectAlreadyScheduledError())
+    }
+
+    if (publishedIn.getTime() <= now.getTime()) {
+      await this.log({
+        actorId: authorId,
+        resourceId: projectId,
+        text: `Projeto ${projectId} não pode ser agendado para ${publishedIn.toISOString()}, que não está no futuro.`,
+        status: AuditLogStatus.FAILURE,
+      })
+
+      return left(new InvalidScheduleDateError())
     }
 
     const projectScheduled = ProjectScheduled.create({
