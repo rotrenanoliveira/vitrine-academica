@@ -26,6 +26,18 @@ export class InMemoryProjectScheduledRepository implements ProjectScheduledRepos
       .sort((a, b) => a.publishedIn.getTime() - b.publishedIn.getTime())
   }
 
+  async findManyDueToPublish(now: Date): Promise<ProjectScheduled[]> {
+    return this.items
+      .filter((item) => item.publishedIn <= now)
+      .sort((a, b) => a.publishedIn.getTime() - b.publishedIn.getTime())
+  }
+
+  async findManyInRange(start: Date, end: Date): Promise<ProjectScheduled[]> {
+    return this.items
+      .filter((item) => item.publishedIn >= start && item.publishedIn < end)
+      .sort((a, b) => a.publishedIn.getTime() - b.publishedIn.getTime())
+  }
+
   async create(projectScheduled: ProjectScheduled): Promise<void> {
     this.items.push(projectScheduled)
   }

@@ -50,6 +50,26 @@ export class DrizzleProjectScheduledRepository implements ProjectScheduledReposi
     return rows.map(DrizzleProjectScheduledMapper.toDomain)
   }
 
+  async findManyDueToPublish(now: Date): Promise<ProjectScheduled[]> {
+    const rows = await this.db
+      .select()
+      .from(projectScheduled)
+      .where(lte(projectScheduled.publishedIn, now))
+      .orderBy(asc(projectScheduled.publishedIn))
+
+    return rows.map(DrizzleProjectScheduledMapper.toDomain)
+  }
+
+  async findManyInRange(start: Date, end: Date): Promise<ProjectScheduled[]> {
+    const rows = await this.db
+      .select()
+      .from(projectScheduled)
+      .where(and(gte(projectScheduled.publishedIn, start), lt(projectScheduled.publishedIn, end)))
+      .orderBy(asc(projectScheduled.publishedIn))
+
+    return rows.map(DrizzleProjectScheduledMapper.toDomain)
+  }
+
   async create(entity: ProjectScheduled): Promise<void> {
     await this.db.insert(projectScheduled).values(DrizzleProjectScheduledMapper.toPersistence(entity))
   }
