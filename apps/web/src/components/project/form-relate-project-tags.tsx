@@ -18,7 +18,6 @@ type FormRelateProjectTagsProps = {
 export function FormRelateProjectTags({ project, tags }: FormRelateProjectTagsProps) {
   const router = useRouter()
   const linkedSet = new Set(project.tags)
-  const availableTags = tags.filter((tag) => !linkedSet.has(tag.id))
 
   const [_, handleSubmit, isPending] = useFormState(actionRegisterProjectTags, {
     onSuccess: (message) => {
@@ -34,42 +33,31 @@ export function FormRelateProjectTags({ project, tags }: FormRelateProjectTagsPr
     return <p className="text-sm text-muted-foreground">Nenhuma tag cadastrada no sistema.</p>
   }
 
-  if (availableTags.length === 0) {
-    return <p className="text-sm text-muted-foreground">Todas as tags do sistema já estão vinculadas.</p>
-  }
-
   return (
-    <form className="space-y-4" onSubmit={handleSubmit}>
+    <form key={[...project.tags].sort().join(',')} className="space-y-4" onSubmit={handleSubmit}>
       <h2 className="font-heading text-xl font-semibold">Tags do projeto</h2>
-      <p className="text-sm text-muted-foreground">Relacione o projeto às tags existentes no sistema.</p>
+      <p className="text-sm text-muted-foreground">Marque ou desmarque as tags relacionadas ao projeto.</p>
       <input type="hidden" name="project-id" value={project.id} />
 
       <ul className="space-y-2">
-        {tags.map((tag) => {
-          const alreadyLinked = linkedSet.has(tag.id)
-
-          return (
-            <li key={tag.id} className="flex items-center gap-2">
-              <input
-                id={`project-tag-${tag.id}`}
-                type="checkbox"
-                name="tag-id"
-                value={tag.id}
-                defaultChecked={alreadyLinked}
-                disabled={alreadyLinked}
-                className="size-4 border border-input accent-primary"
-              />
-              <Label htmlFor={`project-tag-${tag.id}`} className={alreadyLinked ? 'text-muted-foreground' : undefined}>
-                {tag.name}
-              </Label>
-            </li>
-          )
-        })}
+        {tags.map((tag) => (
+          <li key={tag.id} className="flex items-center gap-2">
+            <input
+              id={`project-tag-${tag.id}`}
+              type="checkbox"
+              name="tag-id"
+              value={tag.id}
+              defaultChecked={linkedSet.has(tag.id)}
+              className="size-4 border border-input accent-primary"
+            />
+            <Label htmlFor={`project-tag-${tag.id}`}>{tag.name}</Label>
+          </li>
+        ))}
       </ul>
 
       <div className="flex w-full items-end justify-end">
         <Button type="submit" disabled={isPending}>
-          {!isPending && <span>Vincular tags</span>}
+          {!isPending && <span>Salvar tags</span>}
           {isPending && <HugeiconsIcon icon={Loading03Icon} className="size-5 animate-spin" />}
         </Button>
       </div>
