@@ -45,6 +45,7 @@ describe('(E2E) - POST /api/v1/attachments', () => {
     })
 
     expect(uploadResponse.status).toBe(200)
+    await uploadResponse.arrayBuffer()
 
     const deleteResponse = await request(app.server).delete(`/api/v1/attachments/${response.body.attachment.id}`)
 
