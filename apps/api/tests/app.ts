@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, beforeEach } from 'vitest'
+import { resetTestStorage } from '@/infra/storage/test-storage'
 import { cleanupDatabase, resetDatabase, setupDatabase } from './setup-e2e'
 
 let app: FastifyInstance
@@ -14,6 +15,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await resetDatabase()
+  resetTestStorage()
 })
 
 afterAll(async () => {
