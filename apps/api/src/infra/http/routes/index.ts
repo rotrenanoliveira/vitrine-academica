@@ -6,6 +6,7 @@ import { authenticateWithAccessCodeRoute } from './auth/authenticate-with-access
 import { getMeRoute } from './auth/get-me'
 import { logoutRoute } from './auth/logout'
 import { requestAccessCodeRoute } from './auth/request-access-code'
+import { registerCallRoute } from './calls/register-call'
 import { updateInstitutionRoute } from './institutions/edit-institution'
 import { fetchInstitutionsRoute } from './institutions/fetch-institutions'
 import { getInstitutionByIdRoute } from './institutions/get-institution-by-id'
@@ -29,6 +30,7 @@ import { fetchMyProjectsRoute } from './projects/fetch-my-projects'
 import { fetchProjectsOfInterestRoute } from './projects/fetch-projects-of-interest'
 import { fetchPublishedProjectsRoute } from './projects/fetch-published-projects'
 import { fetchPublishedProjectsTodayRoute } from './projects/fetch-published-projects-today'
+import { fetchScheduledProjectsRoute } from './projects/fetch-scheduled-projects'
 import { getMyStarOnProjectRoute } from './projects/get-my-star-on-project'
 import { getMyTeacherRatingOnProjectRoute } from './projects/get-my-teacher-rating-on-project'
 import { getProjectByIdRoute } from './projects/get-project-by-id'
@@ -37,7 +39,6 @@ import { listActiveRatingCriteriaRoute } from './projects/list-active-rating-cri
 import { listMyStarredProjectsRoute } from './projects/list-my-starred-projects'
 import { listMyTeacherRatingsRoute } from './projects/list-my-teacher-ratings'
 import { listProjectTeacherRatingsRoute } from './projects/list-project-teacher-ratings'
-import { fetchScheduledProjectsRoute } from './projects/fetch-scheduled-projects'
 import { publishProjectRoute } from './projects/publish-project'
 import { publishScheduledProjectsRoute } from './projects/publish-scheduled-projects'
 import { rateProjectByCriteriaRoute } from './projects/rate-project-by-criteria'
@@ -190,4 +191,6 @@ export async function routes(app: FastifyInstance) {
   await app.register(rejectInstitutionMembershipRequestRoute)
   /** GET /institutions/:institutionId/membership-requests */
   await app.register(fetchInstitutionMembershipRequestsRoute)
+
+  await app.register(registerCallRoute)
 }
