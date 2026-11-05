@@ -10,6 +10,7 @@ import { fetchCallsRoute } from './calls/fetch-calls'
 import { fetchMyCallsRoute } from './calls/fetch-my-calls'
 import { getCallByIdRoute } from './calls/get-call-by-id'
 import { registerCallRoute } from './calls/register-call'
+import { updateCallRoute } from './calls/update-call'
 import { updateInstitutionRoute } from './institutions/edit-institution'
 import { fetchInstitutionsRoute } from './institutions/fetch-institutions'
 import { getInstitutionByIdRoute } from './institutions/get-institution-by-id'
@@ -199,4 +200,5 @@ export async function routes(app: FastifyInstance) {
   await app.register(getCallByIdRoute)
   await app.register(fetchMyCallsRoute)
   await app.register(fetchCallsRoute)
+  await app.register(updateCallRoute)
 }
