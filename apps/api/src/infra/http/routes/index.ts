@@ -6,6 +6,7 @@ import { authenticateWithAccessCodeRoute } from './auth/authenticate-with-access
 import { getMeRoute } from './auth/get-me'
 import { logoutRoute } from './auth/logout'
 import { requestAccessCodeRoute } from './auth/request-access-code'
+import { closeCallRoute } from './calls/close-call'
 import { fetchCallsRoute } from './calls/fetch-calls'
 import { fetchMyCallsRoute } from './calls/fetch-my-calls'
 import { getCallByIdRoute } from './calls/get-call-by-id'
@@ -201,4 +202,5 @@ export async function routes(app: FastifyInstance) {
   await app.register(fetchMyCallsRoute)
   await app.register(fetchCallsRoute)
   await app.register(updateCallRoute)
+  await app.register(closeCallRoute)
 }
