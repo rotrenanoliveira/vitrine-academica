@@ -9,6 +9,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import { getCurrentUser } from '@/server/auth/require-user'
+import { getCachedInstitutionEvents } from '@/server/http/routes/events/fetch-institution-events'
 import { getCachedInstitutionBySlug } from '@/server/http/routes/institutions/get-institution'
 import { getCachedMyInstitutionMemberships } from '@/server/http/routes/institutions/get-my-institution-memberships'
 import { canManageInstitution, isActiveInstitutionMember } from '@/utils/can-manage-institution'
@@ -25,6 +26,7 @@ type PageProps = {
 export default async function InstitutionDetailPage({ params }: PageProps) {
   const { slug } = await params
   const [{ institution }, user] = await Promise.all([getCachedInstitutionBySlug(slug), getCurrentUser()])
+  const { events } = await getCachedInstitutionEvents(institution.id)
 
   let alreadyMember = false
   let canManage = false
@@ -54,6 +56,7 @@ export default async function InstitutionDetailPage({ params }: PageProps) {
       <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-4 py-8">
         <InstitutionDetail
           institution={institution}
+          events={events}
           isAuthenticated={Boolean(user)}
           alreadyMember={alreadyMember}
           canManage={canManage}

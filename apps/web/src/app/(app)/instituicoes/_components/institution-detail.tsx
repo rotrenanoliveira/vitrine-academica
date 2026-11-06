@@ -1,7 +1,9 @@
 import Link from 'next/link'
+import { EventCard } from '@/components/event/event-card'
 import { FormRequestInstitutionMembership } from '@/components/institution/form-request-institution-membership'
 import { Button } from '@/components/ui/button'
-import type { Institution } from '@/utils/type'
+import { Separator } from '@/components/ui/separator'
+import type { Event, Institution } from '@/utils/type'
 import { InstitutionStatusActions } from './institution-status-actions'
 
 const statusLabels: Record<Institution['status'], string> = {
@@ -27,12 +29,19 @@ const originLabels: Record<Institution['origin'], string> = {
 
 type InstitutionDetailProps = {
   institution: Institution
+  events: Event[]
   isAuthenticated: boolean
   alreadyMember: boolean
   canManage: boolean
 }
 
-export function InstitutionDetail({ institution, isAuthenticated, alreadyMember, canManage }: InstitutionDetailProps) {
+export function InstitutionDetail({
+  institution,
+  events,
+  isAuthenticated,
+  alreadyMember,
+  canManage,
+}: InstitutionDetailProps) {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -91,6 +100,9 @@ export function InstitutionDetail({ institution, isAuthenticated, alreadyMember,
                 >
                   Solicitações
                 </Button>
+                <Button variant="outline" nativeButton={false} render={<Link href="/eventos/novo" />}>
+                  Novo ciclo
+                </Button>
               </>
             )}
           </div>
@@ -107,6 +119,24 @@ export function InstitutionDetail({ institution, isAuthenticated, alreadyMember,
           )}
         </div>
       )}
+
+      <Separator />
+
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-lg font-medium">Eventos</h2>
+          <p className="text-muted-foreground text-sm">Ciclos temáticos criados por esta instituição.</p>
+        </div>
+        {events.length === 0 ? (
+          <p className="text-muted-foreground text-sm">Nenhum evento criado ainda.</p>
+        ) : (
+          <div>
+            {events.map((event) => (
+              <EventCard key={event.id} event={event} canManage={canManage} />
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   )
 }
