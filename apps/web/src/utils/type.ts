@@ -225,3 +225,79 @@ export const attachmentSchema = z.object({
 })
 
 export type Attachment = z.infer<typeof attachmentSchema>
+
+export const eventPhaseSchema = z.enum(['THEME_SELECTION', 'INSTITUTIONAL_SELECTION', 'OPEN', 'CLOSED'])
+
+export const participationScopeSchema = z.enum(['GLOBAL', 'INSTITUTION'])
+
+export const eventThemeStatusSchema = z.enum(['PENDING', 'APPROVED', 'REJECTED', 'HIDDEN'])
+
+export const eventRegistrationStatusSchema = z.enum(['PENDING', 'APPROVED', 'REJECTED'])
+
+export const eventSchema = z.object({
+  id: z.string(),
+  institutionId: z.string(),
+  slug: z.string(),
+  name: z.string().nullable(),
+  participationScope: participationScopeSchema,
+  phase: eventPhaseSchema,
+  winnerThemeId: z.string().nullable(),
+  startsAt: z.string(),
+  themeSelectionEndsAt: z.string(),
+  endsAt: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string().nullable(),
+})
+
+export type Event = z.infer<typeof eventSchema>
+export type EventPhase = z.infer<typeof eventPhaseSchema>
+export type ParticipationScope = z.infer<typeof participationScopeSchema>
+
+export const eventThemeSchema = z.object({
+  id: z.string(),
+  eventId: z.string(),
+  authorId: z.string(),
+  title: z.string(),
+  description: z.string(),
+  status: eventThemeStatusSchema,
+  moderatedByUserId: z.string().nullable(),
+  moderatedAt: z.string().nullable(),
+  moderationReason: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string().nullable(),
+})
+
+export type EventTheme = z.infer<typeof eventThemeSchema>
+export type EventThemeStatus = z.infer<typeof eventThemeStatusSchema>
+
+export const eventVoteSchema = z.object({
+  id: z.string(),
+  eventId: z.string(),
+  themeId: z.string(),
+  userId: z.string(),
+  createdAt: z.string(),
+})
+
+export type EventVote = z.infer<typeof eventVoteSchema>
+
+export const eventRegistrationSchema = z.object({
+  id: z.string(),
+  eventId: z.string(),
+  projectId: z.string(),
+  responsibleUserId: z.string(),
+  status: eventRegistrationStatusSchema,
+  reviewedByUserId: z.string().nullable(),
+  reviewedAt: z.string().nullable(),
+  reviewReason: z.string().nullable(),
+  registeredAt: z.string(),
+})
+
+export type EventRegistration = z.infer<typeof eventRegistrationSchema>
+export type EventRegistrationStatus = z.infer<typeof eventRegistrationStatusSchema>
+
+export const eventVoteCounterSchema = z.object({
+  themeId: z.string(),
+  votes: z.number().int(),
+})
+
+export type EventVoteCounter = z.infer<typeof eventVoteCounterSchema>
