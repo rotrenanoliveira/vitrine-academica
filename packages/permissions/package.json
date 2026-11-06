@@ -1,0 +1,14 @@
+{
+  "name": "@vitrine-academica/permissions",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "@casl/ability": "^6.7.3",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@vitrine-academica/tsconfig": "workspace:*"
+  }
+}
