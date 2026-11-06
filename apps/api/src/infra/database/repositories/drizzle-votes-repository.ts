@@ -1,5 +1,5 @@
 import { and, eq, sql } from 'drizzle-orm'
-import type { ThemeVoteTally, VotesRepository } from '@/domain/event/application/repositories/votes-repository'
+import type { ThemeVoteCounter, VotesRepository } from '@/domain/event/application/repositories/votes-repository'
 import type { Vote } from '@/domain/event/enterprise/entities/vote'
 import type { DrizzleClient } from '../drizzle/client'
 import { DrizzleVoteMapper } from '../drizzle/mappers/drizzle-vote-mapper'
@@ -23,7 +23,7 @@ export class DrizzleVotesRepository implements VotesRepository {
     return rows.map(DrizzleVoteMapper.toDomain)
   }
 
-  async countByThemeForEvent(eventId: string): Promise<ThemeVoteTally[]> {
+  async countByThemeForEvent(eventId: string): Promise<ThemeVoteCounter[]> {
     const rows = await this.db
       .select({
         themeId: eventVotes.themeId,

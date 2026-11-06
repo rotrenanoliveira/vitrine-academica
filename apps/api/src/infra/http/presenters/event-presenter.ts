@@ -1,4 +1,4 @@
-import type { ThemeVoteTally } from '@/domain/event/application/repositories/votes-repository'
+import type { ThemeVoteCounter } from '@/domain/event/application/repositories/votes-repository'
 import type { Event } from '@/domain/event/enterprise/entities/event'
 import type { EventRegistration } from '@/domain/event/enterprise/entities/event-registration'
 import type { Theme } from '@/domain/event/enterprise/entities/theme'
@@ -69,11 +69,11 @@ export class EventRegistrationPresenter {
   }
 }
 
-export class VoteTallyPresenter {
-  static toHTTP(tally: ThemeVoteTally) {
+export class VoteCounterPresenter {
+  static toHTTP(counter: ThemeVoteCounter) {
     return {
-      themeId: tally.themeId,
-      votes: tally.votes,
+      themeId: counter.themeId,
+      votes: counter.votes,
     }
   }
 }

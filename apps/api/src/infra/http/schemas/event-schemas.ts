@@ -57,7 +57,7 @@ export const registrationHttpSchema = z.object({
   registeredAt: z.iso.datetime(),
 })
 
-export const voteTallyHttpSchema = z.object({
+export const voteCounterHttpSchema = z.object({
   themeId: z.string(),
   votes: z.number().int(),
 })
