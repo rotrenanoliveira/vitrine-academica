@@ -29,21 +29,25 @@ import { fetchMyProjectsRoute } from './projects/fetch-my-projects'
 import { fetchProjectsOfInterestRoute } from './projects/fetch-projects-of-interest'
 import { fetchPublishedProjectsRoute } from './projects/fetch-published-projects'
 import { fetchPublishedProjectsTodayRoute } from './projects/fetch-published-projects-today'
+import { fetchScheduledProjectsRoute } from './projects/fetch-scheduled-projects'
 import { getMyStarOnProjectRoute } from './projects/get-my-star-on-project'
 import { getMyTeacherRatingOnProjectRoute } from './projects/get-my-teacher-rating-on-project'
 import { getProjectByIdRoute } from './projects/get-project-by-id'
 import { getProjectRatingsRoute } from './projects/get-project-ratings'
+import { inviteProjectMemberRoute } from './projects/invite-project-member'
 import { listActiveRatingCriteriaRoute } from './projects/list-active-rating-criteria'
+import { listMyProjectInvitationsRoute } from './projects/list-my-project-invitations'
 import { listMyStarredProjectsRoute } from './projects/list-my-starred-projects'
 import { listMyTeacherRatingsRoute } from './projects/list-my-teacher-ratings'
+import { listProjectMembersRoute } from './projects/list-project-members'
 import { listProjectTeacherRatingsRoute } from './projects/list-project-teacher-ratings'
-import { fetchScheduledProjectsRoute } from './projects/fetch-scheduled-projects'
 import { publishProjectRoute } from './projects/publish-project'
 import { publishScheduledProjectsRoute } from './projects/publish-scheduled-projects'
 import { rateProjectByCriteriaRoute } from './projects/rate-project-by-criteria'
 import { registerProjectRoute } from './projects/register-project'
 import { registerProjectTagRoute } from './projects/register-project-tag'
 import { removeProjectTagRoute } from './projects/remove-project-tag'
+import { respondProjectInvitationRoute } from './projects/respond-project-invitation'
 import { scheduleProjectRoute } from './projects/schedule-project'
 import { searchExternalProjectsRoute } from './projects/search-external-projects'
 import { starProjectRoute } from './projects/star-project'
@@ -148,6 +152,16 @@ export async function routes(app: FastifyInstance) {
   await app.register(searchExternalProjectsRoute)
   /** GET /projects/scheduled/soon */
   await app.register(fetchScheduledProjectsRoute)
+
+  /** Project members routes */
+  /** POST /projects/:projectId/members */
+  await app.register(inviteProjectMemberRoute)
+  /** GET /projects/invitations/me */
+  await app.register(listMyProjectInvitationsRoute)
+  /** POST /projects/invitations/:invitationId/respond */
+  await app.register(respondProjectInvitationRoute)
+  /** GET /projects/:projectId/members */
+  await app.register(listProjectMembersRoute)
 
   /** Project tags routes */
   /** POST /projects/:projectId/tags */
