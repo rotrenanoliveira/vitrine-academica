@@ -2,6 +2,7 @@ import { type Either, left, right } from '@/core/either'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
 import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { NotProjectOwnerError } from '@/domain/project/application/_errors/not-project-owner-error'
 import { ProjectNotFoundError } from '@/domain/project/application/_errors/project-not-found-error'
 import { ProjectTagAlreadyExistsError } from '@/domain/project/application/_errors/project-tag-already-exists-error'
 import type { ProjectTagsRepository } from '@/domain/project/application/repositories/project-tags-repository'
@@ -25,7 +26,7 @@ type LogParams = {
 }
 
 type RegisterProjectTagUseCaseResponse = Either<
-  ProjectNotFoundError | TagNotFoundError | ProjectTagAlreadyExistsError,
+  ProjectNotFoundError | NotProjectOwnerError | TagNotFoundError | ProjectTagAlreadyExistsError,
   { projectTag: ProjectTag }
 >
 
@@ -68,6 +69,17 @@ export class RegisterProjectTagUseCase {
       return left(new ProjectNotFoundError())
     }
 
+    if (project.author.toString() !== actorId) {
+      await this.log({
+        actorId,
+        resourceId: projectId,
+        text: `Usuário ${actorId} não tem permissão para vincular tags ao projeto ${projectId}.`,
+        status: AuditLogStatus.FAILURE,
+      })
+
+      return left(new NotProjectOwnerError())
+    }
+
     const tag = await this.tagsRepository.findById(tagId)
 
     if (!tag) {
@@ -101,7 +113,8 @@ export class RegisterProjectTagUseCase {
 
     await this.projectTagsRepository.create(projectTag)
 
-    const nextTags = project.tags.includes(tagId) ? project.tags : [...project.tags, tagId]
+    const previousTags = project.tags
+    const nextTags = previousTags.includes(tagId) ? previousTags : [...previousTags, tagId]
     project.tags = nextTags
     await this.projectsRepository.save(project)
 
@@ -110,7 +123,7 @@ export class RegisterProjectTagUseCase {
       resourceId: projectTag.id.toString(),
       text: `Tag ${tagId} associada ao projeto ${projectId} com sucesso.`,
       status: AuditLogStatus.SUCCESS,
-      diff: { projectId: { old: project.tags, new: nextTags } },
+      diff: { tags: { old: previousTags, new: nextTags } },
     })
 
     return right({ projectTag })

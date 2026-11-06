@@ -1,4 +1,5 @@
 import type { FastifyReply } from 'fastify'
+import { NotProjectOwnerError } from '@/domain/project/application/_errors/not-project-owner-error'
 import { ProjectNotFoundError } from '@/domain/project/application/_errors/project-not-found-error'
 import { ProjectTagAlreadyExistsError } from '@/domain/project/application/_errors/project-tag-already-exists-error'
 import type { RegisterProjectTagUseCase } from '@/domain/project/application/use-cases/project-tag/register-project-tag'
@@ -29,6 +30,12 @@ export class RegisterProjectTagController {
 
       if (error instanceof ProjectNotFoundError || error instanceof TagNotFoundError) {
         return reply.status(404).send({
+          message: error.message,
+        })
+      }
+
+      if (error instanceof NotProjectOwnerError) {
+        return reply.status(403).send({
           message: error.message,
         })
       }

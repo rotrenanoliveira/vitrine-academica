@@ -4,6 +4,7 @@ import z from 'zod'
 import { getCurrentUser } from '../auth/require-user'
 import { getProject } from '../http/routes/projects/get-project'
 import { registerProjectTag } from '../http/routes/projects/register-project-tag'
+import { removeProjectTag } from '../http/routes/projects/remove-project-tag'
 import { revalidateProjects } from '../revalidate-projects'
 
 function parseTagIds(data: FormData): string[] {
@@ -12,7 +13,7 @@ function parseTagIds(data: FormData): string[] {
 
 const registerProjectTagsSchema = z.object({
   'project-id': z.uuid('Projeto inválido.'),
-  tagIds: z.array(z.uuid()).min(1, 'Selecione ao menos uma tag.'),
+  tagIds: z.array(z.uuid()),
 })
 
 function isAlreadyRegisteredError(message?: string) {
@@ -23,7 +24,7 @@ export async function actionRegisterProjectTags(data: FormData) {
   const user = await getCurrentUser()
 
   if (!user) {
-    return { success: false, message: 'Faça login para vincular tags.' }
+    return { success: false, message: 'Faça login para alterar as tags.' }
   }
 
   const formResult = registerProjectTagsSchema.safeParse({
@@ -45,13 +46,16 @@ export async function actionRegisterProjectTags(data: FormData) {
     return { success: false, message: 'Você não é o autor deste projeto.' }
   }
 
-  const newTagIds = formResult.data.tagIds.filter((tagId) => !project.tags.includes(tagId))
+  const currentTagIds = new Set(project.tags)
+  const selectedTagIds = new Set(formResult.data.tagIds)
+  const tagIdsToLink = [...selectedTagIds].filter((tagId) => !currentTagIds.has(tagId))
+  const tagIdsToUnlink = [...currentTagIds].filter((tagId) => !selectedTagIds.has(tagId))
 
-  if (newTagIds.length === 0) {
-    return { success: false, message: 'Selecione ao menos uma tag nova.' }
+  if (tagIdsToLink.length === 0 && tagIdsToUnlink.length === 0) {
+    return { success: true, message: 'Nenhuma alteração nas tags do projeto.' }
   }
 
-  for (const tagId of newTagIds) {
+  for (const tagId of tagIdsToLink) {
     const [_, responseError] = await registerProjectTag(projectId, tagId)
 
     if (responseError && !isAlreadyRegisteredError(responseError.message)) {
@@ -62,7 +66,18 @@ export async function actionRegisterProjectTags(data: FormData) {
     }
   }
 
+  for (const tagId of tagIdsToUnlink) {
+    const [_, responseError] = await removeProjectTag(projectId, tagId)
+
+    if (responseError) {
+      return {
+        success: false,
+        message: responseError.message ?? 'Não foi possível remover as tags.',
+      }
+    }
+  }
+
   revalidateProjects(projectId)
 
-  return { success: true, message: 'Tags vinculadas ao projeto.' }
+  return { success: true, message: 'Tags do projeto atualizadas.' }
 }

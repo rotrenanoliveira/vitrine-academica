@@ -7,4 +7,5 @@ export interface ProjectTagsRepository {
   findByProjectIdAndTagId(projectId: string, tagId: string): Promise<ProjectTag | null>
 
   create(projectTag: ProjectTag): Promise<void>
+  delete(projectTag: ProjectTag): Promise<void>
 }
