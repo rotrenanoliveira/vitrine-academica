@@ -1,4 +1,8 @@
 import type { FastifyInstance } from 'fastify'
+import { getInstitutionsAnalyticsRoute } from './analytics/get-institutions-analytics'
+import { getProjectsAnalyticsRoute } from './analytics/get-projects-analytics'
+import { getTagsAnalyticsRoute } from './analytics/get-tags-analytics'
+import { getUsersAnalyticsRoute } from './analytics/get-users-analytics'
 import { deleteAttachmentRoute } from './attachments/delete-attachment'
 import { getAttachmentRoute } from './attachments/get-attachment'
 import { uploadAttachmentRoute } from './attachments/upload-attachment'
@@ -65,6 +69,15 @@ import { registerUserRoute } from './users/register-user'
  * Routes prefix: /api/v1
  */
 export async function routes(app: FastifyInstance) {
+  /** Analytics routes */
+  /** GET /analytics/projects */
+  await app.register(getProjectsAnalyticsRoute)
+  /** GET /analytics/users */
+  await app.register(getUsersAnalyticsRoute)
+  /** GET /analytics/institutions */
+  await app.register(getInstitutionsAnalyticsRoute)
+  /** GET /analytics/tags */
+  await app.register(getTagsAnalyticsRoute)
   /** Attachments routes */
   /** POST /attachments */
   await app.register(uploadAttachmentRoute)
