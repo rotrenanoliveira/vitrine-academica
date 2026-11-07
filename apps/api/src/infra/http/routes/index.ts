@@ -64,6 +64,7 @@ import { deleteUserAccountRoute } from './users/delete-user-account'
 import { exportUserDataRoute } from './users/export-user-data'
 import { findUserByIdRoute } from './users/find-user-by-id'
 import { registerUserRoute } from './users/register-user'
+import { getCurationRoute } from './curation/get-curation'
 
 /**
  * Routes prefix: /api/v1
@@ -183,6 +184,10 @@ export async function routes(app: FastifyInstance) {
   await app.register(removeProjectTagRoute)
   /** GET /users/:userId/projects-of-interest */
   await app.register(fetchProjectsOfInterestRoute)
+
+  /** Curation routes */
+  /** GET /curation */
+  await app.register(getCurationRoute)
 
   /** Institutions routes */
   /** POST /institutions */
