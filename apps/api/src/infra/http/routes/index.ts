@@ -10,6 +10,23 @@ import { authenticateWithAccessCodeRoute } from './auth/authenticate-with-access
 import { getMeRoute } from './auth/get-me'
 import { logoutRoute } from './auth/logout'
 import { requestAccessCodeRoute } from './auth/request-access-code'
+import { createEventRoute } from './events/create-event'
+import { editEventNameRoute } from './events/edit-event-name'
+import { fetchApprovedParticipantsRoute } from './events/fetch-approved-participants'
+import { fetchApprovedThemesRoute } from './events/fetch-approved-themes'
+import { fetchEventRegistrationsRoute } from './events/fetch-event-registrations'
+import { fetchInstitutionEventsRoute } from './events/fetch-institution-events'
+import { fetchPublicEventsRoute } from './events/fetch-public-events'
+import { getCurrentThemeSelectionRoute } from './events/get-current-theme-selection'
+import { getMyVoteRoute } from './events/get-my-vote'
+import { getPublicEventRoute } from './events/get-public-event'
+import { getVoteCounterRoute } from './events/get-vote-counter'
+import { moderateThemeRoute } from './events/moderate-theme'
+import { registerProjectInEventRoute } from './events/register-project-in-event'
+import { reviewEventRegistrationRoute } from './events/review-event-registration'
+import { selectInstitutionalThemeRoute } from './events/select-institutional-theme'
+import { suggestThemeRoute } from './events/suggest-theme'
+import { voteThemeRoute } from './events/vote-theme'
 import { updateInstitutionRoute } from './institutions/edit-institution'
 import { fetchInstitutionsRoute } from './institutions/fetch-institutions'
 import { getInstitutionByIdRoute } from './institutions/get-institution-by-id'
@@ -96,6 +113,42 @@ export async function routes(app: FastifyInstance) {
   await app.register(logoutRoute)
   /** GET /auth/me */
   await app.register(getMeRoute)
+
+  /** Events routes */
+  /** GET /events */
+  await app.register(fetchPublicEventsRoute)
+  /** GET /events/:eventIdOrSlug */
+  await app.register(getPublicEventRoute)
+  /** GET /events/:eventId/themes */
+  await app.register(fetchApprovedThemesRoute)
+  /** GET /events/:eventId/participants */
+  await app.register(fetchApprovedParticipantsRoute)
+  /** GET /institutions/:institutionId/events */
+  await app.register(fetchInstitutionEventsRoute)
+  /** POST /institutions/:institutionId/events */
+  await app.register(createEventRoute)
+  /** PATCH /events/:eventId */
+  await app.register(editEventNameRoute)
+  /** POST /events/:eventId/themes */
+  await app.register(suggestThemeRoute)
+  /** PATCH /events/themes/:themeId/moderation */
+  await app.register(moderateThemeRoute)
+  /** POST /events/:eventId/votes */
+  await app.register(voteThemeRoute)
+  /** GET /events/:eventId/votes/me */
+  await app.register(getMyVoteRoute)
+  /** GET /events/:eventId/theme-selection */
+  await app.register(getCurrentThemeSelectionRoute)
+  /** GET /events/:eventId/vote-counter */
+  await app.register(getVoteCounterRoute)
+  /** POST /events/:eventId/select-theme */
+  await app.register(selectInstitutionalThemeRoute)
+  /** POST /events/:eventId/registrations */
+  await app.register(registerProjectInEventRoute)
+  /** GET /events/:eventId/registrations */
+  await app.register(fetchEventRegistrationsRoute)
+  /** PATCH /events/registrations/:registrationId/review */
+  await app.register(reviewEventRegistrationRoute)
 
   /** Users routes */
   /** POST /users */

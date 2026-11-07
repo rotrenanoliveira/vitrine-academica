@@ -27,7 +27,6 @@ export async function getMyProjects(params: Params = {}) {
   return response
 }
 
-/** Request-scoped memoization (cookies/auth safe). Tag invalidation via revalidateProjects. */
 export const getCachedMyProjects = cache(async (params: Params & { userId: string }) => {
   const { userId: _, ...filters } = params
   return getMyProjects(filters)
