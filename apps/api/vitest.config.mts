@@ -32,6 +32,7 @@ export default defineConfig({
           exclude: ['**/*.spec.ts'],
           fileParallelism: false,
           testTimeout: 30000,
+          setupFiles: ['./tests/mocks/setup-msw.ts'],
         },
       },
     ],

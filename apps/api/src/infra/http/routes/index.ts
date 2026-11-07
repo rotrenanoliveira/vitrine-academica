@@ -1,4 +1,8 @@
 import type { FastifyInstance } from 'fastify'
+import { getInstitutionsAnalyticsRoute } from './analytics/get-institutions-analytics'
+import { getProjectsAnalyticsRoute } from './analytics/get-projects-analytics'
+import { getTagsAnalyticsRoute } from './analytics/get-tags-analytics'
+import { getUsersAnalyticsRoute } from './analytics/get-users-analytics'
 import { deleteAttachmentRoute } from './attachments/delete-attachment'
 import { getAttachmentRoute } from './attachments/get-attachment'
 import { uploadAttachmentRoute } from './attachments/upload-attachment'
@@ -51,9 +55,12 @@ import { getMyStarOnProjectRoute } from './projects/get-my-star-on-project'
 import { getMyTeacherRatingOnProjectRoute } from './projects/get-my-teacher-rating-on-project'
 import { getProjectByIdRoute } from './projects/get-project-by-id'
 import { getProjectRatingsRoute } from './projects/get-project-ratings'
+import { inviteProjectMemberRoute } from './projects/invite-project-member'
 import { listActiveRatingCriteriaRoute } from './projects/list-active-rating-criteria'
+import { listMyProjectInvitationsRoute } from './projects/list-my-project-invitations'
 import { listMyStarredProjectsRoute } from './projects/list-my-starred-projects'
 import { listMyTeacherRatingsRoute } from './projects/list-my-teacher-ratings'
+import { listProjectMembersRoute } from './projects/list-project-members'
 import { listProjectTeacherRatingsRoute } from './projects/list-project-teacher-ratings'
 import { publishProjectRoute } from './projects/publish-project'
 import { publishScheduledProjectsRoute } from './projects/publish-scheduled-projects'
@@ -61,6 +68,7 @@ import { rateProjectByCriteriaRoute } from './projects/rate-project-by-criteria'
 import { registerProjectRoute } from './projects/register-project'
 import { registerProjectTagRoute } from './projects/register-project-tag'
 import { removeProjectTagRoute } from './projects/remove-project-tag'
+import { respondProjectInvitationRoute } from './projects/respond-project-invitation'
 import { scheduleProjectRoute } from './projects/schedule-project'
 import { searchExternalProjectsRoute } from './projects/search-external-projects'
 import { starProjectRoute } from './projects/star-project'
@@ -73,11 +81,21 @@ import { deleteUserAccountRoute } from './users/delete-user-account'
 import { exportUserDataRoute } from './users/export-user-data'
 import { findUserByIdRoute } from './users/find-user-by-id'
 import { registerUserRoute } from './users/register-user'
+import { getCurationRoute } from './curation/get-curation'
 
 /**
  * Routes prefix: /api/v1
  */
 export async function routes(app: FastifyInstance) {
+  /** Analytics routes */
+  /** GET /analytics/projects */
+  await app.register(getProjectsAnalyticsRoute)
+  /** GET /analytics/users */
+  await app.register(getUsersAnalyticsRoute)
+  /** GET /analytics/institutions */
+  await app.register(getInstitutionsAnalyticsRoute)
+  /** GET /analytics/tags */
+  await app.register(getTagsAnalyticsRoute)
   /** Attachments routes */
   /** POST /attachments */
   await app.register(uploadAttachmentRoute)
@@ -202,6 +220,16 @@ export async function routes(app: FastifyInstance) {
   /** GET /projects/scheduled/soon */
   await app.register(fetchScheduledProjectsRoute)
 
+  /** Project members routes */
+  /** POST /projects/:projectId/members */
+  await app.register(inviteProjectMemberRoute)
+  /** GET /projects/invitations/me */
+  await app.register(listMyProjectInvitationsRoute)
+  /** POST /projects/invitations/:invitationId/respond */
+  await app.register(respondProjectInvitationRoute)
+  /** GET /projects/:projectId/members */
+  await app.register(listProjectMembersRoute)
+
   /** Project tags routes */
   /** POST /projects/:projectId/tags */
   await app.register(registerProjectTagRoute)
@@ -209,6 +237,10 @@ export async function routes(app: FastifyInstance) {
   await app.register(removeProjectTagRoute)
   /** GET /users/:userId/projects-of-interest */
   await app.register(fetchProjectsOfInterestRoute)
+
+  /** Curation routes */
+  /** GET /curation */
+  await app.register(getCurationRoute)
 
   /** Institutions routes */
   /** POST /institutions */

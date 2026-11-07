@@ -10,10 +10,18 @@ export enum UserStatus {
   DELETED = 'DELETED',
 }
 
+export enum UserRole {
+  USER = 'USER',
+  STUDENT = 'STUDENT',
+  PROFESSOR = 'PROFESSOR',
+  ADMIN = 'ADMIN',
+}
+
 export interface UserProps {
   name: string
   email: string
   status: UserStatus
+  role: UserRole
   updatedAt?: Date | null
 }
 
@@ -45,6 +53,15 @@ export class User extends Entity<UserProps> {
     this.touch()
   }
 
+  get role(): UserRole {
+    return this.props.role
+  }
+
+  set role(value: UserRole) {
+    this.props.role = value
+    this.touch()
+  }
+
   get updatedAt(): Date | null | undefined {
     return this.props.updatedAt
   }
@@ -53,12 +70,13 @@ export class User extends Entity<UserProps> {
     this.props.updatedAt = new Date()
   }
 
-  static create(props: Optional<UserProps, 'status'>, id?: UniqueEntityId) {
+  static create(props: Optional<UserProps, 'status' | 'role'>, id?: UniqueEntityId) {
     return new User(
       {
         ...props,
         email: props.email.toLocaleLowerCase(),
         status: props.status ?? UserStatus.PENDING,
+        role: props.role ?? UserRole.USER,
       },
       id,
     )

@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/breadcrumb'
 import { requireUser } from '@/server/auth/require-user'
 import { getProject } from '@/server/http/routes/projects/get-project'
+import { listProjectMembers } from '@/server/http/routes/projects/list-project-members'
 import { getCachedTags } from '@/server/http/routes/tags/fetch-tags'
 
 export const metadata: Metadata = {
@@ -27,13 +28,20 @@ type PageProps = {
 export default async function EditProjectPage({ params }: PageProps) {
   const { id } = await params
   const user = await requireUser()
-  const [{ project }, { tags }] = await Promise.all([getProject(id), getCachedTags()])
+  const [{ project }, { tags }, { members }] = await Promise.all([
+    getProject(id),
+    getCachedTags(),
+    listProjectMembers({ projectId: id }),
+  ])
 
-  if (user.id !== project.authorId) {
+  const isOwner = user.id === project.authorId
+  const isCoauthor = members.some((member) => member.userId === user.id)
+
+  if (!isOwner && !isCoauthor) {
     notFound()
   }
 
-  const canSchedule = project.status === 'SKETCH'
+  const canSchedule = isOwner && project.status === 'SKETCH'
 
   return (
     <div className="flex flex-1 flex-col">
@@ -58,11 +66,13 @@ export default async function EditProjectPage({ params }: PageProps) {
       <div className="flex flex-1 items-start justify-center px-4 py-8">
         <div className="w-full max-w-lg space-y-8">
           <div className="border border-border p-6">
-            <FormUpdateProject project={project} />
+            <FormUpdateProject project={project} canChangeStatus={isOwner} />
           </div>
-          <div className="border border-border p-6">
-            <FormRelateProjectTags project={project} tags={tags} />
-          </div>
+          {isOwner && (
+            <div className="border border-border p-6">
+              <FormRelateProjectTags project={project} tags={tags} />
+            </div>
+          )}
           {canSchedule && (
             <div className="border border-border p-6">
               <FormScheduleProject projectId={project.id} />

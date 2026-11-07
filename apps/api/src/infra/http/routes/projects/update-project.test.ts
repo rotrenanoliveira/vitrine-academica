@@ -5,6 +5,10 @@ import { makeProjectOnDatabase } from '@tests/factories/make-project'
 import { makeUserOnDatabase } from '@tests/factories/make-user'
 import request from 'supertest'
 import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
+import { makeProjectMemberOnDatabase } from '@tests/factories/make-project-member'
+import { ProjectMemberStatus } from '@/domain/project/enterprise/entities/project-member'
+import { db } from '@/infra/database/drizzle/client'
+import { DrizzleProjectsRepository } from '@/infra/database/repositories/drizzle-projects-repository'
 
 async function authenticateUser() {
   const { user } = await makeUserOnDatabase()
@@ -100,6 +104,75 @@ describe('(E2E) - PUT /api/v1/projects/:projectId', () => {
         title: 'Hack',
         description: 'Hack',
       })
+
+    expect(response.status).toBe(403)
+  })
+
+
+  it('deve permitir ao coautor que aceitou o convite editar o projeto', async () => {
+    const { accessToken, user } = await authenticateUser()
+    const { user: owner } = await makeUserOnDatabase()
+    const { project } = await makeProjectOnDatabase({ author: owner.id, status: ProjectStatus.SKETCH })
+    await makeProjectMemberOnDatabase({ projectId: project.id, userId: user.id, status: ProjectMemberStatus.ACCEPTED })
+
+    const response = await request(app.server)
+      .put(`/api/v1/projects/${project.id.toString()}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ title: 'Título do coautor', description: 'Descrição do coautor' })
+
+    expect(response.status).toBe(200)
+    expect(response.body.project.title).toBe('Título do coautor')
+
+    const saved = await new DrizzleProjectsRepository(db).findById(project.id.toString())
+
+    expect(saved?.title).toBe('Título do coautor')
+  })
+
+  it('deve permitir ao coautor enviar o mesmo status do projeto, sem alterá-lo', async () => {
+    const { accessToken, user } = await authenticateUser()
+    const { user: owner } = await makeUserOnDatabase()
+    const { project } = await makeProjectOnDatabase({ author: owner.id, status: ProjectStatus.SCHEDULED })
+    await makeProjectMemberOnDatabase({ projectId: project.id, userId: user.id, status: ProjectMemberStatus.ACCEPTED })
+
+    const response = await request(app.server)
+      .put(`/api/v1/projects/${project.id.toString()}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ title: 'Novo título', description: 'Nova descrição', status: 'SCHEDULED' })
+
+    expect(response.status).toBe(200)
+    expect(response.body.project.status).toBe('SCHEDULED')
+  })
+
+  it('não deve permitir ao coautor publicar o projeto, retornando 403 e nada muda', async () => {
+    const { accessToken, user } = await authenticateUser()
+    const { user: owner } = await makeUserOnDatabase()
+    const { project } = await makeProjectOnDatabase({ author: owner.id, status: ProjectStatus.SKETCH })
+    await makeProjectMemberOnDatabase({ projectId: project.id, userId: user.id, status: ProjectMemberStatus.ACCEPTED })
+
+    const response = await request(app.server)
+      .put(`/api/v1/projects/${project.id.toString()}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ title: 'Título que não deve ser gravado', description: project.description, status: 'PUBLISHED' })
+
+    expect(response.status).toBe(403)
+    expect(response.body.message).toBe('Somente o dono do projeto pode alterar o status')
+
+    const saved = await new DrizzleProjectsRepository(db).findById(project.id.toString())
+
+    expect(saved?.status).toBe(ProjectStatus.SKETCH)
+    expect(saved?.title).toBe(project.title)
+  })
+
+  it('não deve permitir a quem tem convite pendente editar o projeto', async () => {
+    const { accessToken, user } = await authenticateUser()
+    const { user: owner } = await makeUserOnDatabase()
+    const { project } = await makeProjectOnDatabase({ author: owner.id, status: ProjectStatus.SKETCH })
+    await makeProjectMemberOnDatabase({ projectId: project.id, userId: user.id, status: ProjectMemberStatus.PENDING })
+
+    const response = await request(app.server)
+      .put(`/api/v1/projects/${project.id.toString()}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ title: 'Alteração indevida', description: 'Alteração indevida' })
 
     expect(response.status).toBe(403)
   })

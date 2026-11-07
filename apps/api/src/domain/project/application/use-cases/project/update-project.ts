@@ -2,8 +2,10 @@ import { type Either, left, right } from '@/core/either'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
 import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import type { Project, ProjectStatus } from '../../../enterprise/entities/project'
+import { ProjectMemberStatus } from '../../../enterprise/entities/project-member'
 import { NotProjectOwnerError } from '../../_errors/not-project-owner-error'
 import { ProjectNotFoundError } from '../../_errors/project-not-found-error'
+import type { ProjectMembersRepository } from '../../repositories/project-members-repository'
 import type { ProjectsRepository } from '../../repositories/projects-repositories'
 
 interface UpdateProjectUseCaseRequest {
@@ -29,6 +31,7 @@ export class UpdateProjectUseCase {
   constructor(
     private readonly projectsRepository: ProjectsRepository,
     private readonly registerLog: RegisterLogUseCase,
+    private readonly projectMembersRepository: ProjectMembersRepository,
   ) {}
 
   private async log({ actorId, resourceId, text, status, diff }: LogParams) {
@@ -42,6 +45,12 @@ export class UpdateProjectUseCase {
       status,
       text,
     })
+  }
+
+  private async isAcceptedMember(projectId: string, userId: string): Promise<boolean> {
+    const projectMember = await this.projectMembersRepository.findByProjectAndUser(projectId, userId)
+
+    return projectMember?.status === ProjectMemberStatus.ACCEPTED
   }
 
   async execute({
@@ -65,15 +74,30 @@ export class UpdateProjectUseCase {
       return left(new ProjectNotFoundError())
     }
 
-    if (project.author.toString() !== authorId) {
-      await this.log({
-        actorId: authorId,
-        resourceId: projectId,
-        text: `Usuário ${authorId} não tem permissão para atualizar o projeto ${projectId}.`,
-        status: AuditLogStatus.FAILURE,
-      })
+    const isOwner = project.author.toString() === authorId
 
-      return left(new NotProjectOwnerError())
+    if (!isOwner) {
+      if (!(await this.isAcceptedMember(projectId, authorId))) {
+        await this.log({
+          actorId: authorId,
+          resourceId: projectId,
+          text: `Usuário ${authorId} não tem permissão para atualizar o projeto ${projectId}.`,
+          status: AuditLogStatus.FAILURE,
+        })
+
+        return left(new NotProjectOwnerError())
+      }
+
+      if (status !== undefined && status !== project.status) {
+        await this.log({
+          actorId: authorId,
+          resourceId: projectId,
+          text: `Coautor ${authorId} tentou mudar o status do projeto ${projectId}.`,
+          status: AuditLogStatus.FAILURE,
+        })
+
+        return left(new NotProjectOwnerError('Somente o dono do projeto pode alterar o status'))
+      }
     }
 
     const diff: Record<string, { old: unknown; new: unknown }> = {
@@ -84,7 +108,7 @@ export class UpdateProjectUseCase {
     project.title = title
     project.description = description
 
-    if (status !== undefined) {
+    if (isOwner && status !== undefined) {
       diff.status = { old: project.status, new: status }
       project.status = status
     }

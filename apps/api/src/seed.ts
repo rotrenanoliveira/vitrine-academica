@@ -17,7 +17,7 @@ import { makeTagOnDatabase } from '@tests/factories/make-tag'
 import { makeUserOnDatabase } from '@tests/factories/make-user'
 import { sql } from 'drizzle-orm'
 import { Slug } from '@/core/entities/value-objects/slug'
-import { UserStatus } from '@/domain/identity/enterprise/entities/user'
+import { UserRole, UserStatus } from '@/domain/identity/enterprise/entities/user'
 import {
   InstitutionMemberRole,
   InstitutionMemberStatus,
@@ -243,8 +243,9 @@ async function seed() {
   for (let i = 1; i <= 6; i++) {
     const { user } = await makeUserOnDatabase({
       name: faker.person.fullName(),
-      email: faker.internet.email(),
+      email: i === 1 ? 'admin@vitrine.local' : faker.internet.email(),
       status: UserStatus.ACTIVE,
+      role: i === 1 ? UserRole.ADMIN : UserRole.USER,
     })
 
     const avatarId = i <= attachments.length ? attachments[i - 1]?.id : null
@@ -469,7 +470,7 @@ async function seed() {
   console.log(`Access codes: ${accessCodes.length}`)
   console.log('────────────────────────────────────')
   console.log('Login de exemplo:')
-  console.log(`  email: seed.user1@vitrine.local`)
+  console.log(`  email: admin@vitrine.local`)
   console.log(`  code:  ${SEED_ACCESS_CODE}`)
 }
 

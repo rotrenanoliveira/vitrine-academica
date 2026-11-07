@@ -55,7 +55,7 @@ function _loadFile() {
 export async function makeAttachmentOnStorage(attachment: Attachment, fileBuffer: Buffer, uploadUrl?: string) {
   const signedUrl = uploadUrl ?? (await makeSignedUrl(attachment)).uploadUrl.url
 
-  await fetch(signedUrl, {
+  const response = await fetch(signedUrl, {
     method: 'PUT',
     headers: {
       'Content-Type': attachment.mimeType,
@@ -63,6 +63,8 @@ export async function makeAttachmentOnStorage(attachment: Attachment, fileBuffer
     },
     body: fileBuffer,
   })
+
+  await response.arrayBuffer()
 
   return { attachment }
 }
