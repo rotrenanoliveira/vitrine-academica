@@ -7,9 +7,19 @@ import { deleteAttachmentRoute } from './attachments/delete-attachment'
 import { getAttachmentRoute } from './attachments/get-attachment'
 import { uploadAttachmentRoute } from './attachments/upload-attachment'
 import { authenticateWithAccessCodeRoute } from './auth/authenticate-with-access-code'
+import { applyToCallRoute } from './call-applications/apply-to-call'
+import { decideCallApplicationRoute } from './call-applications/decide-call-application'
+import { fetchCallApplicationsRoute } from './call-applications/fetch-call-applications'
+import { fetchMyCallApplicationsRoute } from './call-applications/fetch-my-call-applications'
 import { getMeRoute } from './auth/get-me'
 import { logoutRoute } from './auth/logout'
 import { requestAccessCodeRoute } from './auth/request-access-code'
+import { closeCallRoute } from './calls/close-call'
+import { fetchCallsRoute } from './calls/fetch-calls'
+import { fetchMyCallsRoute } from './calls/fetch-my-calls'
+import { getCallByIdRoute } from './calls/get-call-by-id'
+import { registerCallRoute } from './calls/register-call'
+import { updateCallRoute } from './calls/update-call'
 import { createEventRoute } from './events/create-event'
 import { editEventNameRoute } from './events/edit-event-name'
 import { fetchApprovedParticipantsRoute } from './events/fetch-approved-participants'
@@ -275,4 +285,16 @@ export async function routes(app: FastifyInstance) {
   await app.register(rejectInstitutionMembershipRequestRoute)
   /** GET /institutions/:institutionId/membership-requests */
   await app.register(fetchInstitutionMembershipRequestsRoute)
+
+  await app.register(registerCallRoute)
+  await app.register(getCallByIdRoute)
+  await app.register(fetchMyCallsRoute)
+  await app.register(fetchCallsRoute)
+  await app.register(updateCallRoute)
+  await app.register(closeCallRoute)
+
+  await app.register(applyToCallRoute)
+  await app.register(fetchCallApplicationsRoute)
+  await app.register(decideCallApplicationRoute)
+  await app.register(fetchMyCallApplicationsRoute)
 }
