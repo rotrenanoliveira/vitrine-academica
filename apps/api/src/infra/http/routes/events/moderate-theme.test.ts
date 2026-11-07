@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { appForTest as app } from '@tests/app'
 import { setupManagerWithEventCycle, suggestTheme } from '@tests/factories/setup-event'
 import { authenticateUser } from '@tests/factories/setup-manager-institution'
@@ -54,9 +55,10 @@ describe('(E2E) - PATCH /api/v1/events/themes/:themeId/moderation', () => {
 
   it('should not be able to moderate a non-existent theme', async () => {
     const { accessToken } = await setupManagerWithEventCycle()
+    const invalidThemeId = randomUUID()
 
     const response = await request(app.server)
-      .patch('/api/v1/events/themes/invalid-theme-id/moderation')
+      .patch(`/api/v1/events/themes/${invalidThemeId}/moderation`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ action: 'APPROVE' })
 

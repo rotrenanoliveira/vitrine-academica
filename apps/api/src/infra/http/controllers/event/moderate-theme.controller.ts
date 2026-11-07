@@ -18,7 +18,7 @@ export class ModerateThemeController {
       const error = result.value
 
       if (error instanceof InvalidThemeError) {
-        return reply.status(400).send({ message: error.message })
+        return reply.status(404).send({ message: error.message })
       }
 
       if (error instanceof EventNotFoundError) {

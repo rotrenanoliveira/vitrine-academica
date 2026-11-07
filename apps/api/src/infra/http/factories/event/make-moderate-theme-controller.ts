@@ -4,12 +4,12 @@ import { makeEventDeps } from './make-event-deps'
 
 export function makeModerateThemeController() {
   const deps = makeEventDeps()
-  return new ModerateThemeController(
-    new ModerateThemeUseCase(
-      deps.eventsRepository,
-      deps.themesRepository,
-      deps.institutionMembersRepository,
-      deps.registerLog,
-    ),
+  const moderateThemeUseCase = new ModerateThemeUseCase(
+    deps.eventsRepository,
+    deps.themesRepository,
+    deps.institutionMembersRepository,
+    deps.registerLog,
   )
+
+  return new ModerateThemeController(moderateThemeUseCase)
 }
