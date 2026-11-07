@@ -35,7 +35,10 @@ describe('(E2E) - GET /api/v1/calls/:callId/applications', () => {
   it('should return the applicants with name, institution and role but without email', async () => {
     const { accessToken, user } = await authenticateUser()
     const { user: applicant } = await makeUserOnDatabase({ name: 'Maria Silva', email: 'maria@email.com' })
-    const { institution } = await makeInstitutionOnDatabase({ name: 'UMC' })
+    const { institution } = await makeInstitutionOnDatabase({
+      name: 'UMC',
+      registerBy: user.id,
+    })
     const { member } = makeInstitutionMember({
       institutionId: institution.id.toString(),
       userId: applicant.id.toString(),
