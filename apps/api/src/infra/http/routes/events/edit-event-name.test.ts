@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { appForTest as app } from '@tests/app'
 import { setupManagerWithEventCycle } from '@tests/factories/setup-event'
 import { authenticateUser } from '@tests/factories/setup-manager-institution'
@@ -31,9 +32,10 @@ describe('(E2E) - PATCH /api/v1/events/:eventId', () => {
 
   it('should not be able to edit a non-existent event', async () => {
     const { accessToken } = await authenticateUser()
+    const invalidEventId = randomUUID()
 
     const response = await request(app.server)
-      .patch('/api/v1/events/invalid-event-id')
+      .patch(`/api/v1/events/${invalidEventId}`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ name: 'Qualquer' })
 

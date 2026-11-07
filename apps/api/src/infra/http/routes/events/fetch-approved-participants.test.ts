@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { appForTest as app } from '@tests/app'
 import { makeProjectOnDatabase } from '@tests/factories/make-project'
 import { setupOpenEventCycle } from '@tests/factories/setup-event'
@@ -52,7 +53,9 @@ describe('(E2E) - GET /api/v1/events/:eventId/participants', () => {
   })
 
   it('should return 404 for a non-existent event', async () => {
-    const response = await request(app.server).get('/api/v1/events/invalid-event-id/participants')
+    const invalidEventId = randomUUID()
+
+    const response = await request(app.server).get(`/api/v1/events/${invalidEventId}/participants`)
 
     expect(response.status).toBe(404)
   })

@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { appForTest as app } from '@tests/app'
 import { moderateTheme, setupManagerWithEventCycle, suggestTheme } from '@tests/factories/setup-event'
 import { authenticateUser } from '@tests/factories/setup-manager-institution'
@@ -54,11 +55,12 @@ describe('(E2E) - POST /api/v1/events/:eventId/votes', () => {
 
   it('should not be able to vote on a non-existent event', async () => {
     const { accessToken } = await authenticateUser()
+    const invalidId = randomUUID()
 
     const response = await request(app.server)
-      .post('/api/v1/events/invalid-theme-id/votes')
+      .post(`/api/v1/events/${invalidId}/votes`)
       .set('Authorization', `Bearer ${accessToken}`)
-      .send({ themeId: 'invalid-theme-id' })
+      .send({ themeId: invalidId })
 
     expect(response.status).toBe(404)
   })

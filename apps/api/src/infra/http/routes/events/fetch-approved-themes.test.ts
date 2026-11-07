@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { appForTest as app } from '@tests/app'
 import { moderateTheme, setupManagerWithEventCycle, suggestTheme } from '@tests/factories/setup-event'
 import request from 'supertest'
@@ -23,7 +24,9 @@ describe('(E2E) - GET /api/v1/events/:eventId/themes', () => {
   })
 
   it('should return 404 for a non-existent event', async () => {
-    const response = await request(app.server).get('/api/v1/events/invalid-event-id/themes')
+    const invalidEventId = randomUUID()
+
+    const response = await request(app.server).get(`/api/v1/events/${invalidEventId}/themes`)
 
     expect(response.status).toBe(404)
   })

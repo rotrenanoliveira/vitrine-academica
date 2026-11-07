@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { appForTest as app } from '@tests/app'
 import { makeInstitutionMemberOnDatabase } from '@tests/factories/make-institution-member'
 import { setupManagerWithEventCycle } from '@tests/factories/setup-event'
@@ -66,9 +67,10 @@ describe('(E2E) - POST /api/v1/events/:eventId/themes', () => {
 
   it('should not be able to suggest a theme for a non-existent event', async () => {
     const { accessToken } = await authenticateUser()
+    const invalidEventId = randomUUID()
 
     const response = await request(app.server)
-      .post('/api/v1/events/invalid-event-id/themes')
+      .post(`/api/v1/events/${invalidEventId}/themes`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
         title: 'Tema',

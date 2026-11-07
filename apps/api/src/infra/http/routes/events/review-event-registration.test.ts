@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { appForTest as app } from '@tests/app'
 import { makeProjectOnDatabase } from '@tests/factories/make-project'
 import { setupOpenEventCycle } from '@tests/factories/setup-event'
@@ -76,9 +77,10 @@ describe('(E2E) - PATCH /api/v1/events/registrations/:registrationId/review', ()
 
   it('should return 404 for a non-existent registration', async () => {
     const { accessToken } = await setupOpenEventCycle()
+    const invalidRegistrationId = randomUUID()
 
     const response = await request(app.server)
-      .patch('/api/v1/events/registrations/invalid-registration-id/review')
+      .patch(`/api/v1/events/registrations/${invalidRegistrationId}/review`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ action: 'APPROVE' })
 
