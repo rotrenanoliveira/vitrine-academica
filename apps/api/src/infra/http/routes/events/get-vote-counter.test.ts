@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { appForTest as app } from '@tests/app'
 import { moderateTheme, setupManagerWithEventCycle, suggestTheme } from '@tests/factories/setup-event'
 import { authenticateUser } from '@tests/factories/setup-manager-institution'
@@ -45,9 +46,10 @@ describe('(E2E) - GET /api/v1/events/:eventId/vote-counter', () => {
 
   it('should return 404 for a non-existent event', async () => {
     const { accessToken } = await setupManagerWithEventCycle()
+    const invalidEventId = randomUUID()
 
     const response = await request(app.server)
-      .get('/api/v1/events/invalid-theme-id/vote-counter')
+      .get(`/api/v1/events/${invalidEventId}/vote-counter`)
       .set('Authorization', `Bearer ${accessToken}`)
 
     expect(response.status).toBe(404)

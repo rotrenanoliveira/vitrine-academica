@@ -18,7 +18,7 @@ export class GetVoteCounterController {
       }
 
       if (error instanceof EventNotFoundError) {
-        return reply.status(403).send({ message: error.message })
+        return reply.status(404).send({ message: error.message })
       }
 
       throw error
