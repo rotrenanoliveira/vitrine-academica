@@ -9,6 +9,7 @@ const links = [
   { href: '/exposicao', label: 'Exposição do dia' },
   { href: '/projetos', label: 'Projetos' },
   { href: '/pesquisas-cientificas', label: 'Pesquisas científicas' },
+  { href: '/chamados', label: 'Chamados' },
   { href: '/instituicoes', label: 'Instituições' },
   { href: '/conta', label: 'Conta' },
 ]
