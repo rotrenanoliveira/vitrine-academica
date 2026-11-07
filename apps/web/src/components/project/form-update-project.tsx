@@ -14,6 +14,7 @@ import type { Project } from '@/utils/type'
 
 type FormUpdateProjectProps = {
   project: Project
+  canChangeStatus?: boolean
 }
 
 const statusOptions = [
@@ -23,7 +24,7 @@ const statusOptions = [
   { value: 'ARCHIVED', label: 'Arquivado' },
 ] as const
 
-export function FormUpdateProject({ project }: FormUpdateProjectProps) {
+export function FormUpdateProject({ project, canChangeStatus = true }: FormUpdateProjectProps) {
   const router = useRouter()
 
   const [_, handleSubmit, isPending] = useFormState(actionUpdateProject, {
@@ -52,25 +53,29 @@ export function FormUpdateProject({ project }: FormUpdateProjectProps) {
         <Textarea id="description" name="description" required rows={5} defaultValue={project.description} />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="status">Status</Label>
-        <select
-          id="status"
-          name="status"
-          required
-          defaultValue={project.status}
-          className="border-input bg-background h-9 w-full border-b px-0 text-sm outline-none"
-        >
-          {statusOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <p className="text-xs text-muted-foreground">
-          Altere para Publicado para disponibilizar o projeto imediatamente.
-        </p>
-      </div>
+      {canChangeStatus ? (
+        <div className="space-y-2">
+          <Label htmlFor="status">Status</Label>
+          <select
+            id="status"
+            name="status"
+            required
+            defaultValue={project.status}
+            className="border-input bg-background h-9 w-full border-b px-0 text-sm outline-none"
+          >
+            {statusOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-muted-foreground">
+            Altere para Publicado para disponibilizar o projeto imediatamente.
+          </p>
+        </div>
+      ) : (
+        <input type="hidden" name="status" value={project.status} />
+      )}
 
       <div className="flex w-full items-end justify-end">
         <Button type="submit" disabled={isPending}>

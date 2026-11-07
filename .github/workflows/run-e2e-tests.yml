@@ -1,0 +1,60 @@
+name: Integration Tests
+run-name: ${{ github.event.head_commit.message || github.event.pull_request.title }}
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+      - production
+
+jobs:
+  run-e2e-tests:
+    name: ${{ github.event.head_commit.message || github.event.pull_request.title }}
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: vitrine
+          POSTGRES_PASSWORD: VACAD28
+          POSTGRES_DB: vitrine_academica_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U vitrine -d vitrine_academica_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      NODE_ENV: test
+      PORT: 4000
+      COOKIE_SECRET: cookie_secret
+      DATABASE_URL: postgresql://vitrine:VACAD28@localhost:5432/vitrine_academica_test
+      CLOUDFLARE_R2_ACCOUNT_ID: account_id
+      CLOUDFLARE_R2_ACCESS_KEY_ID: access_key_id
+      CLOUDFLARE_R2_SECRET_ACCESS_KEY: secret_access_key
+      CLOUDFLARE_R2_BUCKET_NAME: bucket_name
+      CLOUDFLARE_R2_ASSETS_URL: https://assets.test
+      RESEND_API_KEY: resend_api_key
+      MAIL_FROM: noreply@email.com
+      JWT_SECRET: jwt_secret
+      OPENALEX_API_KEY: openalex_api_key
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm --filter @vitrine-academica/api test:e2e:run

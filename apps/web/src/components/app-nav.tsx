@@ -8,6 +8,8 @@ import { buttonVariants } from './ui/button'
 const links = [
   { href: '/exposicao', label: 'Exposição do dia' },
   { href: '/projetos', label: 'Projetos' },
+  { href: '/eventos', label: 'Eventos' },
+  { href: '/projetos/convites', label: 'Convites' },
   { href: '/pesquisas-cientificas', label: 'Pesquisas científicas' },
   { href: '/chamados', label: 'Chamados' },
   { href: '/instituicoes', label: 'Instituições' },

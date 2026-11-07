@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
+import { FormPublishProject } from '@/components/project/form-publish-project'
+import { FormScheduleProject } from '@/components/project/form-schedule-project'
+import { ProjectMembersSection } from '@/components/project/project-members-section'
 import { ProjectStarButton } from '@/components/project/project-star-button'
 import { ProjectTeacherRatingForm } from '@/components/project/project-teacher-rating-form'
 import { ProjectTeacherVotesTable } from '@/components/project/project-teacher-votes-table'
-import { FormPublishProject } from '@/components/project/form-publish-project'
-import { FormScheduleProject } from '@/components/project/form-schedule-project'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -222,11 +223,19 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           </div>
         )}
 
+        {canSchedule && (
+          <div className="border border-border p-4">
+            <FormScheduleProject projectId={project.id} />
+          </div>
+        )}
+
         {canPublish && (
           <div className="border border-border p-4">
             <FormPublishProject projectId={project.id} />
           </div>
         )}
+
+        <ProjectMembersSection projectId={project.id} projectStatus={project.status} isOwner={isOwner} currentUserId={user.id} />
       </div>
     </div>
   )
