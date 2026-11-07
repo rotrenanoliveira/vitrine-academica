@@ -3,6 +3,10 @@ import { deleteAttachmentRoute } from './attachments/delete-attachment'
 import { getAttachmentRoute } from './attachments/get-attachment'
 import { uploadAttachmentRoute } from './attachments/upload-attachment'
 import { authenticateWithAccessCodeRoute } from './auth/authenticate-with-access-code'
+import { applyToCallRoute } from './call-applications/apply-to-call'
+import { decideCallApplicationRoute } from './call-applications/decide-call-application'
+import { fetchCallApplicationsRoute } from './call-applications/fetch-call-applications'
+import { fetchMyCallApplicationsRoute } from './call-applications/fetch-my-call-applications'
 import { getMeRoute } from './auth/get-me'
 import { logoutRoute } from './auth/logout'
 import { requestAccessCodeRoute } from './auth/request-access-code'
@@ -203,4 +207,9 @@ export async function routes(app: FastifyInstance) {
   await app.register(fetchCallsRoute)
   await app.register(updateCallRoute)
   await app.register(closeCallRoute)
+
+  await app.register(applyToCallRoute)
+  await app.register(fetchCallApplicationsRoute)
+  await app.register(decideCallApplicationRoute)
+  await app.register(fetchMyCallApplicationsRoute)
 }
