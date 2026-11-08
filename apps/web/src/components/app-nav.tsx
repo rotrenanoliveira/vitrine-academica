@@ -7,6 +7,7 @@ import { buttonVariants } from './ui/button'
 
 const links = [
   { href: '/exposicao', label: 'Exposição do dia' },
+  { href: '/curation', label: 'Destaques' },
   { href: '/projetos', label: 'Projetos' },
   { href: '/eventos', label: 'Eventos' },
   { href: '/projetos/convites', label: 'Convites' },
