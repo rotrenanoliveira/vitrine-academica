@@ -44,7 +44,9 @@ const IMAGE_FILES = [
   { fileName: '4-pintura.jpeg', mimeType: 'image/jpeg' },
 ] as const
 
-const TAG_NAMES = ['Inteligência Artificial', 'Educação', 'Sustentabilidade', 'Saúde', 'Cultura', 'Tecnologia']
+const TAG_NAMES = ['Inteligência Artificial', 'Educação', 'Sustentabilidade', 'Saúde', 'Cultura']
+const PROJECT_COUNT = 30
+const MIN_PROJECTS_PER_TAG = 5
 
 const INSTITUTION_SEEDS = [
   {
@@ -89,38 +91,16 @@ const INSTITUTION_SEEDS = [
   },
 ] as const
 
-const PROJECT_SEEDS = [
-  {
-    title: faker.lorem.word(4).toLocaleUpperCase(),
-    description: faker.lorem.sentence(),
-    status: ProjectStatus.PUBLISHED,
-  },
-  {
-    title: faker.lorem.word(4).toLocaleUpperCase(),
-    description: faker.lorem.sentence(),
-    status: ProjectStatus.PUBLISHED,
-  },
-  {
-    title: faker.lorem.word(4).toLocaleUpperCase(),
-    description: faker.lorem.sentence(),
-    status: ProjectStatus.SCHEDULED,
-  },
-  {
-    title: faker.lorem.word(4).toLocaleUpperCase(),
-    description: faker.lorem.sentence(),
-    status: ProjectStatus.SCHEDULED,
-  },
-  {
-    title: faker.lorem.word(4).toLocaleUpperCase(),
-    description: faker.lorem.sentence(),
-    status: ProjectStatus.SKETCH,
-  },
-  {
-    title: faker.lorem.word(4).toLocaleUpperCase(),
-    description: faker.lorem.sentence(),
-    status: ProjectStatus.ARCHIVED,
-  },
-] as const
+function projectStatusAt(index: number) {
+  if (index < 20) return ProjectStatus.PUBLISHED
+  if (index < 24) return ProjectStatus.SCHEDULED
+  if (index < 27) return ProjectStatus.SKETCH
+  return ProjectStatus.ARCHIVED
+}
+
+function projectTagIndex(index: number, tagCount: number) {
+  return index % tagCount
+}
 
 const MEMBER_ROLES = [
   InstitutionMemberRole.MANAGER,
@@ -333,44 +313,52 @@ async function seed() {
   }
   console.log(`  ✓ ${requests.length} solicitações`)
 
-  console.log('\nCriando projetos com capas/attachments...')
+  console.log(`\nCriando ${PROJECT_COUNT} projetos com capas/attachments...`)
   const projects = []
+  const tagAssignments: { projectIndex: number; tagIndex: number }[] = []
 
-  for (const [index, data] of PROJECT_SEEDS.entries()) {
+  for (let index = 0; index < PROJECT_COUNT; index++) {
     const cover = attachments[index % attachments.length]!
     const extra = attachments[(index + 1) % attachments.length]!
-    const projectTags = [tags[index % tags.length]?.id.toString(), tags[(index + 1) % tags.length]?.id.toString()]
+    const tagIndex = projectTagIndex(index, tags.length)
 
     const { project } = await makeProjectOnDatabase({
-      title: data.title,
-      description: data.description,
+      title: `${faker.lorem.word()} ${faker.lorem.word()} ${index + 1}`.toLocaleUpperCase(),
+      description: faker.lorem.sentence(),
       author: users[index % users.length]?.id,
-      status: data.status,
+      status: projectStatusAt(index),
       attachments: [cover.id.toString(), extra.id.toString()],
-      tags: projectTags,
+      tags: [tags[tagIndex]?.id.toString()],
     })
 
     projects.push(project)
+    tagAssignments.push({ projectIndex: index, tagIndex })
+
     console.log(`  ✓ ${project.title} (capa: ${cover.name})`)
   }
 
   console.log('\nCriando project tags...')
   const projectTags = []
+  const projectsPerTag = new Array<number>(tags.length).fill(0)
 
-  for (let i = 0; i < 5; i++) {
+  for (const assignment of tagAssignments) {
     const { projectTag } = await makeProjectTagOnDatabase({
-      projectId: projects[i]?.id,
-      tagId: tags[i]?.id,
+      projectId: projects[assignment.projectIndex]?.id,
+      tagId: tags[assignment.tagIndex]?.id,
     })
     projectTags.push(projectTag)
+    projectsPerTag[assignment.tagIndex] = (projectsPerTag[assignment.tagIndex] ?? 0) + 1
   }
 
-  const { projectTag: extraProjectTag } = await makeProjectTagOnDatabase({
-    projectId: projects[5]?.id,
-    tagId: tags[0]?.id,
-  })
-  projectTags.push(extraProjectTag)
-  console.log(`  ✓ ${projectTags.length} project tags`)
+  for (const [tagIndex, tag] of tags.entries()) {
+    const total = projectsPerTag[tagIndex] ?? 0
+
+    if (total < MIN_PROJECTS_PER_TAG) {
+      throw new Error(`A tag "${tag.name}" ficou com ${total} projetos; o mínimo é ${MIN_PROJECTS_PER_TAG}.`)
+    }
+
+    console.log(`  ✓ ${tag.name}: ${total} projetos`)
+  }
 
   console.log('\nCriando preference tags...')
   const preferenceTags = []
