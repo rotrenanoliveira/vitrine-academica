@@ -1,13 +1,14 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { HomePreferencesBanner, HomeProjectsList } from '@/app/_components/home-projects-list'
+import { HomePreferencesBanner } from '@/app/_components/home-projects-list'
 import { AppNav } from '@/components/app-nav'
+import { ProjectGallery } from '@/components/project/project-gallery'
 import { getCurrentUser } from '@/server/auth/require-user'
 import { getCachedUserPreferenceTags } from '@/server/http/routes/preference-tags/fetch-user-preference-tags'
 import { getCachedProjectsOfInterest } from '@/server/http/routes/projects/fetch-projects-of-interest'
 import { getCachedPublishedProjects } from '@/server/http/routes/projects/fetch-published-projects'
-import { loadStarredProjectIds } from '@/server/projects/load-starred-project-ids'
+import { getCachedTags } from '@/server/http/routes/tags/fetch-tags'
 import { resolveProjectsWithCover } from '@/server/projects/resolve-project-cover-url'
 import type { Project } from '@/utils/type'
 
@@ -41,15 +42,15 @@ async function loadHomeProjects(userId?: string): Promise<{
 
 export default async function HomePage() {
   const user = await getCurrentUser()
-  const [{ projects, showPreferencesBanner, personalized }, starredProjectIds] = await Promise.all([
+  const [{ projects, showPreferencesBanner, personalized }, { tags }] = await Promise.all([
     loadHomeProjects(user?.id),
-    loadStarredProjectIds(Boolean(user)),
+    getCachedTags(),
   ])
   const projectsWithCover = await resolveProjectsWithCover(projects)
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-8 px-4 py-8">
-      <header className="flex items-start justify-between gap-4">
+    <div className="mx-auto flex min-h-screen w-full max-w-dvw flex-col gap-8 py-8">
+      <header className="flex items-start justify-between gap-4 px-5 sm:px-8 lg:px-16">
         <div className="flex items-start gap-2">
           <Link href="/">
             <Image src="/vitrine-icon.png" alt="Vitrine Acadêmica" width={48} height={48} />
@@ -66,13 +67,13 @@ export default async function HomePage() {
       </header>
 
       <main className="space-y-4">
-        {showPreferencesBanner ? <HomePreferencesBanner /> : null}
-        <HomeProjectsList
-          projects={projectsWithCover}
-          starredProjectIds={starredProjectIds}
-          currentUserId={user?.id}
-          authenticated={Boolean(user)}
-        />
+        {showPreferencesBanner ? (
+          <div className="px-5 sm:px-8 lg:px-16">
+            <HomePreferencesBanner />
+          </div>
+        ) : null}
+
+        <ProjectGallery projects={projectsWithCover} tags={tags} featuredCount={5} />
       </main>
     </div>
   )
