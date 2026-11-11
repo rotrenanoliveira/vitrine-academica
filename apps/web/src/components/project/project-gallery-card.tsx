@@ -4,13 +4,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import type { Project, Tag } from '@/utils/type'
+import type { ProjectListItem, Tag } from '@/utils/type'
 import { resolveProjectTagNames } from './project-gallery-utils'
 
-type ProjectWithCover = Project & { coverUrl: string | null }
-
 type ProjectGalleryCardProps = {
-  project: ProjectWithCover
+  project: ProjectListItem
   tags?: Tag[]
 }
 

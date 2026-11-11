@@ -1,10 +1,8 @@
-import type { Project, Tag } from '@/utils/type'
+import type { ProjectListItem, Tag } from '@/utils/type'
 import { ProjectGalleryCard } from './project-gallery-card'
 
-type ProjectWithCover = Project & { coverUrl: string | null }
-
 type ProjectGalleryCardsProps = {
-  projects: ProjectWithCover[]
+  projects: ProjectListItem[]
   tags?: Tag[]
   title?: string
   eyebrow?: string

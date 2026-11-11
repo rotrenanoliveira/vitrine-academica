@@ -7,15 +7,13 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import type { Project, Tag } from '@/utils/type'
+import type { ProjectListItem, Tag } from '@/utils/type'
 import { resolveProjectTagNames } from './project-gallery-utils'
 
 const AUTO_ADVANCE_MS = 15_000
 
-type ProjectWithCover = Project & { coverUrl: string | null }
-
 type ProjectGallerySlideProps = {
-  projects: ProjectWithCover[]
+  projects: ProjectListItem[]
   tags?: Tag[]
 }
 

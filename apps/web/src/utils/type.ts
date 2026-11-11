@@ -17,9 +17,11 @@ export const projectStatusSchema = z.enum(['SKETCH', 'SCHEDULED', 'PUBLISHED', '
 export const projectSchema = z.object({
   id: z.string(),
   title: z.string(),
+  slug: z.string(),
   description: z.string(),
   authorId: z.string(),
   status: projectStatusSchema,
+  coverUrl: z.string().nullable(),
   attachments: z.array(z.string()),
   tags: z.array(z.string()),
   createdAt: z.string(),
@@ -27,6 +29,17 @@ export const projectSchema = z.object({
 
 export type Project = z.infer<typeof projectSchema>
 export type ProjectStatus = z.infer<typeof projectStatusSchema>
+
+export const projectListItemSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  coverUrl: z.string().nullable(),
+  createdAt: z.string(),
+  tags: z.array(z.string()),
+})
+
+export type ProjectListItem = z.infer<typeof projectListItemSchema>
 
 export const projectScheduledSchema = z.object({
   id: z.string(),

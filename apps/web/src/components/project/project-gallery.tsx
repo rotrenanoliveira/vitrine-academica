@@ -1,4 +1,4 @@
-import type { Project, Tag } from '@/utils/type'
+import type { ProjectListItem, Tag } from '@/utils/type'
 import { ProjectGalleryCards } from './project-gallery-cards'
 import { ProjectGallerySlide } from './project-gallery-slide'
 
@@ -6,7 +6,7 @@ export { ProjectGalleryCard } from './project-gallery-card'
 export { ProjectGalleryCards } from './project-gallery-cards'
 export { ProjectGallerySlide } from './project-gallery-slide'
 
-export type ProjectWithCover = Project & { coverUrl: string | null }
+export type ProjectWithCover = ProjectListItem
 
 type ProjectGalleryProps = {
   projects: ProjectWithCover[]
