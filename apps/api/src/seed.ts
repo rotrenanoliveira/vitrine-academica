@@ -329,7 +329,8 @@ async function seed() {
       description: faker.lorem.paragraphs(3),
       author: users[index % users.length]?.id,
       status: projectStatusAt(index),
-      attachments: [cover.id.toString(), extra.id.toString()],
+      coverUrl: cover.id.toString(),
+      attachments: [extra.id.toString()],
       tags: [tags[tagIndex]?.id.toString()],
     })
 

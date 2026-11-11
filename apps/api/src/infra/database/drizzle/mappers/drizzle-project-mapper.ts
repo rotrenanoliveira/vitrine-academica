@@ -10,9 +10,11 @@ export class DrizzleProjectMapper {
     return Project.create(
       {
         title: row.title,
+        slug: row.slug,
         description: row.description,
         author: new UniqueEntityId(row.authorId),
         status: row.status as ProjectStatus,
+        coverUrl: row.coverUrl ?? null,
         attachments: row.attachments ?? [],
         tags: row.tags ?? [],
         createdAt: row.createdAt,
@@ -26,9 +28,11 @@ export class DrizzleProjectMapper {
     return {
       id: project.id.toString(),
       title: project.title,
+      slug: project.slug,
       description: project.description,
       authorId: project.author.toString(),
       status: project.status,
+      coverUrl: project.coverUrl,
       attachments: project.attachments,
       tags: project.tags,
       createdAt: project.createdAt,
