@@ -66,6 +66,7 @@ import { fetchScheduledProjectsRoute } from './projects/fetch-scheduled-projects
 import { getMyStarOnProjectRoute } from './projects/get-my-star-on-project'
 import { getMyTeacherRatingOnProjectRoute } from './projects/get-my-teacher-rating-on-project'
 import { getProjectByIdRoute } from './projects/get-project-by-id'
+import { getProjectBySlugRoute } from './projects/get-project-by-slug'
 import { getProjectRatingsRoute } from './projects/get-project-ratings'
 import { inviteProjectMemberRoute } from './projects/invite-project-member'
 import { listActiveRatingCriteriaRoute } from './projects/list-active-rating-criteria'
@@ -206,6 +207,8 @@ export async function routes(app: FastifyInstance) {
   await app.register(publishProjectRoute)
   /** PUT /projects/:projectId */
   await app.register(updateProjectRoute)
+  /** GET /projects/slug/:slug */
+  await app.register(getProjectBySlugRoute)
   /** GET /projects/:projectId */
   await app.register(getProjectByIdRoute)
   /** POST /projects/:projectId/stars */
