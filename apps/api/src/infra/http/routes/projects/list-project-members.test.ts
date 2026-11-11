@@ -42,7 +42,6 @@ async function addMember(projectId: UniqueEntityId, status: ProjectMemberStatus,
 describe('(E2E) - GET /api/v1/projects/:projectId/members', () => {
   afterAll(async () => await app.close())
 
-
   it('listar membros: como outra pessoa em projeto publicado, deve retornar 200 só com quem aceitou', async () => {
     const { accessToken } = await authenticateUser()
     const { user: owner } = await makeUserOnDatabase()

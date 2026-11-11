@@ -16,10 +16,7 @@ interface GetCurationUseCaseRequest {
   now?: Date | undefined
 }
 
-type GetCurationUseCaseResponse = Either<
-  never,
-  { board: TeacherCurationEntry[]; community: CommunityCurationEntry[] }
->
+type GetCurationUseCaseResponse = Either<never, { board: TeacherCurationEntry[]; community: CommunityCurationEntry[] }>
 
 export class GetCurationUseCase {
   constructor(private readonly curationRepository: CurationRepository) {}

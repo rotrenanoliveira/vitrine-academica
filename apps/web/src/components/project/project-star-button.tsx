@@ -89,6 +89,7 @@ export function ProjectStarButton({
 
   if (variant === 'icon') {
     return (
+      // biome-ignore lint/a11y/useKeyWithClickEvents: stop propagation of the event
       <form onSubmit={handleSubmit} onClick={stopPropagation}>
         <input type="hidden" name="project-id" value={projectId} />
         <Button
@@ -107,6 +108,7 @@ export function ProjectStarButton({
   }
 
   return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: stop propagation of the event
     <form onSubmit={handleSubmit} onClick={stopPropagation}>
       <input type="hidden" name="project-id" value={projectId} />
       <Button

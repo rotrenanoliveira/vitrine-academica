@@ -80,7 +80,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   const starred = Boolean(myStarResult.star)
   const myTeacherRating = myTeacherRatingResult.teacherRating
   const voteCriteria = votesResult.criteria.length > 0 ? votesResult.criteria : criteriaForForm.criteria
-  const canEdit = isOwner
+  // const canEdit = isOwner
   const canSchedule = isOwner && project.status === 'SKETCH'
   const canPublish = isOwner && (project.status === 'SKETCH' || project.status === 'SCHEDULED')
 
@@ -235,7 +235,12 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           </div>
         )}
 
-        <ProjectMembersSection projectId={project.id} projectStatus={project.status} isOwner={isOwner} currentUserId={user.id} />
+        <ProjectMembersSection
+          projectId={project.id}
+          projectStatus={project.status}
+          isOwner={isOwner}
+          currentUserId={user.id}
+        />
       </div>
     </div>
   )

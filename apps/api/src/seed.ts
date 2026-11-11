@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/style/noNonNullAssertion: seed file */
 import { readFileSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { faker } from '@faker-js/faker'

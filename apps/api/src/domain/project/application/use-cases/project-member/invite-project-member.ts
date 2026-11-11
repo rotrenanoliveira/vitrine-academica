@@ -139,7 +139,6 @@ export class InviteProjectMemberUseCase {
     const existingMember = await this.projectMembersRepository.findByProjectAndUser(projectId, user.id.toString())
 
     if (existingMember) {
-  
       if (existingMember.status === ProjectMemberStatus.REJECTED) {
         existingMember.status = ProjectMemberStatus.PENDING
         await this.projectMembersRepository.save(existingMember)

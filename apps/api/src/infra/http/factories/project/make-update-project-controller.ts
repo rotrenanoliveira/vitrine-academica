@@ -11,7 +11,11 @@ export function makeUpdateProjectController() {
   const projectMembersRepository = new DrizzleProjectMembersRepository(db)
   const auditLogsRepository = new DrizzleAuditLogsRepository(db)
   const registerLogUseCase = new RegisterLogUseCase(auditLogsRepository)
-  const updateProjectUseCase = new UpdateProjectUseCase(projectsRepository, registerLogUseCase, projectMembersRepository)
+  const updateProjectUseCase = new UpdateProjectUseCase(
+    projectsRepository,
+    registerLogUseCase,
+    projectMembersRepository,
+  )
 
   return new UpdateProjectController(updateProjectUseCase)
 }
