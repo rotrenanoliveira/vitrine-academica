@@ -1,4 +1,7 @@
-import type { ProjectsRepository } from '@/domain/project/application/repositories/projects-repositories'
+import type {
+  FindManyProjectsFilters,
+  ProjectsRepository,
+} from '@/domain/project/application/repositories/projects-repositories'
 import type { Project } from '@/domain/project/enterprise/entities/project'
 
 export class InMemoryProjectsRepository implements ProjectsRepository {
@@ -8,8 +11,25 @@ export class InMemoryProjectsRepository implements ProjectsRepository {
     return this.items
   }
 
+  async findMany(filters: FindManyProjectsFilters = {}): Promise<Project[]> {
+    const title = filters.title?.toLowerCase()
+
+    return this.items
+      .filter((project) => {
+        if (filters.ids && !filters.ids.includes(project.id.toString())) return false
+        if (filters.status && project.status !== filters.status) return false
+        if (title && !project.title.toLowerCase().includes(title)) return false
+        return true
+      })
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+  }
+
   async findById(id: string): Promise<Project | null> {
     return this.items.find((project) => project.id.toString() === id) ?? null
+  }
+
+  async findBySlug(slug: string): Promise<Project | null> {
+    return this.items.find((project) => project.slug === slug) ?? null
   }
 
   async findManyByIds(ids: string[]): Promise<Project[]> {
