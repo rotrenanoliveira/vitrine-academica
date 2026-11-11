@@ -31,10 +31,7 @@ export function ProjectGallery({
   const otherProjects = projects.slice(featuredCount)
 
   return (
-    <section
-      className="bg-[#f4f1eb] px-5 py-8 text-[#252422] sm:px-8 lg:px-14 lg:py-12"
-      aria-labelledby="gallery-title"
-    >
+    <section className="bg-[#f4f1eb] px-5 py-8 text-[#252422] sm:px-8 lg:px-14" aria-labelledby="gallery-title">
       <h2 id="gallery-title" className="sr-only">
         Galeria de projetos
       </h2>

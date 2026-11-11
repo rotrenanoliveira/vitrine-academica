@@ -39,9 +39,11 @@ const ATTACHMENT_FOLDER = 'seed'
 
 const IMAGE_FILES = [
   { fileName: '1-pintura.jpg', mimeType: 'image/jpeg' },
-  { fileName: '2-pintura.jpg', mimeType: 'image/jpeg' },
-  { fileName: '3-pintura.jpg', mimeType: 'image/jpeg' },
-  { fileName: '4-pintura.jpeg', mimeType: 'image/jpeg' },
+  { fileName: '2-pintura.jpeg', mimeType: 'image/jpeg' },
+  { fileName: '3-pintura.png', mimeType: 'image/png' },
+  { fileName: '4-pintura.png', mimeType: 'image/png' },
+  { fileName: '5-pintura.png', mimeType: 'image/png' },
+  { fileName: '6-pintura.png', mimeType: 'image/png' },
 ] as const
 
 const TAG_NAMES = ['Inteligência Artificial', 'Educação', 'Sustentabilidade', 'Saúde', 'Cultura']
@@ -323,8 +325,8 @@ async function seed() {
     const tagIndex = projectTagIndex(index, tags.length)
 
     const { project } = await makeProjectOnDatabase({
-      title: `${faker.lorem.word()} ${faker.lorem.word()} ${index + 1}`.toLocaleUpperCase(),
-      description: faker.lorem.sentence(),
+      title: `${faker.lorem.sentence()}`,
+      description: faker.lorem.paragraphs(3),
       author: users[index % users.length]?.id,
       status: projectStatusAt(index),
       attachments: [cover.id.toString(), extra.id.toString()],

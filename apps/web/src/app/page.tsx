@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { HomePreferencesBanner } from '@/app/_components/home-projects-list'
 import { AppNav } from '@/components/app-nav'
 import { ProjectGallery } from '@/components/project/project-gallery'
 import { getCurrentUser } from '@/server/auth/require-user'
@@ -16,14 +15,10 @@ export const metadata: Metadata = {
   title: 'Vitrine Acadêmica',
 }
 
-async function loadHomeProjects(userId?: string): Promise<{
-  projects: Project[]
-  showPreferencesBanner: boolean
-  personalized: boolean
-}> {
+async function loadHomeProjects(userId?: string): Promise<{ projects: Project[]; personalized: boolean }> {
   if (!userId) {
     const { projects } = await getCachedPublishedProjects()
-    return { projects, showPreferencesBanner: false, personalized: false }
+    return { projects, personalized: false }
   }
 
   const { preferenceTags } = await getCachedUserPreferenceTags(userId)
@@ -31,21 +26,18 @@ async function loadHomeProjects(userId?: string): Promise<{
 
   if (activePreferences.length === 0) {
     const { projects } = await getCachedPublishedProjects()
-    return { projects, showPreferencesBanner: true, personalized: false }
+    return { projects, personalized: false }
   }
 
   const { projects } = await getCachedProjectsOfInterest(userId)
   const published = projects.filter((project) => project.status === 'PUBLISHED')
 
-  return { projects: published, showPreferencesBanner: false, personalized: true }
+  return { projects: published, personalized: true }
 }
 
 export default async function HomePage() {
   const user = await getCurrentUser()
-  const [{ projects, showPreferencesBanner, personalized }, { tags }] = await Promise.all([
-    loadHomeProjects(user?.id),
-    getCachedTags(),
-  ])
+  const [{ projects, personalized }, { tags }] = await Promise.all([loadHomeProjects(user?.id), getCachedTags()])
   const projectsWithCover = await resolveProjectsWithCover(projects)
 
   return (
@@ -67,12 +59,6 @@ export default async function HomePage() {
       </header>
 
       <main className="space-y-4">
-        {showPreferencesBanner ? (
-          <div className="px-5 sm:px-8 lg:px-16">
-            <HomePreferencesBanner />
-          </div>
-        ) : null}
-
         <ProjectGallery projects={projectsWithCover} tags={tags} featuredCount={5} />
       </main>
     </div>

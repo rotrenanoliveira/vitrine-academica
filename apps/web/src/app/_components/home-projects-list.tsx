@@ -79,17 +79,3 @@ export function HomeProjectsList({
     </ul>
   )
 }
-
-export function HomePreferencesBanner() {
-  return (
-    <div className="border border-border px-4 py-3 text-sm">
-      <p>
-        Você ainda não cadastrou tags preferidas.{' '}
-        <Link href="/conta" className="font-medium underline-offset-4 hover:underline">
-          Cadastre em Minha conta
-        </Link>{' '}
-        para personalizar a vitrine.
-      </p>
-    </div>
-  )
-}

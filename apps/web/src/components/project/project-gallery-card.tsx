@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { Project, Tag } from '@/utils/type'
-import { formatGalleryCategory, resolveProjectTagNames } from './project-gallery-utils'
+import { resolveProjectTagNames } from './project-gallery-utils'
 
 type ProjectWithCover = Project & { coverUrl: string | null }
 
@@ -45,11 +45,11 @@ export function ProjectGalleryCard({ project, tags = [] }: ProjectGalleryCardPro
           </Link>
         </div>
       </div>
-      <CardContent className="flex min-h-51 flex-col bg-[#ebe6de] p-5">
+      <CardContent className="flex min-h-56 flex-col bg-[#ebe6de] p-5">
         <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#252422]/55">
-          {formatGalleryCategory(project, tagNames)}
+          <span>{tagNames[0]}</span>
         </p>
-        <h3 className="font-serif text-2xl leading-tight tracking-[-0.03em]">
+        <h3 className="font-semibold text-xl leading-tight tracking-[-0.03em]">
           <Link href={projectHref} className="hover:underline">
             {project.title}
           </Link>
@@ -58,11 +58,11 @@ export function ProjectGalleryCard({ project, tags = [] }: ProjectGalleryCardPro
         <Button
           variant="link"
           nativeButton={false}
-          className="mt-auto h-auto justify-between p-0 pt-5 text-[#252422] no-underline hover:no-underline"
+          className="mt-auto h-auto justify-between p-0 pt-5 group text-[#252422] no-underline hover:no-underline"
           render={<Link href={projectHref} />}
           aria-label={`Visualizar o projeto ${project.title}`}
         >
-          Visualizar projeto
+          <span className="group-hover:underline">Visualizar projeto</span>
           <HugeiconsIcon icon={ArrowUpRight01Icon} data-icon="inline-end" className="size-5" />
         </Button>
       </CardContent>

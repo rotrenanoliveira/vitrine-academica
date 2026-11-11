@@ -14,7 +14,7 @@ type ProjectGalleryCardsProps = {
 export function ProjectGalleryCards({
   projects,
   tags = [],
-  title = 'Outros projetos',
+  title = 'Sala de Exposição',
   eyebrow,
   description = 'Continue a visita por outras pesquisas e narrativas do acervo.',
 }: ProjectGalleryCardsProps) {
@@ -22,7 +22,7 @@ export function ProjectGalleryCards({
     return null
   }
 
-  const resolvedEyebrow = eyebrow ?? `Arquivo aberto · ${String(projects.length).padStart(2, '0')} projetos`
+  const resolvedEyebrow = eyebrow ?? `galeria · ${String(projects.length).padStart(2, '0')} projetos`
 
   return (
     <section aria-labelledby="other-projects-title">
@@ -34,7 +34,7 @@ export function ProjectGalleryCards({
           </h2>
         </div>
         {description ? (
-          <p className="hidden max-w-xs text-right text-sm leading-relaxed text-[#252422]/65 md:block">{description}</p>
+          <p className="hidden max-w-xl text-right text-sm leading-relaxed text-[#252422]/65 md:block">{description}</p>
         ) : null}
       </div>
 

@@ -9,7 +9,7 @@ export class DrizzleProjectsRepository implements ProjectsRepository {
   constructor(private readonly db: DrizzleClient) {}
 
   async findAll(): Promise<Project[]> {
-    const rows = await this.db.select().from(projects)
+    const rows = await this.db.select().from(projects).orderBy(desc(projects.createdAt))
 
     return rows.map(DrizzleProjectMapper.toDomain)
   }
