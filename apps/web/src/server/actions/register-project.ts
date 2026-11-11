@@ -13,6 +13,8 @@ const COVER_ATTACHMENT_FOLDER = 'projects'
 const registerProjectSchema = z.object({
   title: z.string().min(1, 'Informe o título.').max(200),
   description: z.string().min(1, 'Informe a descrição.'),
+  slug: z.string().min(1, 'Informe o slug.'),
+  tags: z.array(z.string().uuid()).min(1, 'Selecione ao menos uma tag.'),
 })
 
 function getCoverFile(data: FormData): File | null {
@@ -25,24 +27,28 @@ function getCoverFile(data: FormData): File | null {
   return value
 }
 
+function getTagIds(data: FormData): string[] {
+  return data.getAll('tag-id').filter((value): value is string => typeof value === 'string' && value.length > 0)
+}
+
 export async function actionRegisterProject(data: FormData) {
   const coverFile = getCoverFile(data)
 
-  if (!coverFile) {
-    return { success: false, message: 'Informe a imagem de capa.' }
-  }
+  if (coverFile) {
+    if (coverFile.size > MAX_COVER_SIZE) {
+      return { success: false, message: 'A capa deve ter no máximo 5 MB.' }
+    }
 
-  if (coverFile.size > MAX_COVER_SIZE) {
-    return { success: false, message: 'A capa deve ter no máximo 5 MB.' }
-  }
-
-  if (!ALLOWED_COVER_MIME_TYPES.includes(coverFile.type)) {
-    return { success: false, message: 'Tipo de arquivo não permitido. Use PNG ou JPG.' }
+    if (!ALLOWED_COVER_MIME_TYPES.includes(coverFile.type)) {
+      return { success: false, message: 'Tipo de arquivo não permitido. Use PNG ou JPG.' }
+    }
   }
 
   const formResult = registerProjectSchema.safeParse({
     title: data.get('title'),
     description: data.get('description'),
+    slug: data.get('slug'),
+    tags: getTagIds(data),
   })
 
   if (formResult.success === false) {
@@ -52,38 +58,46 @@ export async function actionRegisterProject(data: FormData) {
     }
   }
 
-  const [uploadResult, uploadError] = await uploadAttachment({
-    name: coverFile.name,
-    mimeType: coverFile.type,
-    size: coverFile.size,
-    attachmentFolder: COVER_ATTACHMENT_FOLDER,
-  })
+  let coverUrl: string | undefined
 
-  if (uploadError || !uploadResult) {
-    return {
-      success: false,
-      message: uploadError?.message ?? 'Não foi possível preparar o envio da capa.',
+  if (coverFile) {
+    const [uploadResult, uploadError] = await uploadAttachment({
+      name: coverFile.name,
+      mimeType: coverFile.type,
+      size: coverFile.size,
+      attachmentFolder: COVER_ATTACHMENT_FOLDER,
+    })
+
+    if (uploadError || !uploadResult) {
+      return {
+        success: false,
+        message: uploadError?.message ?? 'Não foi possível preparar o envio da capa.',
+      }
     }
-  }
 
-  const putResult = await putAttachmentFile({
-    uploadUrl: uploadResult.uploadUrl,
-    file: coverFile,
-    mimeType: coverFile.type,
-    size: coverFile.size,
-  })
+    const putResult = await putAttachmentFile({
+      uploadUrl: uploadResult.uploadUrl,
+      file: coverFile,
+      mimeType: coverFile.type,
+      size: coverFile.size,
+    })
 
-  if (!putResult.success) {
-    return {
-      success: false,
-      message: putResult.message,
+    if (!putResult.success) {
+      return {
+        success: false,
+        message: putResult.message,
+      }
     }
+
+    coverUrl = uploadResult.attachment.id
   }
 
   const [_, responseError] = await registerProject({
     title: formResult.data.title,
     description: formResult.data.description,
-    attachments: [uploadResult.attachment.id],
+    slug: formResult.data.slug,
+    tags: formResult.data.tags,
+    coverUrl,
   })
 
   if (responseError) {
