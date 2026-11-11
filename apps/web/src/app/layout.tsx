@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { DM_Sans, Geist, Geist_Mono, Outfit } from 'next/font/google'
-import { Toaster } from 'sonner'
 import './globals.css'
 import { cn } from '@/lib/utils'
+import { Providers } from './providers'
 
 const outfitHeading = Outfit({ subsets: ['latin'], variable: '--font-heading' })
 
@@ -38,8 +38,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       )}
     >
       <body className="min-h-full">
-        {children}
-        <Toaster closeButton position="top-right" />
+        <Providers>{children}</Providers>
       </body>
     </html>
   )
