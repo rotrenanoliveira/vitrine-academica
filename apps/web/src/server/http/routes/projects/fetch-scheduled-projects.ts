@@ -2,11 +2,11 @@
 
 import { cache } from 'react'
 import { fetcher } from '@/utils/fetcher'
-import type { Project } from '@/utils/type'
+import type { ProjectListItem } from '@/utils/type'
 import { api } from '../../api-client'
 
 export interface ScheduledProjectItem {
-  project: Project
+  project: ProjectListItem
   publishedIn: string
 }
 
@@ -20,6 +20,11 @@ export async function fetchScheduledProjects() {
   if (responseError) throw new Error(responseError.message)
 
   return response
+}
+
+export async function fetchScheduledProjectsWithCover() {
+  const { scheduledProjects } = await fetchScheduledProjects()
+  return scheduledProjects.map(({ project }) => project)
 }
 
 export const getCachedScheduledProjects = cache(async () => fetchScheduledProjects())

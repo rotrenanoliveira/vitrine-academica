@@ -1,7 +1,5 @@
 import type { Metadata } from 'next'
 
-import { Suspense } from 'react'
-
 import { TodayProjectsList } from './_components/today-projects-list'
 
 export const metadata: Metadata = {
@@ -9,12 +7,6 @@ export const metadata: Metadata = {
   description: 'Projetos acadêmicos lançados no dia atual',
 }
 
-export const dynamic = 'force-dynamic'
-
-export default async function TodayProjectsPage() {
-  return (
-    <Suspense fallback={<p className="text-sm text-muted-foreground">Carregando projetos…</p>}>
-      <TodayProjectsList />
-    </Suspense>
-  )
+export default function TodayProjectsPage() {
+  return <TodayProjectsList />
 }
