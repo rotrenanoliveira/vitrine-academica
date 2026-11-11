@@ -2,64 +2,27 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { AppNav } from '@/components/app-nav'
-import { ProjectGallery } from '@/components/project/project-gallery'
-import { getCurrentUser } from '@/server/auth/require-user'
-import { getCachedUserPreferenceTags } from '@/server/http/routes/preference-tags/fetch-user-preference-tags'
-import { getCachedProjectsOfInterest } from '@/server/http/routes/projects/fetch-projects-of-interest'
-import { getCachedPublishedProjects } from '@/server/http/routes/projects/fetch-published-projects'
-import { getCachedTags } from '@/server/http/routes/tags/fetch-tags'
-import { resolveProjectsWithCover } from '@/server/projects/resolve-project-cover-url'
-import type { Project } from '@/utils/type'
+import { HomeProjectsGallery } from './_components/home-projects-gallery'
 
 export const metadata: Metadata = {
   title: 'Vitrine Acadêmica',
+  description: 'Galeria virtual de projetos.',
 }
 
-async function loadHomeProjects(userId?: string): Promise<{ projects: Project[]; personalized: boolean }> {
-  if (!userId) {
-    const { projects } = await getCachedPublishedProjects()
-    return { projects, personalized: false }
-  }
-
-  const { preferenceTags } = await getCachedUserPreferenceTags(userId)
-  const activePreferences = preferenceTags.filter((preference) => preference.status === 'ACTIVE')
-
-  if (activePreferences.length === 0) {
-    const { projects } = await getCachedPublishedProjects()
-    return { projects, personalized: false }
-  }
-
-  const { projects } = await getCachedProjectsOfInterest(userId)
-  const published = projects.filter((project) => project.status === 'PUBLISHED')
-
-  return { projects: published, personalized: true }
-}
-
-export default async function HomePage() {
-  const user = await getCurrentUser()
-  const [{ projects, personalized }, { tags }] = await Promise.all([loadHomeProjects(user?.id), getCachedTags()])
-  const projectsWithCover = await resolveProjectsWithCover(projects)
-
+export default function HomePage() {
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-dvw flex-col gap-8 py-8">
       <header className="flex items-start justify-between gap-4 px-5 sm:px-8 lg:px-16">
-        <div className="flex items-start gap-2">
-          <Link href="/">
-            <Image src="/vitrine-icon.png" alt="Vitrine Acadêmica" width={48} height={48} />
-          </Link>
-          <div className="space-y-1">
-            <p className="font-heading text-2xl font-semibold">Vitrine Acadêmica</p>
-            <p className="text-sm text-muted-foreground">
-              {personalized ? 'Projetos com base nas suas tags preferidas.' : 'Projetos acadêmicos publicados.'}
-            </p>
-          </div>
-        </div>
+        <Link href="/" className="flex items-center justify-center gap-2">
+          <Image src="/vitrine-icon.png" alt="Vitrine Acadêmica" width={48} height={48} />
+          <p className="font-heading text-2xl font-semibold">Vitrine Acadêmica</p>
+        </Link>
 
         <AppNav />
       </header>
 
       <main className="space-y-4">
-        <ProjectGallery projects={projectsWithCover} tags={tags} featuredCount={5} />
+        <HomeProjectsGallery />
       </main>
     </div>
   )
