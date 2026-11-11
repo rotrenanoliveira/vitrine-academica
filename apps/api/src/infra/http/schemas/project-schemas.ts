@@ -16,6 +16,7 @@ export const projectHttpSchema = z.object({
 export const projectListHttpSchema = z.object({
   id: z.string(),
   title: z.string(),
+  slug: z.string(),
   description: z.string(),
   coverUrl: z.string().nullable(),
   createdAt: z.iso.datetime(),

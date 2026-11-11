@@ -9,6 +9,7 @@ export class ProjectInvitationPresenter {
       project: {
         id: project.id.toString(),
         title: project.title,
+        slug: project.slug,
       },
       // Só o nome de quem convidou: nenhum outro dado do dono é exposto
       owner: owner ? { id: owner.id.toString(), name: owner.name } : null,

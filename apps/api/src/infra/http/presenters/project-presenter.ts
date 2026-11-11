@@ -20,6 +20,7 @@ export class ProjectPresenter {
     return {
       id: project.id.toString(),
       title: project.title,
+      slug: project.slug,
       description: project.description,
       coverUrl,
       createdAt: project.createdAt.toISOString(),

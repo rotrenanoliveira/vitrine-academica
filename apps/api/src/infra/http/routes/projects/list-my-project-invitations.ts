@@ -30,6 +30,7 @@ export async function listMyProjectInvitationsRoute(app: FastifyInstance) {
                 project: z.object({
                   id: z.string(),
                   title: z.string(),
+                  slug: z.string(),
                 }),
                 owner: z
                   .object({
