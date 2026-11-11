@@ -53,7 +53,7 @@ export default async function RatedProjectsPage() {
             {items.map(({ project, rating }) => (
               <li key={rating.id} className="flex flex-col gap-3 px-4 py-4">
                 <div className="space-y-1">
-                  <Link href={`/projetos/${project.id}`} className="font-heading text-lg font-semibold hover:underline">
+                  <Link href={`/projetos/${project.slug}`} className="font-heading text-lg font-semibold hover:underline">
                     {project.title}
                   </Link>
                   <p className="text-xs text-muted-foreground">

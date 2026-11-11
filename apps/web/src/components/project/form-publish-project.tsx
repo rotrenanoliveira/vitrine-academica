@@ -11,9 +11,10 @@ import { actionPublishProject } from '@/server/actions/publish-project'
 
 type FormPublishProjectProps = {
   projectId: string
+  projectSlug: string
 }
 
-export function FormPublishProject({ projectId }: FormPublishProjectProps) {
+export function FormPublishProject({ projectId, projectSlug }: FormPublishProjectProps) {
   const router = useRouter()
 
   const [_, handleSubmit, isPending] = useFormState(actionPublishProject, {
@@ -42,6 +43,7 @@ export function FormPublishProject({ projectId }: FormPublishProjectProps) {
         O projeto fica visível para todos imediatamente. Se estiver agendado, o agendamento é cancelado.
       </p>
       <input type="hidden" name="project-id" value={projectId} />
+      <input type="hidden" name="project-slug" value={projectSlug} />
 
       <div className="flex w-full items-end justify-end">
         <Button type="submit" disabled={isPending}>

@@ -21,7 +21,7 @@ import { getAttachment } from '@/server/http/routes/attachments/get-attachment'
 import { getCachedMyInstitutionMemberships } from '@/server/http/routes/institutions/get-my-institution-memberships'
 import { getMyStarOnProject } from '@/server/http/routes/projects/get-my-star-on-project'
 import { getMyTeacherRatingOnProject } from '@/server/http/routes/projects/get-my-teacher-rating-on-project'
-import { getProject } from '@/server/http/routes/projects/get-project'
+import { getProjectBySlug } from '@/server/http/routes/projects/get-project-by-slug'
 import { getProjectRatings } from '@/server/http/routes/projects/get-project-ratings'
 import { listActiveRatingCriteria } from '@/server/http/routes/projects/list-active-rating-criteria'
 import { listProjectTeacherRatings } from '@/server/http/routes/projects/list-project-teacher-ratings'
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 }
 
 type PageProps = {
-  params: Promise<{ id: string }>
+  params: Promise<{ slug: string }>
 }
 
 const statusLabels = {
@@ -45,12 +45,14 @@ const statusLabels = {
 } as const
 
 export default async function ProjectDetailPage({ params }: PageProps) {
-  const { id } = await params
+  const { slug } = await params
   const user = await requireUser()
 
-  const [{ project }, { rating }, { tags: allTags }, { members }] = await Promise.all([
-    getProject(id),
-    getProjectRatings(id),
+  const { project } = await getProjectBySlug(slug)
+  const projectId = project.id
+
+  const [{ rating }, { tags: allTags }, { members }] = await Promise.all([
+    getProjectRatings(projectId),
     getCachedTags(),
     getCachedMyInstitutionMemberships(user.id),
   ])
@@ -62,7 +64,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   const [coverUrl, myStarResult, attachmentEntries, votesResult, criteriaForForm, myTeacherRatingResult] =
     await Promise.all([
       resolveProjectCoverUrl(project),
-      canStar || project.status === 'PUBLISHED' ? getMyStarOnProject(id) : Promise.resolve({ star: null }),
+      canStar || project.status === 'PUBLISHED' ? getMyStarOnProject(projectId) : Promise.resolve({ star: null }),
       Promise.all(
         project.attachments.map(async (attachmentId) => {
           const [result] = await getAttachment(attachmentId)
@@ -70,9 +72,11 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           return { id: attachmentId, ...result }
         }),
       ),
-      project.status === 'PUBLISHED' ? listProjectTeacherRatings(id) : Promise.resolve({ criteria: [], items: [] }),
+      project.status === 'PUBLISHED'
+        ? listProjectTeacherRatings(projectId)
+        : Promise.resolve({ criteria: [], items: [] }),
       canRate ? listActiveRatingCriteria() : Promise.resolve({ criteria: [] }),
-      canRate ? getMyTeacherRatingOnProject(id) : Promise.resolve({ teacherRating: null }),
+      canRate ? getMyTeacherRatingOnProject(projectId) : Promise.resolve({ teacherRating: null }),
     ])
 
   const projectTags = allTags.filter((tag) => project.tags.includes(tag.id))
@@ -80,7 +84,6 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   const starred = Boolean(myStarResult.star)
   const myTeacherRating = myTeacherRatingResult.teacherRating
   const voteCriteria = votesResult.criteria.length > 0 ? votesResult.criteria : criteriaForForm.criteria
-  const canEdit = isOwner
   const canSchedule = isOwner && project.status === 'SKETCH'
   const canPublish = isOwner && (project.status === 'SKETCH' || project.status === 'SCHEDULED')
 
@@ -122,6 +125,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             <div className="flex flex-col items-end gap-2">
               <ProjectStarButton
                 projectId={project.id}
+                projectSlug={project.slug}
                 starred={starred}
                 starsCount={rating.starsCount}
                 disabled={isOwner}
@@ -207,6 +211,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             {canRate && criteriaForForm.criteria.length > 0 && (
               <ProjectTeacherRatingForm
                 projectId={project.id}
+                projectSlug={project.slug}
                 criteria={criteriaForForm.criteria}
                 initialRating={myTeacherRating}
                 teacherName={user.name}
@@ -217,7 +222,11 @@ export default async function ProjectDetailPage({ params }: PageProps) {
 
         {isOwner && (
           <div>
-            <Button nativeButton={false} variant="outline" render={<Link href={`/projetos/${project.id}/editar`} />}>
+            <Button
+              nativeButton={false}
+              variant="outline"
+              render={<Link href={`/projetos/${project.slug}/editar`} />}
+            >
               Gerenciar / Editar
             </Button>
           </div>
@@ -225,17 +234,23 @@ export default async function ProjectDetailPage({ params }: PageProps) {
 
         {canSchedule && (
           <div className="border border-border p-4">
-            <FormScheduleProject projectId={project.id} />
+            <FormScheduleProject projectId={project.id} projectSlug={project.slug} />
           </div>
         )}
 
         {canPublish && (
           <div className="border border-border p-4">
-            <FormPublishProject projectId={project.id} />
+            <FormPublishProject projectId={project.id} projectSlug={project.slug} />
           </div>
         )}
 
-        <ProjectMembersSection projectId={project.id} projectStatus={project.status} isOwner={isOwner} currentUserId={user.id} />
+        <ProjectMembersSection
+          projectId={project.id}
+          projectSlug={project.slug}
+          projectStatus={project.status}
+          isOwner={isOwner}
+          currentUserId={user.id}
+        />
       </div>
     </div>
   )

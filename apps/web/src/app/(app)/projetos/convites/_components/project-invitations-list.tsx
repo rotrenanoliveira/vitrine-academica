@@ -32,7 +32,11 @@ export async function ProjectInvitationsList() {
           </div>
 
           {invitation.status === 'PENDING' ? (
-            <ProjectInvitationActions invitationId={invitation.id} projectId={invitation.project.id} />
+            <ProjectInvitationActions
+              invitationId={invitation.id}
+              projectId={invitation.project.id}
+              projectSlug={invitation.project.slug}
+            />
           ) : (
             <span className="shrink-0 text-xs text-muted-foreground">{answeredLabels[invitation.status]}</span>
           )}

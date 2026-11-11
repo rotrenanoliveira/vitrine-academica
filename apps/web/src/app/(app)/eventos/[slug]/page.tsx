@@ -100,7 +100,7 @@ export default async function EventDetailPage({ params }: PageProps) {
             <ul className="space-y-3">
               {projects.map((project) => (
                 <li key={project.id} className="border-b border-border py-3">
-                  <Link href={`/projetos/${project.id}`} className="font-medium hover:underline">
+                  <Link href={`/projetos/${project.slug}`} className="font-medium hover:underline">
                     {project.title}
                   </Link>
                   <p className="text-muted-foreground line-clamp-2 text-sm">{project.description}</p>

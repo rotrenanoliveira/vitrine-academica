@@ -46,7 +46,7 @@ export function ProjectsTable({ data }: ProjectsTableProps) {
                 )}
               </TableCell>
               <TableCell>
-                <Link href={`/projetos/${project.id}`} className="font-medium underline-offset-4 hover:underline">
+                <Link href={`/projetos/${project.slug}`} className="font-medium underline-offset-4 hover:underline">
                   {project.title}
                 </Link>
               </TableCell>

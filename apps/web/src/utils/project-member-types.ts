@@ -23,6 +23,7 @@ export interface ProjectInvitation {
   project: {
     id: string
     title: string
+    slug: string
   }
   owner: {
     id: string

@@ -33,6 +33,7 @@ export type ProjectStatus = z.infer<typeof projectStatusSchema>
 export const projectListItemSchema = z.object({
   id: z.string(),
   title: z.string(),
+  slug: z.string(),
   description: z.string(),
   coverUrl: z.string().nullable(),
   createdAt: z.string(),

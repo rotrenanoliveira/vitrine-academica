@@ -34,7 +34,7 @@ function CurationRankList({ title, description, items }: CurationRankListProps) 
             <li key={project.id} className="flex items-center gap-4 px-4 py-3">
               <span className="w-6 shrink-0 text-center font-heading text-lg font-semibold">{index + 1}</span>
 
-              <Link href={`/projetos/${project.id}`} className="shrink-0">
+              <Link href={`/projetos/${project.slug}`} className="shrink-0">
                 {coverUrl ? (
                   <div className="relative aspect-video w-28 overflow-hidden">
                     <Image src={coverUrl} alt={`Capa de ${project.title}`} fill unoptimized className="object-cover" />
@@ -46,7 +46,7 @@ function CurationRankList({ title, description, items }: CurationRankListProps) 
 
               <div className="min-w-0 space-y-1">
                 <h3 className="truncate font-medium">
-                  <Link href={`/projetos/${project.id}`} className="hover:underline">
+                  <Link href={`/projetos/${project.slug}`} className="hover:underline">
                     {project.title}
                   </Link>
                 </h3>

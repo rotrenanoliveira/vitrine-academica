@@ -13,7 +13,7 @@ type ProjectGalleryCardProps = {
 }
 
 export function ProjectGalleryCard({ project, tags = [] }: ProjectGalleryCardProps) {
-  const projectHref = `/projetos/${project.id}`
+  const projectHref = `/projetos/${project.slug}`
   const tagNames = resolveProjectTagNames(project, tags)
 
   return (

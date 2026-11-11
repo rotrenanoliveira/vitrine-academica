@@ -47,7 +47,7 @@ export default async function StarredProjectsPage() {
           <ul className="divide-y divide-border border border-border">
             {items.map(({ project, star }) => (
               <li key={star.id} className="flex flex-col gap-1 px-4 py-3">
-                <Link href={`/projetos/${project.id}`} className="font-heading text-lg font-semibold hover:underline">
+                <Link href={`/projetos/${project.slug}`} className="font-heading text-lg font-semibold hover:underline">
                   {project.title}
                 </Link>
                 <p className="text-xs text-muted-foreground">

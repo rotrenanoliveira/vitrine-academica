@@ -1,9 +1,9 @@
 import { revalidatePath } from 'next/cache'
 
-export function revalidateProjectMembers(projectId?: string) {
+export function revalidateProjectMembers(projectSlug?: string) {
   revalidatePath('/projetos/convites')
 
-  if (projectId) {
-    revalidatePath(`/projetos/${projectId}`)
+  if (projectSlug) {
+    revalidatePath(`/projetos/${projectSlug}`)
   }
 }

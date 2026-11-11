@@ -39,7 +39,7 @@ export function ProjectGallerySlide({ projects, tags = [] }: ProjectGallerySlide
   const project = projects[activeIndex] ?? projects[0]
   const tagNames = resolveProjectTagNames(project, tags)
 
-  const projectHref = `/projetos/${project.id}`
+  const projectHref = `/projetos/${project.slug}`
 
   function goTo(index: number) {
     setActiveIndex((index + total) % total)

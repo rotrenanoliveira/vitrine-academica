@@ -7,6 +7,7 @@ import { revalidateProjects } from '../revalidate-projects'
 
 const starProjectSchema = z.object({
   'project-id': z.uuid('Projeto inválido.'),
+  'project-slug': z.string().min(1, 'Slug inválido.'),
 })
 
 export async function actionStarProject(data: FormData) {
@@ -20,13 +21,14 @@ export async function actionStarProject(data: FormData) {
   }
 
   const projectId = formResult.data['project-id']
+  const projectSlug = formResult.data['project-slug']
   const [_, responseError] = await starProject(projectId)
 
   if (responseError) {
     return { success: false, message: responseError.message ?? 'Não foi possível apoiar o projeto.' }
   }
 
-  revalidateProjects(projectId)
+  revalidateProjects(projectSlug)
   revalidatePath('/projetos/apoiados')
 
   return { success: true, message: 'Projeto apoiado com estrela.' }

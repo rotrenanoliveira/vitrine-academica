@@ -13,7 +13,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import { requireUser } from '@/server/auth/require-user'
-import { getProject } from '@/server/http/routes/projects/get-project'
+import { getProjectBySlug } from '@/server/http/routes/projects/get-project-by-slug'
 import { listProjectMembers } from '@/server/http/routes/projects/list-project-members'
 import { getCachedTags } from '@/server/http/routes/tags/fetch-tags'
 
@@ -22,16 +22,16 @@ export const metadata: Metadata = {
 }
 
 type PageProps = {
-  params: Promise<{ id: string }>
+  params: Promise<{ slug: string }>
 }
 
 export default async function EditProjectPage({ params }: PageProps) {
-  const { id } = await params
+  const { slug } = await params
   const user = await requireUser()
-  const [{ project }, { tags }, { members }] = await Promise.all([
-    getProject(id),
+  const { project } = await getProjectBySlug(slug)
+  const [{ tags }, { members }] = await Promise.all([
     getCachedTags(),
-    listProjectMembers({ projectId: id }),
+    listProjectMembers({ projectId: project.id }),
   ])
 
   const isOwner = user.id === project.authorId
@@ -53,7 +53,7 @@ export default async function EditProjectPage({ params }: PageProps) {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link href={`/projetos/${project.id}`} />}>Vitrine</BreadcrumbLink>
+              <BreadcrumbLink render={<Link href={`/projetos/${project.slug}`} />}>Vitrine</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -75,7 +75,7 @@ export default async function EditProjectPage({ params }: PageProps) {
           )}
           {canSchedule && (
             <div className="border border-border p-6">
-              <FormScheduleProject projectId={project.id} />
+              <FormScheduleProject projectId={project.id} projectSlug={project.slug} />
             </div>
           )}
         </div>

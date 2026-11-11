@@ -7,6 +7,7 @@ import { ProjectMembersList } from './project-members-list'
 
 type ProjectMembersSectionProps = {
   projectId: string
+  projectSlug: string
   projectStatus: ProjectStatus
   isOwner: boolean
   currentUserId: string
@@ -14,6 +15,7 @@ type ProjectMembersSectionProps = {
 
 export async function ProjectMembersSection({
   projectId,
+  projectSlug,
   projectStatus,
   isOwner,
   currentUserId,
@@ -28,7 +30,7 @@ export async function ProjectMembersSection({
     <>
       {isCoauthor && (
         <div>
-          <Button nativeButton={false} variant="outline" render={<Link href={`/projetos/${projectId}/editar`} />}>
+          <Button nativeButton={false} variant="outline" render={<Link href={`/projetos/${projectSlug}/editar`} />}>
             Gerenciar / Editar
           </Button>
         </div>
@@ -36,7 +38,7 @@ export async function ProjectMembersSection({
 
       {canInvite && (
         <div className="border border-border p-4">
-          <FormInviteProjectMember projectId={projectId} />
+          <FormInviteProjectMember projectId={projectId} projectSlug={projectSlug} />
         </div>
       )}
 
