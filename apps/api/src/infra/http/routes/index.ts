@@ -41,6 +41,7 @@ import { voteThemeRoute } from './events/vote-theme'
 import { updateInstitutionRoute } from './institutions/edit-institution'
 import { fetchInstitutionsRoute } from './institutions/fetch-institutions'
 import { getInstitutionByIdRoute } from './institutions/get-institution-by-id'
+import { fetchInstitutionProjectsBySlugRoute } from './institutions/fetch-institution-projects-by-slug'
 import { getInstitutionBySlugRoute } from './institutions/get-institution-by-slug'
 import { registerInstitutionRoute } from './institutions/register-institution'
 import { updateInstitutionStatusRoute } from './institutions/update-institution-status'
@@ -267,6 +268,8 @@ export async function routes(app: FastifyInstance) {
   await app.register(fetchMyInstitutionMembershipsRoute)
   /** GET /institutions/slug/:slug */
   await app.register(getInstitutionBySlugRoute)
+  /** GET /institutions/slug/:slug/projects */
+  await app.register(fetchInstitutionProjectsBySlugRoute)
   /** POST /institutions/:institutionId/status */
   await app.register(updateInstitutionStatusRoute)
   /** PUT /institutions/:institutionId */
