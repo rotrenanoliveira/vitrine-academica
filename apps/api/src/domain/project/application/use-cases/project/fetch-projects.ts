@@ -18,11 +18,6 @@ export class FetchProjectsUseCase {
   ) {}
 
   async execute({ status, tagIds, title }: FetchProjectsUseCaseRequest): Promise<FetchProjectsUseCaseResponse> {
-    // if (tagIds && tagIds.length === 0) {
-    //   return right({ projects: [] })
-    // }
-    console.log('tagIds', tagIds)
-
     let ids: string[] | undefined
 
     if (tagIds) {
