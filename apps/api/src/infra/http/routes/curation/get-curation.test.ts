@@ -10,16 +10,14 @@ import type { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { InstitutionMemberStatus } from '@/domain/institution/enterprise/entities/institution-member'
 import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
 
-type CurationEntry = { project: { id: string } }
-
-type CreateProjectOptions = { status?: ProjectStatus; createdAt?: Date }
+type CreateProjectOptions = { status?: ProjectStatus; createdAt?: Date; title?: string }
 
 function getCuration(query = '') {
   return request(app.server).get(`/api/v1/curation${query}`)
 }
 
-function idsOf(entries: CurationEntry[]) {
-  return entries.map((entry) => entry.project.id)
+function idsOf(projects: Array<{ id: string }>) {
+  return projects.map((project) => project.id)
 }
 
 function monthsAgo(months: number) {
@@ -29,12 +27,13 @@ function monthsAgo(months: number) {
   return date
 }
 
-async function createProject({ status = ProjectStatus.PUBLISHED, createdAt }: CreateProjectOptions = {}) {
+async function createProject({ status = ProjectStatus.PUBLISHED, createdAt, title }: CreateProjectOptions = {}) {
   const { user: author } = await makeUserOnDatabase()
   const { project } = await makeProjectOnDatabase({
     author: author.id,
     status,
     ...(createdAt ? { createdAt } : {}),
+    ...(title ? { title } : {}),
   })
 
   return { project, author }
@@ -45,6 +44,7 @@ async function rateByTeacher(projectId: UniqueEntityId, score: number) {
 
   await makeProjectTeacherRatingOnDatabase({ projectId, teacherId: teacher.id, overallScore: score, items: [] })
 }
+
 async function starProject(projectId: UniqueEntityId, weight: number, active = true) {
   const { user } = await makeUserOnDatabase()
 
@@ -54,54 +54,35 @@ async function starProject(projectId: UniqueEntityId, weight: number, active = t
 describe('(E2E) - GET /api/v1/curation', () => {
   afterAll(async () => await app.close())
 
-  it('curadoria: a banca deve ordenar os projetos pela nota média dos professores', async () => {
-    const { project: average } = await createProject()
-    const { project: best } = await createProject()
-    const { project: worst } = await createProject()
-    await rateByTeacher(average.id, 9)
-    await rateByTeacher(average.id, 7)
-    await rateByTeacher(best.id, 9.5)
-    await rateByTeacher(worst.id, 6)
+  it('curadoria: a banca deve ordenar os projetos pelo createdAt desc', async () => {
+    const { project: older } = await createProject({ createdAt: monthsAgo(1) })
+    const { project: newer } = await createProject()
+    await rateByTeacher(older.id, 9.5)
+    await rateByTeacher(newer.id, 6)
 
-    const response = await getCuration()
+    const response = await getCuration('?scope=board')
 
     expect(response.status).toBe(200)
-    expect(idsOf(response.body.board)).toEqual([best.id.toString(), average.id.toString(), worst.id.toString()])
-    expect(response.body.board[0].project.status).toBe('PUBLISHED')
-    expect(response.body.board[1].teacherAverage).toBe(8)
-    expect(response.body.board[1].teacherRatingsCount).toBe(2)
+    expect(idsOf(response.body.projects)).toEqual([newer.id.toString(), older.id.toString()])
+    expect(response.body.projects[0]).toMatchObject({
+      id: newer.id.toString(),
+      title: newer.title,
+      slug: newer.slug,
+      coverUrl: null,
+    })
+    expect(response.body.total).toBe(2)
   })
 
-  it('curadoria: a banca deve desempatar pelo maior número de avaliações', async () => {
-    const { project: withOne } = await createProject()
-    const { project: withTwo } = await createProject()
-    await rateByTeacher(withOne.id, 8)
-    await rateByTeacher(withTwo.id, 8)
-    await rateByTeacher(withTwo.id, 8)
+  it('curadoria: a comunidade deve ordenar os projetos pelo createdAt desc', async () => {
+    const { project: older } = await createProject({ createdAt: monthsAgo(1) })
+    const { project: newer } = await createProject()
+    await starProject(older.id, 5)
+    await starProject(newer.id, 1)
 
-    const response = await getCuration()
+    const response = await getCuration('?scope=community')
 
-    expect(idsOf(response.body.board)).toEqual([withTwo.id.toString(), withOne.id.toString()])
-  })
-
-  it('curadoria: a comunidade deve ordenar os projetos pela soma dos pesos das estrelas', async () => {
-    const { project: single } = await createProject()
-    const { project: many } = await createProject()
-    const { project: mixed } = await createProject()
-    await starProject(single.id, 5)
-    await starProject(many.id, 1)
-    await starProject(many.id, 1)
-    await starProject(many.id, 1)
-    await starProject(mixed.id, 5)
-    await starProject(mixed.id, 1)
-
-    const response = await getCuration()
-
-    expect(idsOf(response.body.community)).toEqual([mixed.id.toString(), single.id.toString(), many.id.toString()])
-    expect(response.body.community[0].weightedScore).toBe(6)
-    expect(response.body.community[0].starsCount).toBe(2)
-    expect(response.body.community[2].weightedScore).toBe(3)
-    expect(response.body.community[2].starsCount).toBe(3)
+    expect(response.status).toBe(200)
+    expect(idsOf(response.body.projects)).toEqual([newer.id.toString(), older.id.toString()])
   })
 
   it('curadoria: as estrelas inativas não devem contar na comunidade', async () => {
@@ -111,14 +92,12 @@ describe('(E2E) - GET /api/v1/curation', () => {
     await starProject(mixed.id, 1)
     await starProject(mixed.id, 5, false)
 
-    const response = await getCuration()
+    const response = await getCuration('?scope=community')
 
-    expect(idsOf(response.body.community)).toEqual([mixed.id.toString()])
-    expect(response.body.community[0].weightedScore).toBe(1)
-    expect(response.body.community[0].starsCount).toBe(1)
+    expect(idsOf(response.body.projects)).toEqual([mixed.id.toString()])
   })
 
-  it('curadoria: só os projetos publicados devem aparecer nas duas listas', async () => {
+  it('curadoria: só os projetos publicados devem aparecer', async () => {
     const { project: published } = await createProject()
     const { project: draft } = await createProject({ status: ProjectStatus.SKETCH })
     await rateByTeacher(published.id, 8)
@@ -126,10 +105,11 @@ describe('(E2E) - GET /api/v1/curation', () => {
     await starProject(published.id, 1)
     await starProject(draft.id, 5)
 
-    const response = await getCuration()
+    const boardResponse = await getCuration('?scope=board')
+    const communityResponse = await getCuration('?scope=community')
 
-    expect(idsOf(response.body.board)).toEqual([published.id.toString()])
-    expect(idsOf(response.body.community)).toEqual([published.id.toString()])
+    expect(idsOf(boardResponse.body.projects)).toEqual([published.id.toString()])
+    expect(idsOf(communityResponse.body.projects)).toEqual([published.id.toString()])
   })
 
   it('curadoria: deve usar 3 meses como período padrão e aceitar outro período', async () => {
@@ -138,11 +118,11 @@ describe('(E2E) - GET /api/v1/curation', () => {
     await rateByTeacher(recent.id, 7)
     await rateByTeacher(old.id, 9)
 
-    const defaultResponse = await getCuration()
-    const longerResponse = await getCuration('?months=6')
+    const defaultResponse = await getCuration('?scope=board')
+    const longerResponse = await getCuration('?scope=board&months=6')
 
-    expect(idsOf(defaultResponse.body.board)).toEqual([recent.id.toString()])
-    expect(idsOf(longerResponse.body.board)).toEqual([old.id.toString(), recent.id.toString()])
+    expect(idsOf(defaultResponse.body.projects)).toEqual([recent.id.toString()])
+    expect(idsOf(longerResponse.body.projects)).toEqual([recent.id.toString(), old.id.toString()])
   })
 
   it('curadoria: o filtro de instituição deve trazer só autores com vínculo ativo', async () => {
@@ -170,37 +150,67 @@ describe('(E2E) - GET /api/v1/curation', () => {
     const response = await getCuration(`?institutionId=${institution.id.toString()}`)
 
     expect(response.status).toBe(200)
-    expect(idsOf(response.body.board)).toEqual([active.id.toString()])
-    expect(idsOf(response.body.community)).toEqual([active.id.toString()])
+    expect(idsOf(response.body.projects)).toEqual([active.id.toString()])
   })
 
-  it('curadoria: o limite deve restringir o tamanho das duas listas', async () => {
-    const projects = []
+  it('curadoria: o limite deve restringir o tamanho da lista', async () => {
+    const created = []
 
     for (let index = 0; index < 3; index++) {
-      const { project } = await createProject()
-      await rateByTeacher(project.id, 9 - index)
-      await starProject(project.id, 3 - index)
-      projects.push(project)
+      const { project } = await createProject({ createdAt: new Date(Date.now() - index * 60_000) })
+      await rateByTeacher(project.id, 8)
+      created.push(project)
     }
 
-    const response = await getCuration('?limit=2')
-    const expected = [projects[0].id.toString(), projects[1].id.toString()]
+    const response = await getCuration('?scope=board&limit=2')
 
-    expect(idsOf(response.body.board)).toEqual(expected)
-    expect(idsOf(response.body.community)).toEqual(expected)
+    expect(idsOf(response.body.projects)).toEqual([created[0].id.toString(), created[1].id.toString()])
+    expect(response.body.total).toBe(2)
   })
 
-  it('curadoria: sem avaliações, deve retornar as duas listas vazias', async () => {
+  it('curadoria: sem avaliações, deve retornar lista vazia', async () => {
     await createProject()
 
     const response = await getCuration()
 
     expect(response.status).toBe(200)
-    expect(response.body).toEqual({ board: [], community: [] })
+    expect(response.body).toEqual({ total: 0, projects: [] })
   })
 
-  it.each(['months=0', 'months=13', 'limit=0', 'limit=51'])(
+  it('curadoria: scope=all deve unir banca e comunidade sem duplicar', async () => {
+    const { project: both } = await createProject()
+    const { project: onlyBoard } = await createProject({ createdAt: monthsAgo(1) })
+    const { project: onlyCommunity } = await createProject({ createdAt: monthsAgo(2) })
+
+    await rateByTeacher(both.id, 8)
+    await starProject(both.id, 1)
+    await rateByTeacher(onlyBoard.id, 8)
+    await starProject(onlyCommunity.id, 1)
+
+    const response = await getCuration('?scope=all')
+
+    expect(response.status).toBe(200)
+    expect(idsOf(response.body.projects)).toEqual([
+      both.id.toString(),
+      onlyBoard.id.toString(),
+      onlyCommunity.id.toString(),
+    ])
+  })
+
+
+
+  it('curadoria: deve filtrar por título', async () => {
+    const { project: match } = await createProject({ title: 'Robótica Avançada' })
+    const { project: other } = await createProject({ title: 'História Medieval' })
+    await rateByTeacher(match.id, 8)
+    await rateByTeacher(other.id, 8)
+
+    const response = await getCuration('?scope=board&title=robótica')
+
+    expect(idsOf(response.body.projects)).toEqual([match.id.toString()])
+  })
+
+  it.each(['months=0', 'months=13', 'limit=0', 'limit=51', 'scope=invalid'])(
     'curadoria: com o parâmetro inválido %s, deve retornar 400',
     async (query) => {
       const response = await getCuration(`?${query}`)
