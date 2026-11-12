@@ -1,27 +1,29 @@
 'use client'
 
+import { User03Icon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from './ui/button'
 
 const links = [
-  { href: '/exposicao', label: 'Exposição do dia' },
-  { href: '/curation', label: 'Destaques' },
   { href: '/projetos', label: 'Projetos' },
+  { href: '/exposicao', label: 'Exposição' },
+  { href: '/destaques', label: 'Destaques' },
   { href: '/eventos', label: 'Eventos' },
-  { href: '/projetos/convites', label: 'Convites' },
-  { href: '/pesquisas-cientificas', label: 'Pesquisas científicas' },
   { href: '/chamados', label: 'Chamados' },
+  { href: '/pesquisas-cientificas', label: 'OpenAlex' },
   { href: '/instituicoes', label: 'Instituições' },
-  { href: '/conta', label: 'Conta' },
+  // { href: '/conta', label: 'Minha Conta' },
+  // { href: '/projetos/convites', label: 'Convites' },
 ]
 
 export function AppNav() {
   const pathname = usePathname()
 
   return (
-    <aside className="space-x-2">
+    <aside className="flex flex-wrap items-center gap-2">
       {links.map((link) => {
         const active = pathname === link.href || pathname.startsWith(`${link.href}/`)
 
@@ -35,6 +37,16 @@ export function AppNav() {
           </Link>
         )
       })}
+
+      <Link
+        href="/conta"
+        className={cn(
+          buttonVariants({ variant: 'outline' }),
+          pathname === 'conta' || (pathname.startsWith('/conta') && 'bg-primary text-primary-foreground'),
+        )}
+      >
+        <HugeiconsIcon icon={User03Icon} className="size-5" />
+      </Link>
     </aside>
   )
 }
