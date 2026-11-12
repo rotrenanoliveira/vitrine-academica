@@ -4,6 +4,9 @@ export interface FindManyProjectsFilters {
   status?: string
   title?: string
   ids?: string[]
+  authorIds?: string[]
+  page?: number
+  limit?: number
 }
 
 export interface ProjectsRepository {
@@ -11,6 +14,7 @@ export interface ProjectsRepository {
   findById(id: string): Promise<Project | null>
   findBySlug(slug: string): Promise<Project | null>
   findMany(filters?: FindManyProjectsFilters): Promise<Project[]>
+  countMany(filters?: FindManyProjectsFilters): Promise<number>
   findManyByIds(ids: string[]): Promise<Project[]>
   findManyByAuthorId(authorId: string, status?: string): Promise<Project[]>
 

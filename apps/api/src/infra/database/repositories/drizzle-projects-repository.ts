@@ -1,4 +1,4 @@
-import { and, desc, eq, ilike, inArray, type SQL } from 'drizzle-orm'
+import { and, count, desc, eq, ilike, inArray, type SQL } from 'drizzle-orm'
 import type {
   FindManyProjectsFilters,
   ProjectsRepository,
@@ -11,21 +11,23 @@ import { projects } from '../drizzle/schemas'
 export class DrizzleProjectsRepository implements ProjectsRepository {
   constructor(private readonly db: DrizzleClient) {}
 
-  async findAll(): Promise<Project[]> {
-    const rows = await this.db.select().from(projects).orderBy(desc(projects.createdAt))
-
-    return rows.map(DrizzleProjectMapper.toDomain)
-  }
-
-  async findMany(filters: FindManyProjectsFilters = {}): Promise<Project[]> {
+  private buildConditions(filters: FindManyProjectsFilters): SQL[] | null {
     if (filters.ids && filters.ids.length === 0) {
-      return []
+      return null
+    }
+
+    if (filters.authorIds && filters.authorIds.length === 0) {
+      return null
     }
 
     const conditions: SQL[] = []
 
     if (filters.ids) {
       conditions.push(inArray(projects.id, filters.ids))
+    }
+
+    if (filters.authorIds) {
+      conditions.push(inArray(projects.authorId, filters.authorIds))
     }
 
     if (filters.status) {
@@ -37,11 +39,53 @@ export class DrizzleProjectsRepository implements ProjectsRepository {
       conditions.push(ilike(projects.title, `%${escapedTitle}%`))
     }
 
-    const selection = this.db.select().from(projects)
-    const filtered = conditions.length > 0 ? selection.where(and(...conditions)) : selection
-    const rows = await filtered.orderBy(desc(projects.createdAt))
+    return conditions
+  }
+
+  async findAll(): Promise<Project[]> {
+    const rows = await this.db.select().from(projects).orderBy(desc(projects.createdAt))
 
     return rows.map(DrizzleProjectMapper.toDomain)
+  }
+
+  async findMany(filters: FindManyProjectsFilters = {}): Promise<Project[]> {
+    const conditions = this.buildConditions(filters)
+
+    if (conditions === null) {
+      return []
+    }
+
+    const selection = this.db.select().from(projects)
+    const filtered = conditions.length > 0 ? selection.where(and(...conditions)) : selection
+    const ordered = filtered.orderBy(desc(projects.createdAt))
+
+    if (filters.page !== undefined && filters.limit !== undefined) {
+      const rows = await ordered.limit(filters.limit).offset((filters.page - 1) * filters.limit)
+      return rows.map(DrizzleProjectMapper.toDomain)
+    }
+
+    if (filters.limit !== undefined) {
+      const rows = await ordered.limit(filters.limit)
+      return rows.map(DrizzleProjectMapper.toDomain)
+    }
+
+    const rows = await ordered
+
+    return rows.map(DrizzleProjectMapper.toDomain)
+  }
+
+  async countMany(filters: FindManyProjectsFilters = {}): Promise<number> {
+    const conditions = this.buildConditions(filters)
+
+    if (conditions === null) {
+      return 0
+    }
+
+    const selection = this.db.select({ total: count() }).from(projects)
+    const filtered = conditions.length > 0 ? selection.where(and(...conditions)) : selection
+    const [row] = await filtered
+
+    return row?.total ?? 0
   }
 
   async findById(id: string): Promise<Project | null> {
