@@ -1,37 +1,64 @@
-import { getCachedInstitutions } from '@/server/http/routes/institutions/fetch-institutions'
-import { getCachedMyInstitutionMemberships } from '@/server/http/routes/institutions/get-my-institution-memberships'
-import type { MyMembershipsFilters } from '../search-params'
+'use client'
+
+import { useQuery } from '@tanstack/react-query'
+import { useQueryStates } from 'nuqs'
+import { fetchInstitutions } from '@/server/http/routes/institutions/fetch-institutions'
+import { getMyInstitutionMemberships } from '@/server/http/routes/institutions/get-my-institution-memberships'
+import { myMembershipsSearchParams, myMembershipsUrlKeys } from '../search-params'
 import { MyMembershipsFilters as Filters } from './my-memberships-filters'
 import { MyMembershipsTable } from './my-memberships-table'
 
-type MyMembershipsListProps = {
-  userId: string
-  filters: MyMembershipsFilters
-}
+export function MyMembershipsList() {
+  const [filters] = useQueryStates(myMembershipsSearchParams, {
+    urlKeys: myMembershipsUrlKeys,
+    shallow: true,
+  })
 
-export async function MyMembershipsList({ userId, filters }: MyMembershipsListProps) {
-  const [{ members }, { institutions }] = await Promise.all([
-    getCachedMyInstitutionMemberships(userId),
-    getCachedInstitutions(),
-  ])
+  const membershipsQuery = useQuery({
+    queryKey: ['my-institution-memberships'],
+    queryFn: () => getMyInstitutionMemberships(),
+  })
 
-  const institutionsById = new Map(institutions.map((institution) => [institution.id, institution]))
+  const institutionsQuery = useQuery({
+    queryKey: ['institutions'],
+    queryFn: () => fetchInstitutions(),
+  })
 
-  const rows = members
-    .filter((member) => (filters.status ? member.status === filters.status : true))
-    .map((member) => {
-      const institution = institutionsById.get(member.institutionId)
+  const isPending = membershipsQuery.isPending || institutionsQuery.isPending
+  const isError = membershipsQuery.isError || institutionsQuery.isError
 
-      return {
-        ...member,
-        institution: institution ? { id: institution.id, slug: institution.slug, name: institution.name } : null,
-      }
-    })
+  const rows =
+    membershipsQuery.data && institutionsQuery.data
+      ? (() => {
+          const institutionsById = new Map(
+            institutionsQuery.data.institutions.map((institution) => [institution.id, institution]),
+          )
+
+          return membershipsQuery.data.members
+            .filter((member) => (filters.status ? member.status === filters.status : true))
+            .map((member) => {
+              const institution = institutionsById.get(member.institutionId)
+
+              return {
+                ...member,
+                institution: institution
+                  ? { id: institution.id, slug: institution.slug, name: institution.name }
+                  : null,
+              }
+            })
+        })()
+      : []
 
   return (
     <div className="space-y-4">
       <Filters />
-      <MyMembershipsTable data={rows} />
+      {isPending ? (
+        <p className="text-sm text-muted-foreground">Carregando membresias…</p>
+      ) : isError ? (
+        <p className="text-sm text-muted-foreground">Não foi possível carregar as membresias.</p>
+      ) : (
+        <MyMembershipsTable data={rows} />
+      )}
     </div>
   )
 }

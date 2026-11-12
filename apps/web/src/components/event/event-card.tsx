@@ -1,35 +1,7 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import type { Event } from '@/utils/type'
-
-const phaseLabels: Record<Event['phase'], string> = {
-  THEME_SELECTION: 'Escolha de tema',
-  INSTITUTIONAL_SELECTION: 'Seleção institucional',
-  OPEN: 'Aberto',
-  CLOSED: 'Encerrado',
-}
-
-function eventHref(event: Event) {
-  switch (event.phase) {
-    case 'THEME_SELECTION':
-      return `/eventos/${event.slug}/escolha`
-    case 'INSTITUTIONAL_SELECTION':
-      return `/eventos/${event.slug}`
-    default:
-      return `/eventos/${event.slug}`
-  }
-}
-
-function eventActionLabel(event: Event) {
-  switch (event.phase) {
-    case 'THEME_SELECTION':
-      return 'Participar da escolha'
-    case 'INSTITUTIONAL_SELECTION':
-      return 'Aguardando tema'
-    default:
-      return 'Ver detalhes'
-  }
-}
+import { eventActionLabel, eventHref, phaseLabels } from './event-utils'
 
 export function EventCard({ event, canManage = false }: { event: Event; canManage?: boolean }) {
   const href = eventHref(event)

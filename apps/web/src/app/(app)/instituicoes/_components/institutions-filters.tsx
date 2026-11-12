@@ -8,7 +8,7 @@ import { institutionsSearchParams, institutionsUrlKeys } from '../search-params'
 export function InstitutionsFilters() {
   const [filters, setFilters] = useQueryStates(institutionsSearchParams, {
     urlKeys: institutionsUrlKeys,
-    shallow: false,
+    shallow: true,
   })
 
   const hasActiveFilters = Boolean(filters.query)

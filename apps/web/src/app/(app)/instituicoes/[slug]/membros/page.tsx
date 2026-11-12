@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Suspense } from 'react'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -41,11 +40,9 @@ export default async function InstitutionMembersPage({ params }: PageProps) {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link href="/instituicoes" />}>Instituições</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink render={<Link href={`/instituicoes/${institution.slug}`} />}>Detalhe</BreadcrumbLink>
+              <BreadcrumbLink render={<Link href={`/instituicoes/${institution.slug}`} />}>
+                {institution.name}
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -55,15 +52,13 @@ export default async function InstitutionMembersPage({ params }: PageProps) {
         </Breadcrumb>
       </header>
 
-      <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 p-4 py-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 p-4 py-8">
         <div className="space-y-1">
           <h1 className="font-heading text-2xl font-semibold">Membros</h1>
           <p className="text-sm text-muted-foreground">{institution.name}</p>
         </div>
 
-        <Suspense fallback={<p className="text-sm text-muted-foreground">Carregando membros…</p>}>
-          <InstitutionMembersList institutionId={institution.id} institutionSlug={institution.slug} />
-        </Suspense>
+        <InstitutionMembersList institutionId={institution.id} institutionSlug={institution.slug} />
       </div>
     </div>
   )

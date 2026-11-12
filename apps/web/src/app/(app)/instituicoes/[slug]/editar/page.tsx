@@ -32,11 +32,9 @@ export default async function EditInstitutionPage({ params }: PageProps) {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link href="/instituicoes" />}>Instituições</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink render={<Link href={`/instituicoes/${institution.slug}`} />}>Detalhe</BreadcrumbLink>
+              <BreadcrumbLink render={<Link href={`/instituicoes/${institution.slug}`} />}>
+                {institution.name}
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -46,8 +44,8 @@ export default async function EditInstitutionPage({ params }: PageProps) {
         </Breadcrumb>
       </header>
 
-      <div className="flex flex-1 items-start justify-center px-4 py-8">
-        <div className="w-full max-w-lg border border-border p-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-1 items-start justify-center px-4 py-8">
+        <div className="w-full space-y-12">
           <FormUpdateInstitution institution={institution} />
 
           <InstitutionStatusActions institution={institution} />

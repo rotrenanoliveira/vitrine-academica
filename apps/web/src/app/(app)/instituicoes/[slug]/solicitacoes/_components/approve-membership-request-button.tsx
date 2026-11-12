@@ -2,6 +2,7 @@
 
 import { Loading03Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
 import { toast } from 'sonner'
@@ -20,6 +21,7 @@ export function ApproveMembershipRequestButton({
   requestId,
 }: ApproveMembershipRequestButtonProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [isPending, startTransition] = useTransition()
 
   function handleApprove() {
@@ -32,6 +34,8 @@ export function ApproveMembershipRequestButton({
 
       if (result.success) {
         toast.success(result.message)
+        void queryClient.invalidateQueries({ queryKey: ['institution-membership-requests', institutionId] })
+        void queryClient.invalidateQueries({ queryKey: ['institution-members', institutionId] })
         router.refresh()
         return
       }
