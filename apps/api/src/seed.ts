@@ -4,19 +4,26 @@ import { faker } from '@faker-js/faker'
 import { makeAccessCodeOnDatabase } from '@tests/factories/make-access-code'
 import { makeAccountOnDatabase } from '@tests/factories/make-account'
 import { makeAttachmentOnDatabase, makeAttachmentOnStorage } from '@tests/factories/make-attachment'
+import { makeEventOnDatabase } from '@tests/factories/make-event'
 import { makeInstitutionOnDatabase } from '@tests/factories/make-institution'
 import { makeInstitutionMemberOnDatabase } from '@tests/factories/make-institution-member'
 import { makeInstitutionMembershipRequestOnDatabase } from '@tests/factories/make-institution-membership-request'
 import { makePreferenceTagOnDatabase } from '@tests/factories/make-preference-tag'
 import { makeProjectOnDatabase } from '@tests/factories/make-project'
 import { makeProjectScheduledOnDatabase } from '@tests/factories/make-project-scheduled'
+import { makeProjectStarOnDatabase } from '@tests/factories/make-project-star'
 import { makeProjectTagOnDatabase } from '@tests/factories/make-project-tag'
+import { makeProjectTeacherRatingOnDatabase } from '@tests/factories/make-project-teacher-rating'
 import { makeRatingCriterionOnDatabase } from '@tests/factories/make-rating-criterion'
 import { makeSessionOnDatabase } from '@tests/factories/make-session'
 import { makeTagOnDatabase } from '@tests/factories/make-tag'
+import { makeThemeOnDatabase } from '@tests/factories/make-theme'
 import { makeUserOnDatabase } from '@tests/factories/make-user'
 import { sql } from 'drizzle-orm'
+import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { Slug } from '@/core/entities/value-objects/slug'
+import { EventPhase, ParticipationScope } from '@/domain/event/enterprise/entities/event'
+import { ThemeStatus } from '@/domain/event/enterprise/entities/theme'
 import { UserRole, UserStatus } from '@/domain/identity/enterprise/entities/user'
 import {
   InstitutionMemberRole,
@@ -93,6 +100,39 @@ const INSTITUTION_SEEDS = [
   },
 ] as const
 
+const EVENT_SEEDS = [
+  {
+    name: 'Mostra Acadêmica 2026',
+    participationScope: ParticipationScope.GLOBAL,
+    themeTitle: 'Pesquisa e extensão para o bem comum',
+    themeDescription: 'Projetos que conectam produção científica e impacto social nas comunidades locais.',
+  },
+  {
+    name: 'Feira de Tecnologia',
+    participationScope: ParticipationScope.INSTITUTION,
+    themeTitle: 'Inovação tecnológica aplicada',
+    themeDescription: 'Soluções digitais, hardware e software com foco em problemas reais do mercado.',
+  },
+  {
+    name: 'Semana de Inovação',
+    participationScope: ParticipationScope.GLOBAL,
+    themeTitle: 'Empreendedorismo e criatividade interdisciplinar',
+    themeDescription: 'Ideias que cruzam áreas do conhecimento para gerar produtos e serviços originais.',
+  },
+  {
+    name: 'Mostra Técnica Profissionalizante',
+    participationScope: ParticipationScope.INSTITUTION,
+    themeTitle: 'Formação técnica e práticas de oficina',
+    themeDescription: 'Trabalhos que demonstram domínio técnico e aplicação prática em ambientes produtivos.',
+  },
+  {
+    name: 'Encontro Colaborativo',
+    participationScope: ParticipationScope.GLOBAL,
+    themeTitle: 'Colaboração aberta e projetos comunitários',
+    themeDescription: 'Iniciativas colaborativas que fortalecem redes acadêmicas e produção cultural compartilhada.',
+  },
+] as const
+
 function projectStatusAt(index: number) {
   if (index < 20) return ProjectStatus.PUBLISHED
   if (index < 24) return ProjectStatus.SCHEDULED
@@ -131,7 +171,7 @@ const REQUEST_STATUSES = [
 async function resetDatabase() {
   console.log('Limpando tabelas...')
   await db.execute(
-    sql`TRUNCATE TABLE "users", "accounts", "attachments", "tags", "preference_tags", "projects", "project_tags", "project_scheduled", "project_stars", "project_teacher_ratings", "teacher_rating_items", "rating_criteria", "access_codes", "sessions", "institutions", "institution_members", "institution_membership_requests" CASCADE`,
+    sql`TRUNCATE TABLE "users", "accounts", "attachments", "tags", "preference_tags", "projects", "project_tags", "project_scheduled", "project_stars", "project_teacher_ratings", "teacher_rating_items", "rating_criteria", "access_codes", "sessions", "institutions", "institution_members", "institution_membership_requests", "events", "event_themes", "event_votes", "event_registrations" CASCADE`,
   )
 }
 
@@ -299,6 +339,46 @@ async function seed() {
   members.push(extraMember)
   console.log(`  ✓ ${members.length} membros`)
 
+  console.log('\nCriando eventos com temas escolhidos...')
+  const events = []
+  const themes = []
+
+  for (const [index, data] of EVENT_SEEDS.entries()) {
+    const institution = institutions[index]!
+    const author = users[index]!
+    const moderator = users[0]!
+    const winnerThemeId = new UniqueEntityId()
+    const eventName = data.name
+    const eventSlug = `evento-${Slug.createFromText(eventName).value}-${institution.slug.value}`
+
+    const { event } = await makeEventOnDatabase({
+      institutionId: institution.id,
+      slug: eventSlug,
+      name: eventName,
+      participationScope: data.participationScope,
+      phase: EventPhase.OPEN,
+      winnerThemeId,
+      startsAt: new Date(),
+    })
+
+    const { theme } = await makeThemeOnDatabase(
+      {
+        eventId: event.id,
+        authorId: author.id,
+        title: data.themeTitle,
+        description: data.themeDescription,
+        status: ThemeStatus.APPROVED,
+        moderatedByUserId: moderator.id,
+        moderatedAt: new Date(),
+      },
+      winnerThemeId,
+    )
+
+    events.push(event)
+    themes.push(theme)
+    console.log(`  ✓ ${event.name} → tema: ${theme.title}`)
+  }
+
   console.log('\nCriando solicitações de vínculo...')
   const requests = []
 
@@ -387,16 +467,75 @@ async function seed() {
   const schedules = []
 
   for (let i = 0; i < 5; i++) {
-    const publishedIn = new Date()
-    publishedIn.setDate(publishedIn.getDate() + (i + 1) * 3)
-
     const { projectScheduled } = await makeProjectScheduledOnDatabase({
       projectId: projects[i]?.id,
+      publishedIn: new Date(),
+    })
+    schedules.push(projectScheduled)
+  }
+
+  const soonOffsetsInDays = [1, 2, 4, 6] as const
+
+  for (const [index, daysAhead] of soonOffsetsInDays.entries()) {
+    const publishedIn = new Date()
+    publishedIn.setDate(publishedIn.getDate() + daysAhead)
+
+    const { projectScheduled } = await makeProjectScheduledOnDatabase({
+      projectId: projects[20 + index]?.id,
       publishedIn,
     })
     schedules.push(projectScheduled)
   }
-  console.log(`  ✓ ${schedules.length} agendamentos`)
+  console.log(`  ✓ ${schedules.length} agendamentos (5 hoje + ${soonOffsetsInDays.length} em breve)`)
+
+  const publishedToday = projects.slice(0, 5)
+
+  console.log('\nCriando avaliações docentes (banca)...')
+  const teacherRatings = []
+
+  const teacherRatingSeeds = [
+    { projectIndex: 0, teacherIndex: 1, overallScore: 9 },
+    { projectIndex: 0, teacherIndex: 2, overallScore: 7 },
+    { projectIndex: 1, teacherIndex: 2, overallScore: 9.5 },
+    { projectIndex: 2, teacherIndex: 1, overallScore: 6 },
+    { projectIndex: 3, teacherIndex: 1, overallScore: 8 },
+    { projectIndex: 4, teacherIndex: 2, overallScore: 6.5 },
+  ] as const
+
+  for (const seed of teacherRatingSeeds) {
+    const { teacherRating } = await makeProjectTeacherRatingOnDatabase({
+      projectId: publishedToday[seed.projectIndex]!.id,
+      teacherId: users[seed.teacherIndex]!.id,
+      overallScore: seed.overallScore,
+      items: [],
+    })
+    teacherRatings.push(teacherRating)
+  }
+  console.log(`  ✓ ${teacherRatings.length} avaliações docentes`)
+
+  console.log('\nCriando estrelas (comunidade)...')
+  const projectStars = []
+
+  const starSeeds = [
+    { projectIndex: 0, userIndex: 2, weight: 5, active: true },
+    { projectIndex: 0, userIndex: 3, weight: 1, active: true },
+    { projectIndex: 1, userIndex: 3, weight: 1, active: true },
+    { projectIndex: 1, userIndex: 4, weight: 1, active: true },
+    { projectIndex: 1, userIndex: 5, weight: 1, active: true },
+    { projectIndex: 2, userIndex: 1, weight: 5, active: true },
+    { projectIndex: 3, userIndex: 0, weight: 1, active: false },
+  ] as const
+
+  for (const seed of starSeeds) {
+    const { projectStar } = await makeProjectStarOnDatabase({
+      projectId: publishedToday[seed.projectIndex]!.id,
+      userId: users[seed.userIndex]!.id,
+      weight: seed.weight,
+      active: seed.active,
+    })
+    projectStars.push(projectStar)
+  }
+  console.log(`  ✓ ${projectStars.length} estrelas`)
 
   console.log('\nCriando sessões...')
   const sessions = []
@@ -452,11 +591,15 @@ async function seed() {
   console.log(`Tags: ${tags.length}`)
   console.log(`Institutions: ${institutions.length}`)
   console.log(`Institution members: ${members.length}`)
+  console.log(`Events: ${events.length}`)
+  console.log(`Themes: ${themes.length}`)
   console.log(`Membership requests: ${requests.length}`)
   console.log(`Projects: ${projects.length}`)
   console.log(`Project tags: ${projectTags.length}`)
   console.log(`Preference tags: ${preferenceTags.length}`)
   console.log(`Project scheduled: ${schedules.length}`)
+  console.log(`Teacher ratings: ${teacherRatings.length}`)
+  console.log(`Project stars: ${projectStars.length}`)
   console.log(`Sessions: ${sessions.length}`)
   console.log(`Access codes: ${accessCodes.length}`)
   console.log('────────────────────────────────────')
