@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import type { InstitutionsRepository } from '@/domain/institution/application/repositories/institutions-repository'
 import type { Institution } from '@/domain/institution/enterprise/entities/institutions'
 import type { DrizzleClient } from '../drizzle/client'
@@ -9,7 +9,7 @@ export class DrizzleInstitutionsRepository implements InstitutionsRepository {
   constructor(private readonly db: DrizzleClient) {}
 
   async findAll(): Promise<Institution[]> {
-    const rows = await this.db.select().from(institutions)
+    const rows = await this.db.select().from(institutions).orderBy(asc(institutions.name))
 
     return rows.map(DrizzleInstitutionMapper.toDomain)
   }

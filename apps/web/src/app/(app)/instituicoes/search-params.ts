@@ -1,15 +1,10 @@
-import { createLoader, parseAsString, parseAsStringEnum, type SearchParams, type UrlKeys } from 'nuqs/server'
-import type { InstitutionStatus } from '@/utils/type'
-
-const statusValues = ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'ARCHIVED'] as const satisfies readonly InstitutionStatus[]
+import { createLoader, parseAsString, type SearchParams, type UrlKeys } from 'nuqs/server'
 
 export const institutionsSearchParams = {
-  status: parseAsStringEnum([...statusValues]),
   query: parseAsString,
 }
 
 export const institutionsUrlKeys: UrlKeys<typeof institutionsSearchParams> = {
-  status: 'status',
   query: 'q',
 }
 

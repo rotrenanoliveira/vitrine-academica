@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/breadcrumb'
 import { requireUser } from '@/server/auth/require-user'
 import { getCachedInstitutionBySlug } from '@/server/http/routes/institutions/get-institution'
+import { InstitutionStatusActions } from '../../_components/institution-status-actions'
 
 export const metadata: Metadata = {
   title: 'Editar instituição',
@@ -48,6 +49,8 @@ export default async function EditInstitutionPage({ params }: PageProps) {
       <div className="flex flex-1 items-start justify-center px-4 py-8">
         <div className="w-full max-w-lg border border-border p-6">
           <FormUpdateInstitution institution={institution} />
+
+          <InstitutionStatusActions institution={institution} />
         </div>
       </div>
     </div>
