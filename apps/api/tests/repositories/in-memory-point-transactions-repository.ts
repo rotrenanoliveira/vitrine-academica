@@ -28,6 +28,12 @@ export class InMemoryPointTransactionsRepository implements PointTransactionsRep
       .slice(0, limit)
   }
 
+  async findAllByUserId(userId: string): Promise<PointTransaction[]> {
+    return this.items
+      .filter((item) => item.userId.toString() === userId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+  }
+
   async getBalanceByUserId(userId: string): Promise<number> {
     return this.items
       .filter((item) => item.userId.toString() === userId)

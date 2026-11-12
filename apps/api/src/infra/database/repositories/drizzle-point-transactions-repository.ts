@@ -43,6 +43,16 @@ export class DrizzlePointTransactionsRepository implements PointTransactionsRepo
     return rows.map(DrizzlePointTransactionMapper.toDomain)
   }
 
+  async findAllByUserId(userId: string): Promise<PointTransaction[]> {
+    const rows = await this.db
+      .select()
+      .from(pointTransactions)
+      .where(eq(pointTransactions.userId, userId))
+      .orderBy(desc(pointTransactions.createdAt), desc(pointTransactions.id))
+
+    return rows.map(DrizzlePointTransactionMapper.toDomain)
+  }
+
   async getBalanceByUserId(userId: string): Promise<number> {
     const [row] = await this.db
       .select({
