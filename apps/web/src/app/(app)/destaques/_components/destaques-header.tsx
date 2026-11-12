@@ -6,8 +6,8 @@ import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 const tabs = [
-  { href: '/destaques/banca', label: 'Destaques da banca' },
-  { href: '/destaques/comunidade', label: 'Destaques da comunidade' },
+  { href: '/destaques/banca', label: 'Banca' },
+  { href: '/destaques/comunidade', label: 'Comunidade' },
 ]
 
 export function DestaquesHeader() {

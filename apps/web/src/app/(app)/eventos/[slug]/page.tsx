@@ -72,8 +72,8 @@ export default async function EventDetailPage({ params }: PageProps) {
                 Inscrever projeto
               </Button>
             )}
-            <Button variant="outline" nativeButton={false} render={<Link href={`/projetos?eventSlug=${event.slug}`} />}>
-              Ver projetos filtrados
+            <Button variant="outline" nativeButton={false} render={<Link href="/projetos" />}>
+              Ver projetos
             </Button>
           </div>
         </div>
