@@ -6,6 +6,8 @@ import { makeUserOnDatabase } from '@tests/factories/make-user'
 import request from 'supertest'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
+import { db } from '@/infra/database/drizzle/client'
+import { DrizzlePointTransactionsRepository } from '@/infra/database/repositories/drizzle-point-transactions-repository'
 
 async function authenticateUser() {
   const { user } = await makeUserOnDatabase()
@@ -50,6 +52,25 @@ describe('(E2E) - POST /api/v1/projects/:projectId/stars', () => {
         createdAt: expect.any(String),
       },
     })
+  })
+
+  it('should credit the project author only once, even if the star is removed and given again', async () => {
+    const { accessToken } = await authenticateUser()
+    const { user: author } = await makeUserOnDatabase()
+    const { project } = await makeProjectOnDatabase({
+      author: author.id,
+      status: ProjectStatus.PUBLISHED,
+    })
+
+    const url = `/api/v1/projects/${project.id.toString()}/stars`
+
+    await request(app.server).post(url).set('Authorization', `Bearer ${accessToken}`)
+    await request(app.server).delete(url).set('Authorization', `Bearer ${accessToken}`)
+    await request(app.server).post(url).set('Authorization', `Bearer ${accessToken}`)
+
+    const pointTransactionsRepository = new DrizzlePointTransactionsRepository(db)
+
+    expect(await pointTransactionsRepository.getBalanceByUserId(author.id.toString())).toBe(1)
   })
 
   it('should not be able to star a project with an unauthenticated user', async () => {
