@@ -5,7 +5,9 @@ import { ResendMail } from './resend-mail'
 export function makeEmail(): Mail {
   if (process.env.VITEST || env.NODE_ENV === 'test') {
     return {
-      async send() {},
+      async send() {
+        return { id: null }
+      },
     }
   }
 
