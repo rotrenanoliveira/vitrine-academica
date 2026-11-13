@@ -12,6 +12,7 @@ const projectSchema = z.object({
   attachments: z.array(z.string()),
   tags: z.array(z.string()),
   createdAt: z.iso.datetime(),
+  featured: z.boolean(),
 })
 
 export async function fetchPublishedProjectsRoute(app: FastifyInstance) {

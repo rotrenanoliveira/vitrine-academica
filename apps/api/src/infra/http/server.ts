@@ -2,6 +2,7 @@ import { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/r
 import { CloseExpiredCallsUseCase } from '@/domain/call/application/use-cases/call/close-expired-calls'
 import { CreateProjectFromCallUseCase } from '@/domain/call/application/use-cases/call/create-project-from-call'
 import { AdvanceDueEventPhasesUseCase } from '@/domain/event/application/use-cases/event/advance-due-event-phases'
+import { ExpireDuePromotionsUseCase } from '@/domain/points/application/use-cases/promotion/expire-due-promotions'
 import { PublishScheduledProjectsUseCase } from '@/domain/project/application/use-cases/scheduled-project/publish-scheduled-projects'
 import { env } from '@/environment-variables'
 import { db } from '@/infra/database/drizzle/client'
@@ -13,8 +14,10 @@ import { DrizzleCallsRepository } from '@/infra/database/repositories/drizzle-ca
 import { DrizzleEventsRepository } from '@/infra/database/repositories/drizzle-events-repository'
 import { DrizzleProjectScheduledRepository } from '@/infra/database/repositories/drizzle-project-scheduled-repository'
 import { DrizzleProjectsRepository } from '@/infra/database/repositories/drizzle-projects-repository'
+import { DrizzlePromotionsRepository } from '@/infra/database/repositories/drizzle-promotions-repository'
 import { startAdvanceEventPhaseJob } from '../jobs/advance-event-phase-job'
 import { startCloseExpiredCallsJob } from '../jobs/close-expired-calls-job'
+import { startExpirePromotionsJob } from '../jobs/expire-promotions-job'
 import { startPublishScheduledProjectsJob } from '../jobs/publish-scheduled-projects-job'
 import { startNewsletterScheduler } from '../jobs/start-newsletter-scheduler'
 import { app } from './app'
@@ -67,6 +70,16 @@ function startScheduler() {
       app.log.error({ err: error, callId }, '[Calls Scheduler]: falha ao encerrar chamados com prazo vencido'),
   })
 
+  const expireDuePromotions = new ExpireDuePromotionsUseCase(new DrizzlePromotionsRepository(db), registerLog)
+
+  startExpirePromotionsJob({
+    expireDuePromotions,
+    onExpired: (total) => app.log.info(`[Promotion Scheduler]: ${total} promoção(ões) encerrada(s)`),
+    onError: (error) => app.log.error({ err: error }, '[Promotion Scheduler]: falha ao encerrar promoções vencidas'),
+  })
+
+  app.log.info(
+    '[Agendador]: ligado, verifica projetos agendados, fases de eventos e promoções vencidas a cada 30 segundos',
   startNewsletterScheduler(app.log)
 
   app.log.info(
