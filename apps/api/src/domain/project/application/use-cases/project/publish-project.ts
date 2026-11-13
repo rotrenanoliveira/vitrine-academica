@@ -1,6 +1,7 @@
 import { type Either, left, right } from '@/core/either'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
 import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import type { PublicationNotifier } from '@/domain/project/application/notifier/publication-notifier'
 import { type Project, ProjectStatus } from '../../../enterprise/entities/project'
 import { ProjectScheduled } from '../../../enterprise/entities/project-scheduled'
 import { InvalidProjectStatusError } from '../../_errors/invalid-project-status-error'
@@ -35,6 +36,7 @@ export class PublishProjectUseCase {
     private readonly projectsRepository: ProjectsRepository,
     private readonly projectScheduledRepository: ProjectScheduledRepository,
     private readonly registerLog: RegisterLogUseCase,
+    private readonly publicationNotifier?: PublicationNotifier,
   ) {}
 
   private async log({ actorId, resourceId, text, status, diff }: LogParams) {
@@ -48,6 +50,14 @@ export class PublishProjectUseCase {
       status,
       text,
     })
+  }
+
+  private async notifyFollowers(projectId: string) {
+    try {
+      await this.publicationNotifier?.execute({ projectId })
+    } catch {
+      return
+    }
   }
 
   async execute({
@@ -113,6 +123,8 @@ export class PublishProjectUseCase {
       status: AuditLogStatus.SUCCESS,
       diff: { status: { old: previousStatus, new: ProjectStatus.PUBLISHED } },
     })
+
+    await this.notifyFollowers(project.id.toString())
 
     return right({ project })
   }

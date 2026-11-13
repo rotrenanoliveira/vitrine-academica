@@ -13,6 +13,7 @@ export interface CallProps {
   description: string
   applicationDeadline: Date
   status: CallStatus
+  projectId: UniqueEntityId | null
   createdAt: Date
   updatedAt?: Date | null
 }
@@ -53,6 +54,10 @@ export class Call extends Entity<CallProps> {
     return this.props.status
   }
 
+  get projectId() {
+    return this.props.projectId
+  }
+
   get createdAt() {
     return this.props.createdAt
   }
@@ -78,16 +83,22 @@ export class Call extends Entity<CallProps> {
     this.touch()
   }
 
+  linkProject(projectId: UniqueEntityId): void {
+    this.props.projectId = projectId
+    this.touch()
+  }
+
   private touch() {
     this.props.updatedAt = new Date()
   }
 
-  static create(props: Optional<CallProps, 'createdAt' | 'status'>, id?: UniqueEntityId) {
+  static create(props: Optional<CallProps, 'createdAt' | 'status' | 'projectId'>, id?: UniqueEntityId) {
     return new Call(
       {
         ...props,
         createdAt: props.createdAt ?? new Date(),
         status: props.status ?? CallStatus.OPEN,
+        projectId: props.projectId ?? null,
       },
       id,
     )

@@ -14,6 +14,7 @@ export class DrizzleCallMapper {
         description: row.description,
         applicationDeadline: row.applicationDeadline,
         status: row.status as CallStatus,
+        projectId: row.projectId ? new UniqueEntityId(row.projectId) : null,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
       },
@@ -29,6 +30,7 @@ export class DrizzleCallMapper {
       description: call.description,
       applicationDeadline: call.applicationDeadline,
       status: call.status,
+      projectId: call.projectId?.toString() ?? null,
       createdAt: call.createdAt,
       updatedAt: call.updatedAt ?? undefined,
     }

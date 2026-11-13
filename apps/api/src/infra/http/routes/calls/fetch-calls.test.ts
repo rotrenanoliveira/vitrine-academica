@@ -86,9 +86,16 @@ describe('(E2E) - GET /api/v1/calls', () => {
     })
   })
 
-  it('should not be able to fetch calls without authentication', async () => {
+  it('should be able to fetch calls without authentication', async () => {
+    const { user: author } = await makeUserOnDatabase()
+    const { tag } = await makeTagOnDatabase()
+    const { call } = await makeCallOnDatabase({ authorId: author.id })
+    await makeCallSkillOnDatabase({ callId: call.id, tagId: tag.id })
+
     const response = await request(app.server).get('/api/v1/calls')
 
-    expect(response.status).toBe(401)
+    expect(response.status).toBe(200)
+    expect(response.body.calls).toHaveLength(1)
+    expect(response.body.calls[0].id).toBe(call.id.toString())
   })
 })

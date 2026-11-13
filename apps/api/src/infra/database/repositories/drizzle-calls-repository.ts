@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, inArray } from 'drizzle-orm'
+import { and, asc, desc, eq, gt, inArray, lte } from 'drizzle-orm'
 import type { CallsRepository } from '@/domain/call/application/repositories/calls-repository'
 import type { Call } from '@/domain/call/enterprise/entities/call'
 import type { DrizzleClient } from '../drizzle/client'
@@ -34,6 +34,16 @@ export class DrizzleCallsRepository implements CallsRepository {
       .from(calls)
       .where(and(eq(calls.status, 'OPEN'), gt(calls.applicationDeadline, now)))
       .orderBy(desc(calls.createdAt))
+
+    return rows.map(DrizzleCallMapper.toDomain)
+  }
+
+  async findManyExpiredOpen(now: Date): Promise<Call[]> {
+    const rows = await this.db
+      .select()
+      .from(calls)
+      .where(and(eq(calls.status, 'OPEN'), lte(calls.applicationDeadline, now)))
+      .orderBy(asc(calls.applicationDeadline))
 
     return rows.map(DrizzleCallMapper.toDomain)
   }

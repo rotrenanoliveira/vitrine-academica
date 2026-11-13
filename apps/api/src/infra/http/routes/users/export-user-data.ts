@@ -56,6 +56,19 @@ export async function exportUserDataRoute(app: FastifyInstance) {
                 status: z.string(),
               }),
             ),
+            points: z.object({
+              balance: z.number().int(),
+              transactions: z.array(
+                z.object({
+                  id: z.string(),
+                  type: z.string(),
+                  amount: z.number().int(),
+                  reason: z.string(),
+                  referenceId: z.string(),
+                  createdAt: z.coerce.date(),
+                }),
+              ),
+            }),
           }),
           400: z.object({
             message: z.string(),

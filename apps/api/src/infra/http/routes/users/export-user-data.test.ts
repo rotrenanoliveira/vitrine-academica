@@ -51,6 +51,10 @@ describe('(E2E) - GET /api/v1/users/me/export', () => {
       institutions: expect.any(Array),
       preferences: expect.any(Array),
       projects: expect.any(Array),
+      points: {
+        balance: 0,
+        transactions: [],
+      },
     })
   })
 

@@ -55,6 +55,14 @@ import { rejectInstitutionMembershipRequestRoute } from './institutions-membersh
 import { requestInstitutionMembershipRoute } from './institutions-membership/request-institution-membership'
 import { updateInstitutionMemberRoleRoute } from './institutions-membership/update-institution-member-role'
 import { updateInstitutionMemberStatusRoute } from './institutions-membership/update-institution-member-status'
+import { getMyPointsBalanceRoute } from './points/get-my-points-balance'
+import { listActivePromotionsRoute } from './points/list-active-promotions'
+import { listMyPointTransactionsRoute } from './points/list-my-point-transactions'
+import { promoteProjectRoute } from './points/promote-project'
+import { listMySubscriptionsRoute } from './newsletter/list-my-subscriptions'
+import { subscribeToAuthorRoute } from './newsletter/subscribe-to-author'
+import { unsubscribeByTokenRoute } from './newsletter/unsubscribe-by-token'
+import { unsubscribeFromAuthorRoute } from './newsletter/unsubscribe-from-author'
 import { deactivatePreferenceTagRoute } from './preference-tags/deactivate-preference-tag'
 import { fetchUserPreferenceTagsRoute } from './preference-tags/fetch-user-preference-tags'
 import { registerPreferenceTagRoute } from './preference-tags/register-preference-tag'
@@ -258,6 +266,25 @@ export async function routes(app: FastifyInstance) {
   /** Curation routes */
   /** GET /curation */
   await app.register(getCurationRoute)
+
+  /** Points routes */
+  /** GET /points/me */
+  await app.register(getMyPointsBalanceRoute)
+  /** GET /points/me/transactions */
+  await app.register(listMyPointTransactionsRoute)
+  /** POST /projects/:projectId/promotions */
+  await app.register(promoteProjectRoute)
+  /** GET /promotions/active */
+  await app.register(listActivePromotionsRoute)
+  /** Newsletter routes */
+  /** POST /authors/:authorId/subscriptions */
+  await app.register(subscribeToAuthorRoute)
+  /** GET /subscriptions/me */
+  await app.register(listMySubscriptionsRoute)
+  /** POST /subscriptions/:subscriptionId/unsubscribe */
+  await app.register(unsubscribeFromAuthorRoute)
+  /** POST /subscriptions/unsubscribe */
+  await app.register(unsubscribeByTokenRoute)
 
   /** Institutions routes */
   /** POST /institutions */
