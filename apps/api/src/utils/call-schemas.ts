@@ -16,6 +16,7 @@ export const callSchema = z.object({
   description: z.string(),
   applicationDeadline: z.iso.datetime(),
   status: callStatusSchema,
+  projectId: z.string().nullable(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime().nullable(),
 })

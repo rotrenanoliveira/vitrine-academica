@@ -11,6 +11,7 @@ export class CallPresenter {
       description: call.description,
       applicationDeadline: call.applicationDeadline.toISOString(),
       status: call.status,
+      projectId: call.projectId?.toString() ?? null,
       createdAt: call.createdAt.toISOString(),
       updatedAt: call.updatedAt?.toISOString() ?? null,
     }

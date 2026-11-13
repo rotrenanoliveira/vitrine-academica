@@ -50,6 +50,7 @@ describe('(E2E) - POST /api/v1/calls', () => {
     expect(response.body).toEqual({
       call: {
         id: expect.any(String),
+        projectId: null,
         authorId: user.id.toString(),
         title: 'Busco dev para API',
         description: 'Projeto de extensão que precisa de um desenvolvedor backend',
