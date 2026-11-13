@@ -5,6 +5,7 @@ import { DrizzleAuditLogsRepository } from '@/infra/database/repositories/drizzl
 import { DrizzleProjectScheduledRepository } from '@/infra/database/repositories/drizzle-project-scheduled-repository'
 import { DrizzleProjectsRepository } from '@/infra/database/repositories/drizzle-projects-repository'
 import { PublishScheduledProjectsController } from '../../controllers/project/publish-scheduled-projects.controller'
+import { makePublicationNotifier } from '../newsletter/make-publication-notifier'
 
 export function makePublishScheduledProjectsController() {
   const projectsRepository = new DrizzleProjectsRepository(db)
@@ -16,6 +17,7 @@ export function makePublishScheduledProjectsController() {
     projectsRepository,
     projectScheduledRepository,
     registerLog,
+    makePublicationNotifier(),
   )
 
   return new PublishScheduledProjectsController(publishScheduledProjectsUseCase)
