@@ -1,12 +1,14 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { useTransition } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
+import { ThemeCard } from '@/components/event/theme-card'
 import { Button } from '@/components/ui/button'
 import { actionModerateEventTheme } from '@/server/actions/moderate-event-theme'
 import { actionSelectInstitutionalTheme } from '@/server/actions/select-institutional-theme'
 import type { Event, EventTheme, EventVoteCounter } from '@/utils/type'
+import { Separator } from '../ui/separator'
 
 function phaseStatusLabel(phase: Event['phase']) {
   switch (phase) {
@@ -30,40 +32,58 @@ export function AdminThemeModeration({
   themes: EventTheme[]
   counter: EventVoteCounter[]
 }) {
-  const router = useRouter()
-  const [pending, startTransition] = useTransition()
+  const queryClient = useQueryClient()
+  const [, startTransition] = useTransition()
+  const [pendingThemeId, setPendingThemeId] = useState<string | null>(null)
+
+  async function invalidateThemeQueries() {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['event-theme-selection'] }),
+      queryClient.invalidateQueries({ queryKey: ['event-vote-counter', event.id] }),
+    ])
+  }
 
   function moderate(themeId: string, action: 'APPROVE' | 'REJECT' | 'HIDE') {
+    setPendingThemeId(themeId)
     startTransition(async () => {
-      const reason = action === 'REJECT' ? 'Rejeitado pela moderação institucional' : null
-      const result = await actionModerateEventTheme({
-        themeId,
-        eventSlug: event.slug,
-        action,
-        reason,
-      })
-      if (!result.success) {
-        toast.error(result.message)
-        return
+      try {
+        const reason = action === 'REJECT' ? 'Rejeitado pela moderação institucional' : null
+        const result = await actionModerateEventTheme({
+          themeId,
+          eventSlug: event.slug,
+          action,
+          reason,
+        })
+        if (!result.success) {
+          toast.error(result.message)
+          return
+        }
+        toast.success(result.message)
+        await invalidateThemeQueries()
+      } finally {
+        setPendingThemeId((current) => (current === themeId ? null : current))
       }
-      toast.success(result.message)
-      router.refresh()
     })
   }
 
   function selectTheme(themeId: string) {
+    setPendingThemeId(themeId)
     startTransition(async () => {
-      const result = await actionSelectInstitutionalTheme({
-        eventId: event.id,
-        eventSlug: event.slug,
-        themeId,
-      })
-      if (!result.success) {
-        toast.error(result.message)
-        return
+      try {
+        const result = await actionSelectInstitutionalTheme({
+          eventId: event.id,
+          eventSlug: event.slug,
+          themeId,
+        })
+        if (!result.success) {
+          toast.error(result.message)
+          return
+        }
+        toast.success(result.message)
+        await invalidateThemeQueries()
+      } finally {
+        setPendingThemeId((current) => (current === themeId ? null : current))
       }
-      toast.success(result.message)
-      router.refresh()
     })
   }
 
@@ -74,50 +94,10 @@ export function AdminThemeModeration({
   const pendingThemes = themes.filter((theme) => theme.status === 'PENDING')
   const approvedThemes = themes.filter((theme) => theme.status === 'APPROVED')
   const otherThemes = themes.filter((theme) => theme.status !== 'PENDING' && theme.status !== 'APPROVED')
-
-  function renderTheme(theme: EventTheme, options: { showSelect?: boolean } = {}) {
-    const votes = counterMap.get(theme.id) ?? 0
-    const isTopVoted = theme.status === 'APPROVED' && maxVotes > 0 && votes === maxVotes
-
-    return (
-      <li key={theme.id} className="space-y-2 border-b border-border py-3">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <p className="font-medium">
-            {theme.title}
-            {isTopVoted && (
-              <span className="text-muted-foreground ml-2 text-xs font-normal uppercase tracking-wide">
-                Mais votado
-              </span>
-            )}
-          </p>
-          <span className="text-muted-foreground text-sm">
-            {theme.status} · {votes} voto(s)
-          </span>
-        </div>
-        <p className="text-muted-foreground text-sm">{theme.description}</p>
-        <div className="flex flex-wrap gap-2">
-          {theme.status === 'PENDING' && (
-            <>
-              <Button size="sm" disabled={pending} onClick={() => moderate(theme.id, 'APPROVE')}>
-                Aprovar
-              </Button>
-              <Button size="sm" variant="outline" disabled={pending} onClick={() => moderate(theme.id, 'REJECT')}>
-                Rejeitar
-              </Button>
-              <Button size="sm" variant="ghost" disabled={pending} onClick={() => moderate(theme.id, 'HIDE')}>
-                Ocultar
-              </Button>
-            </>
-          )}
-          {options.showSelect && canSelectTheme && theme.status === 'APPROVED' && (
-            <Button size="sm" disabled={pending} onClick={() => selectTheme(theme.id)}>
-              Selecionar tema
-            </Button>
-          )}
-        </div>
-      </li>
-    )
-  }
+  const moderationThemes = [...pendingThemes, ...otherThemes]
+  const sortedApprovedThemes = [...approvedThemes].sort(
+    (a, b) => (counterMap.get(b.id) ?? 0) - (counterMap.get(a.id) ?? 0),
+  )
 
   return (
     <div className="space-y-8">
@@ -130,15 +110,57 @@ export function AdminThemeModeration({
             Aprove, rejeite ou oculte temas sugeridos antes da decisão institucional.
           </p>
         </div>
-        {pendingThemes.length === 0 && otherThemes.length === 0 ? (
+        {moderationThemes.length === 0 ? (
           <p className="text-muted-foreground text-sm">Nenhum tema aguardando moderação.</p>
         ) : (
-          <ul className="space-y-3">
-            {pendingThemes.map((theme) => renderTheme(theme))}
-            {otherThemes.map((theme) => renderTheme(theme))}
-          </ul>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {moderationThemes.map((theme) => {
+              const isPending = pendingThemeId === theme.id
+              const showActions = theme.status === 'PENDING'
+
+              return (
+                <ThemeCard
+                  key={theme.id}
+                  theme={theme}
+                  meta={
+                    <>
+                      {theme.status}
+                      {theme.status !== 'PENDING' ? ` · ${counterMap.get(theme.id) ?? 0} voto(s)` : null}
+                    </>
+                  }
+                  actions={
+                    showActions ? (
+                      <div className="flex gap-2">
+                        <Button type="button" disabled={isPending} onClick={() => moderate(theme.id, 'APPROVE')}>
+                          {isPending ? 'Aguardando…' : 'Aprovar'}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          disabled={isPending}
+                          onClick={() => moderate(theme.id, 'REJECT')}
+                        >
+                          Rejeitar
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          disabled={isPending}
+                          onClick={() => moderate(theme.id, 'HIDE')}
+                        >
+                          Ocultar
+                        </Button>
+                      </div>
+                    ) : undefined
+                  }
+                />
+              )
+            })}
+          </div>
         )}
       </section>
+
+      <Separator />
 
       <section className="space-y-3">
         <div>
@@ -147,14 +169,41 @@ export function AdminThemeModeration({
             Contagem atual e seleção do tema do ciclo. O mais votado é só uma referência.
           </p>
         </div>
-        {approvedThemes.length === 0 ? (
+        {sortedApprovedThemes.length === 0 ? (
           <p className="text-muted-foreground text-sm">Nenhum tema aprovado ainda.</p>
         ) : (
-          <ul className="space-y-3">
-            {[...approvedThemes]
-              .sort((a, b) => (counterMap.get(b.id) ?? 0) - (counterMap.get(a.id) ?? 0))
-              .map((theme) => renderTheme(theme, { showSelect: true }))}
-          </ul>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {sortedApprovedThemes.map((theme) => {
+              const votes = counterMap.get(theme.id) ?? 0
+              const isTopVoted = maxVotes > 0 && votes === maxVotes
+              const isPending = pendingThemeId === theme.id
+
+              return (
+                <ThemeCard
+                  key={theme.id}
+                  theme={theme}
+                  meta={
+                    <>
+                      {votes} voto(s)
+                      {isTopVoted ? ' · Mais votado' : null}
+                    </>
+                  }
+                  actions={
+                    canSelectTheme ? (
+                      <Button
+                        type="button"
+                        className="w-full"
+                        disabled={isPending}
+                        onClick={() => selectTheme(theme.id)}
+                      >
+                        {isPending ? 'Selecionando…' : 'Selecionar tema'}
+                      </Button>
+                    ) : undefined
+                  }
+                />
+              )
+            })}
+          </div>
         )}
       </section>
     </div>
