@@ -1,13 +1,15 @@
-import type { Event } from '@/utils/type'
+import type { Event, EventListItem, EventPhase } from '@/utils/type'
 
-export const phaseLabels: Record<Event['phase'], string> = {
+type EventLinkFields = Pick<Event | EventListItem, 'slug' | 'phase'>
+
+export const phaseLabels: Record<EventPhase, string> = {
   THEME_SELECTION: 'Escolha de tema',
   INSTITUTIONAL_SELECTION: 'Seleção institucional',
   OPEN: 'Aberto',
   CLOSED: 'Encerrado',
 }
 
-export function eventHref(event: Event) {
+export function eventHref(event: EventLinkFields) {
   switch (event.phase) {
     case 'THEME_SELECTION':
       return `/eventos/${event.slug}/escolha`
@@ -18,7 +20,7 @@ export function eventHref(event: Event) {
   }
 }
 
-export function eventActionLabel(event: Event) {
+export function eventActionLabel(event: EventLinkFields) {
   switch (event.phase) {
     case 'THEME_SELECTION':
       return 'Participar da escolha'

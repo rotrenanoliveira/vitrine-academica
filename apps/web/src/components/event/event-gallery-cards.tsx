@@ -1,8 +1,8 @@
-import type { Event } from '@/utils/type'
+import type { EventListItem } from '@/utils/type'
 import { EventGalleryCard } from './event-gallery-card'
 
 type EventGalleryCardsProps = {
-  events: Event[]
+  events: EventListItem[]
   title?: string
   eyebrow?: string
   description?: string

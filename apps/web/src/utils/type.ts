@@ -264,7 +264,21 @@ export const eventSchema = z.object({
   updatedAt: z.string().nullable(),
 })
 
+export const eventListItemSchema = z.object({
+  id: z.string(),
+  institutionId: z.string(),
+  institutionName: z.string(),
+  slug: z.string(),
+  name: z.string().nullable(),
+  participationScope: participationScopeSchema,
+  phase: eventPhaseSchema,
+  themeSelectionEndsAt: z.string(),
+  endsAt: z.string(),
+  winner: z.string().nullable(),
+})
+
 export type Event = z.infer<typeof eventSchema>
+export type EventListItem = z.infer<typeof eventListItemSchema>
 export type EventPhase = z.infer<typeof eventPhaseSchema>
 export type ParticipationScope = z.infer<typeof participationScopeSchema>
 

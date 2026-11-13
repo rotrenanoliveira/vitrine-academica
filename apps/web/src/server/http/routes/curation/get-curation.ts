@@ -13,22 +13,22 @@ type GetCurationParams = {
   tags?: string | string[]
 }
 
-export async function getCuration({
-  institutionId,
-  months,
-  limit,
-  scope,
-  title,
-  tags,
-}: GetCurationParams = {}) {
-  const searchParams: Record<string, string | number | string[]> = {}
+export async function getCuration(params: GetCurationParams = {}) {
+  const searchParams = new URLSearchParams({
+    ...(params.institutionId && { institutionId: params.institutionId }),
+    ...(params.months && { months: params.months.toString() }),
+    ...(params.limit && { limit: params.limit.toString() }),
+    ...(params.scope && { scope: params.scope }),
+    ...(params.title && { title: params.title }),
+  })
 
-  if (institutionId) searchParams.institutionId = institutionId
-  if (months) searchParams.months = months
-  if (limit) searchParams.limit = limit
-  if (scope) searchParams.scope = scope
-  if (title) searchParams.title = title
-  if (tags) searchParams.tags = tags
+  if (params.tags) {
+    const tags = Array.isArray(params.tags) ? params.tags : [params.tags]
+
+    tags.forEach((tag) => {
+      searchParams.append('tags', tag)
+    })
+  }
 
   const [response, responseError] = await fetcher(
     api.get<Curation>('api/v1/curation', { cache: 'no-store', searchParams }).json(),

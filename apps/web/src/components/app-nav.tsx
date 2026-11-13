@@ -13,8 +13,8 @@ const links = [
   { href: '/destaques', label: 'Destaques' },
   { href: '/eventos', label: 'Eventos' },
   { href: '/chamados', label: 'Chamados' },
-  { href: '/pesquisas-cientificas', label: 'OpenAlex' },
   { href: '/instituicoes', label: 'Instituições' },
+  { href: '/pesquisas-cientificas', label: 'OpenAlex' },
   // { href: '/conta', label: 'Minha Conta' },
   // { href: '/projetos/convites', label: 'Convites' },
 ]
@@ -42,6 +42,7 @@ export function AppNav() {
         href="/conta"
         className={cn(
           buttonVariants({ variant: 'outline' }),
+          'size-10',
           pathname === 'conta' || (pathname.startsWith('/conta') && 'bg-primary text-primary-foreground'),
         )}
       >
