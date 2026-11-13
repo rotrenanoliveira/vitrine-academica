@@ -38,4 +38,14 @@ export class InMemoryPromotionsRepository implements PromotionsRepository {
   async findManyActive(now: Date): Promise<Promotion[]> {
     return this.items.filter((item) => item.isActive(now)).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
   }
+
+  async findActiveProjectIds(projectIds: string[], now: Date): Promise<string[]> {
+    const wanted = new Set(projectIds)
+
+    const ids = this.items
+      .filter((item) => wanted.has(item.projectId.toString()) && item.isActive(now))
+      .map((item) => item.projectId.toString())
+
+    return [...new Set(ids)]
+  }
 }

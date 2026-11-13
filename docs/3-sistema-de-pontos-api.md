@@ -102,7 +102,10 @@ Resposta 200:
 
 O e-mail de quem promoveu nunca é exposto.
 
-## Ainda não implementado
+## Campo `featured` nos projetos
 
-- Campo booleano `featured` nas respostas de projeto (página do projeto, home personalizada e lista de projetos publicados), para o front mostrar a etiqueta de "promovido".
-- Encerramento automático: uma promoção vencida deixa de aparecer em `GET /promotions/active` assim que passa da validade, sem depender de nenhuma rota.
+Três rotas devolvem `featured` (booleano) em cada projeto: `GET /projects/:projectId` (no objeto `project`), `GET /projects/published` e `GET /users/:userId/projects-of-interest` (a home personalizada), ambas em `projects`.
+
+`true` quando o projeto tem ao menos uma promoção ativa (status `ACTIVE` e dentro da validade). Use para mostrar a etiqueta de "promovido". Para saber quem promoveu e até quando, use `GET /promotions/active`.
+
+As demais rotas que devolvem projetos (por exemplo `GET /projects/me` e `GET /me/starred-projects`) ainda não trazem o campo.

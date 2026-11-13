@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, lte, sql } from 'drizzle-orm'
+import { and, desc, eq, gt, inArray, lte, sql } from 'drizzle-orm'
 import type {
   CreatePromotionWithDebitResult,
   PromotionsRepository,
@@ -76,5 +76,20 @@ export class DrizzlePromotionsRepository implements PromotionsRepository {
       .orderBy(desc(promotions.createdAt), desc(promotions.id))
 
     return rows.map(DrizzlePromotionMapper.toDomain)
+  }
+
+  async findActiveProjectIds(projectIds: string[], now: Date): Promise<string[]> {
+    if (projectIds.length === 0) {
+      return []
+    }
+
+    const rows = await this.db
+      .selectDistinct({ projectId: promotions.projectId })
+      .from(promotions)
+      .where(
+        and(inArray(promotions.projectId, projectIds), eq(promotions.status, 'ACTIVE'), gt(promotions.expiresAt, now)),
+      )
+
+    return rows.map((row) => row.projectId)
   }
 }
