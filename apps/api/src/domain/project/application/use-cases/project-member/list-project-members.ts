@@ -9,7 +9,7 @@ import type { ProjectsRepository } from '../../repositories/projects-repositorie
 
 interface ListProjectMembersUseCaseRequest {
   projectId: string
-  requesterId: string
+  requesterId?: string
 }
 
 export interface ProjectMemberItem {
@@ -36,10 +36,10 @@ export class ListProjectMembersUseCase {
       return left(new ProjectNotFoundError())
     }
 
-    const isOwner = project.author.toString() === requesterId
+    const isOwner = Boolean(requesterId) && project.author.toString() === requesterId
     const isPublished = project.status === ProjectStatus.PUBLISHED
 
-    if (!isOwner && !isPublished && !(await this.isAcceptedMember(projectId, requesterId))) {
+    if (!isOwner && !isPublished && !(requesterId && (await this.isAcceptedMember(projectId, requesterId)))) {
       return left(new ProjectNotFoundError())
     }
 

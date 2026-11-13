@@ -7,7 +7,7 @@ import type { ProjectsRepository } from '../../repositories/projects-repositorie
 
 interface GetProjectBySlugUseCaseRequest {
   slug: string
-  requesterId: string
+  requesterId?: string
 }
 
 type GetProjectBySlugUseCaseResponse = Either<ProjectNotFoundError, { project: Project }>
@@ -26,11 +26,11 @@ export class GetProjectBySlugUseCase {
     }
 
     const projectId = project.id.toString()
-    const isOwner = project.author.toString() === requesterId
+    const isOwner = Boolean(requesterId) && project.author.toString() === requesterId
     const isPublished = project.status === ProjectStatus.PUBLISHED
 
-    // Quem não é o dono nem vê um projeto publicado só abre o projeto se aceitou ser coautor dele
-    if (!isOwner && !isPublished && !(await this.isAcceptedMember(projectId, requesterId))) {
+    // Visitante só vê publicado; logado que não é dono/coautor aceito também só vê publicado
+    if (!isOwner && !isPublished && !(requesterId && (await this.isAcceptedMember(projectId, requesterId)))) {
       return left(new ProjectNotFoundError())
     }
 
