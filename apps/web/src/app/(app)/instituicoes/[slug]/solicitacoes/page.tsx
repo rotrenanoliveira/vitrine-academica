@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { Suspense } from 'react'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -58,7 +59,9 @@ export default async function InstitutionMembershipRequestsPage({ params }: Page
           <p className="text-sm text-muted-foreground">{institution.name}</p>
         </div>
 
-        <MembershipRequestsList institutionId={institution.id} institutionSlug={institution.slug} />
+        <Suspense fallback={<p className="text-sm text-muted-foreground">Carregando solicitações…</p>}>
+          <MembershipRequestsList institutionId={institution.id} institutionSlug={institution.slug} />
+        </Suspense>
       </div>
     </div>
   )

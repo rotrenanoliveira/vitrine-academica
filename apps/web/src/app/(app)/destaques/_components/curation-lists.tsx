@@ -1,12 +1,10 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { getCuration } from '@/server/http/routes/curation/get-curation'
-import { resolveProjectCoverUrl } from '@/server/projects/resolve-project-cover-url'
-import type { Project } from '@/utils/type'
+import type { ProjectListItem } from '@/utils/type'
 
 type RankedItem = {
-  project: Project
-  coverUrl: string | null
+  project: ProjectListItem
   detail: string
 }
 
@@ -15,8 +13,6 @@ type CurationRankListProps = {
   description: string
   items: RankedItem[]
 }
-
-const numberFormatter = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 })
 
 function CurationRankList({ title, description, items }: CurationRankListProps) {
   return (
@@ -30,14 +26,20 @@ function CurationRankList({ title, description, items }: CurationRankListProps) 
         <p className="text-sm text-muted-foreground">Nenhum projeto avaliado neste período.</p>
       ) : (
         <ol className="divide-y divide-border border border-border">
-          {items.map(({ project, coverUrl, detail }, index) => (
+          {items.map(({ project, detail }, index) => (
             <li key={project.id} className="flex items-center gap-4 px-4 py-3">
               <span className="w-6 shrink-0 text-center font-heading text-lg font-semibold">{index + 1}</span>
 
-              <Link href={`/projetos/${project.id}`} className="shrink-0">
-                {coverUrl ? (
+              <Link href={`/projetos/${project.slug}`} className="shrink-0">
+                {project.coverUrl ? (
                   <div className="relative aspect-video w-28 overflow-hidden">
-                    <Image src={coverUrl} alt={`Capa de ${project.title}`} fill unoptimized className="object-cover" />
+                    <Image
+                      src={project.coverUrl}
+                      alt={`Capa de ${project.title}`}
+                      fill
+                      unoptimized
+                      className="object-cover"
+                    />
                   </div>
                 ) : (
                   <div className="aspect-video w-28 bg-muted" aria-hidden />
@@ -46,11 +48,11 @@ function CurationRankList({ title, description, items }: CurationRankListProps) 
 
               <div className="min-w-0 space-y-1">
                 <h3 className="truncate font-medium">
-                  <Link href={`/projetos/${project.id}`} className="hover:underline">
+                  <Link href={`/projetos/${project.slug}`} className="hover:underline">
                     {project.title}
                   </Link>
                 </h3>
-                <p className="text-xs text-muted-foreground">{detail}</p>
+                {detail ? <p className="text-xs text-muted-foreground">{detail}</p> : null}
               </div>
             </li>
           ))}
@@ -65,28 +67,26 @@ type CurationListsProps = {
   months: number
 }
 
+function toRankedItems(projects: ProjectListItem[]): RankedItem[] {
+  return projects.map((project) => ({
+    project,
+    detail: project.tags.length > 0 ? project.tags.join(' · ') : '',
+  }))
+}
+
 export async function CurationLists({ institutionId, months }: CurationListsProps) {
-  const { board, community } = await getCuration({ months, ...(institutionId ? { institutionId } : {}) })
+  const sharedParams = {
+    months,
+    ...(institutionId ? { institutionId } : {}),
+  }
 
-  const boardItems = await Promise.all(
-    board.map(async (entry) => ({
-      project: entry.project,
-      coverUrl: await resolveProjectCoverUrl(entry.project),
-      detail: `Nota média ${numberFormatter.format(entry.teacherAverage)} (${entry.teacherRatingsCount} ${
-        entry.teacherRatingsCount === 1 ? 'avaliação' : 'avaliações'
-      })`,
-    })),
-  )
+  const [board, community] = await Promise.all([
+    getCuration({ ...sharedParams, scope: 'board' }),
+    getCuration({ ...sharedParams, scope: 'community' }),
+  ])
 
-  const communityItems = await Promise.all(
-    community.map(async (entry) => ({
-      project: entry.project,
-      coverUrl: await resolveProjectCoverUrl(entry.project),
-      detail: `${numberFormatter.format(entry.weightedScore)} pontos (${entry.starsCount} ${
-        entry.starsCount === 1 ? 'estrela' : 'estrelas'
-      })`,
-    })),
-  )
+  const boardItems = toRankedItems(board.projects)
+  const communityItems = toRankedItems(community.projects)
 
   return (
     <div className="grid gap-8 lg:grid-cols-2">

@@ -19,7 +19,9 @@ export default async function ExternalProjectsPage({ searchParams }: PageProps) 
   return (
     <div className="flex flex-1 flex-col gap-12 p-4">
       <div className="mt-12 flex justify-center">
-        <ExternalProjectsFilters />
+        <Suspense fallback={null}>
+          <ExternalProjectsFilters />
+        </Suspense>
       </div>
 
       <Suspense fallback={<p className="text-sm text-muted-foreground">Carregando pesquisas…</p>}>

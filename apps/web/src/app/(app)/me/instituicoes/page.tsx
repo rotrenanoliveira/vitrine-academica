@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { MeBackLink } from '@/components/me/me-back-link'
 import { Button } from '@/components/ui/button'
 import { requireUser } from '@/server/auth/require-user'
@@ -30,7 +31,9 @@ export default async function MeInstitutionsPage() {
           </Button>
         </div>
       </div>
-      <MyMembershipsList />
+      <Suspense fallback={<p className="text-sm text-muted-foreground">Carregando instituições…</p>}>
+        <MyMembershipsList />
+      </Suspense>
     </div>
   )
 }

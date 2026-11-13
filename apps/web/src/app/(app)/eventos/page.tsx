@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { EventsSectionNav } from './_components/events-section-nav'
 import { PublicEventsListing } from './_components/public-events-listing'
 
@@ -15,7 +16,9 @@ export default async function EventsPage() {
       </header>
 
       <div className="flex flex-1 flex-col gap-6 p-4">
-        <PublicEventsListing phases={['OPEN']} emptyMessage="Nenhum evento aberto no momento." />
+        <Suspense fallback={<p className="text-sm text-muted-foreground">Carregando eventos…</p>}>
+          <PublicEventsListing phases={['OPEN']} emptyMessage="Nenhum evento aberto no momento." />
+        </Suspense>
       </div>
     </div>
   )
