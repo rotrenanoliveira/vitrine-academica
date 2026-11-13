@@ -17,7 +17,8 @@ export async function closeCallRoute(app: FastifyInstance) {
       schema: {
         tags: ['calls'],
         summary: 'Encerrar chamado',
-        description: 'Encerra um chamado aberto do autor autenticado, que deixa de receber candidaturas',
+        description:
+          'Encerra um chamado aberto do autor autenticado, que deixa de receber candidaturas, e cria um projeto rascunho com os dados do chamado. O projectId da resposta identifica o projeto criado',
         params: z.object({
           callId: z.uuid().describe('O ID do chamado'),
         }),

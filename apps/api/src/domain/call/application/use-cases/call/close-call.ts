@@ -6,6 +6,7 @@ import { CallNotFoundError } from '../../_errors/call-not-found-error'
 import { InvalidCallStatusError } from '../../_errors/invalid-call-status-error'
 import { NotCallOwnerError } from '../../_errors/not-call-owner-error'
 import type { CallsRepository } from '../../repositories/calls-repository'
+import type { CreateProjectFromCallUseCase } from './create-project-from-call'
 
 interface CloseCallUseCaseRequest {
   callId: string
@@ -25,6 +26,7 @@ type CloseCallUseCaseResponse = Either<CallNotFoundError | NotCallOwnerError | I
 export class CloseCallUseCase {
   constructor(
     private readonly callsRepository: CallsRepository,
+    private readonly createProjectFromCall: CreateProjectFromCallUseCase,
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
@@ -78,6 +80,9 @@ export class CloseCallUseCase {
     }
 
     const previousStatus = call.status
+    const previousProjectId = call.projectId?.toString() ?? null
+
+    await this.createProjectFromCall.execute({ call, actorId: authorId })
 
     call.close()
     await this.callsRepository.save(call)
@@ -87,7 +92,10 @@ export class CloseCallUseCase {
       resourceId: callId,
       text: `Chamado ${callId} encerrado com sucesso.`,
       status: AuditLogStatus.SUCCESS,
-      diff: { status: { old: previousStatus, new: call.status } },
+      diff: {
+        status: { old: previousStatus, new: call.status },
+        projectId: { old: previousProjectId, new: call.projectId?.toString() ?? null },
+      },
     })
 
     return right({ call })
