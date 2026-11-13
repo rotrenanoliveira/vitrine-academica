@@ -41,7 +41,6 @@ describe('(E2E) - GET /api/v1/projects/published', () => {
           attachments: [],
           tags: [],
           createdAt: expect.any(String),
-          featured: false,
         },
       ]),
     )

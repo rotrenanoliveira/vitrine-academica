@@ -5,18 +5,6 @@ import { makeAuthenticateMiddleware } from '../../factories/auth/make-authentica
 import { makeGetProjectByIdController } from '../../factories/project/make-get-project-by-id-controller'
 import { projectHttpSchema } from '../../schemas/project-schemas'
 
-const projectSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  authorId: z.string(),
-  status: z.enum(['SKETCH', 'SCHEDULED', 'PUBLISHED', 'ARCHIVED']),
-  attachments: z.array(z.string()),
-  tags: z.array(z.string()),
-  createdAt: z.iso.datetime(),
-  featured: z.boolean(),
-})
-
 export async function getProjectByIdRoute(app: FastifyInstance) {
   const getProjectByIdController = makeGetProjectByIdController()
   const authenticate = makeAuthenticateMiddleware()

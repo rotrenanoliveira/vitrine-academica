@@ -13,6 +13,10 @@ export const projectHttpSchema = z.object({
   createdAt: z.iso.datetime(),
 })
 
+export const projectWithFeaturedHttpSchema = projectHttpSchema.extend({
+  featured: z.boolean(),
+})
+
 export const projectListHttpSchema = z.object({
   id: z.string(),
   title: z.string(),
