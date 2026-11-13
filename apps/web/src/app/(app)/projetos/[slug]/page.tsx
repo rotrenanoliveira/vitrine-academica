@@ -1,30 +1,26 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
+import { FormInviteProjectMember } from '@/components/project/form-invite-project-member'
 import { FormPublishProject } from '@/components/project/form-publish-project'
 import { FormScheduleProject } from '@/components/project/form-schedule-project'
-import { ProjectMembersSection } from '@/components/project/project-members-section'
+import { ProjectAuthors } from '@/components/project/project-authors'
+import { ProjectCoverFrame } from '@/components/project/project-cover-frame'
 import { ProjectPromoteButton } from '@/components/project/project-promote-button'
 import { ProjectStarButton } from '@/components/project/project-star-button'
 import { ProjectTeacherRatingForm } from '@/components/project/project-teacher-rating-form'
 import { ProjectTeacherVotesTable } from '@/components/project/project-teacher-votes-table'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
-import { requireUser } from '@/server/auth/require-user'
+import { getCurrentUser } from '@/server/auth/require-user'
 import { getAttachment } from '@/server/http/routes/attachments/get-attachment'
+import { fetchAuthorProjectsSafe } from '@/server/http/routes/authors/fetch-author-projects'
 import { getCachedMyInstitutionMemberships } from '@/server/http/routes/institutions/get-my-institution-memberships'
 import { getMyStarOnProject } from '@/server/http/routes/projects/get-my-star-on-project'
 import { getMyTeacherRatingOnProject } from '@/server/http/routes/projects/get-my-teacher-rating-on-project'
 import { getProjectBySlug } from '@/server/http/routes/projects/get-project-by-slug'
 import { getProjectRatings } from '@/server/http/routes/projects/get-project-ratings'
 import { listActiveRatingCriteria } from '@/server/http/routes/projects/list-active-rating-criteria'
+import { listProjectMembers } from '@/server/http/routes/projects/list-project-members'
 import { listProjectTeacherRatings } from '@/server/http/routes/projects/list-project-teacher-ratings'
 import { getCachedTags } from '@/server/http/routes/tags/fetch-tags'
 import { resolveProjectCoverUrl } from '@/server/projects/resolve-project-cover-url'
@@ -47,25 +43,30 @@ const statusLabels = {
 
 export default async function ProjectDetailPage({ params }: PageProps) {
   const { slug } = await params
-  const user = await requireUser()
+  const user = await getCurrentUser()
 
   const { project } = await getProjectBySlug(slug)
   const projectId = project.id
 
-  const [{ rating }, { tags: allTags }, { members }] = await Promise.all([
+  const [{ rating }, { tags: allTags }, { members }, [authorData]] = await Promise.all([
     getProjectRatings(projectId),
     getCachedTags(),
-    getCachedMyInstitutionMemberships(user.id),
+    listProjectMembers({ projectId }),
+    fetchAuthorProjectsSafe(project.authorId),
   ])
 
-  const isOwner = user.id === project.authorId
-  const canStar = project.status === 'PUBLISHED' && !isOwner
-  const canRate = project.status === 'PUBLISHED' && !isOwner && canRateAsTeacher(members)
+  const isAuthenticated = user !== null
+  const isOwner = user !== null && user.id === project.authorId
+  const memberships = user ? (await getCachedMyInstitutionMemberships(user.id)).members : []
+  const canStar = isAuthenticated && project.status === 'PUBLISHED' && !isOwner
+  const canRate = isAuthenticated && project.status === 'PUBLISHED' && !isOwner && canRateAsTeacher(memberships)
 
   const [coverUrl, myStarResult, attachmentEntries, votesResult, criteriaForForm, myTeacherRatingResult] =
     await Promise.all([
       resolveProjectCoverUrl(project),
-      canStar || project.status === 'PUBLISHED' ? getMyStarOnProject(projectId) : Promise.resolve({ star: null }),
+      canStar || (isAuthenticated && project.status === 'PUBLISHED')
+        ? getMyStarOnProject(projectId)
+        : Promise.resolve({ star: null }),
       Promise.all(
         project.attachments.map(async (attachmentId) => {
           const [result] = await getAttachment(attachmentId)
@@ -87,31 +88,23 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   const voteCriteria = votesResult.criteria.length > 0 ? votesResult.criteria : criteriaForForm.criteria
   const canSchedule = isOwner && project.status === 'SKETCH'
   const canPublish = isOwner && (project.status === 'SKETCH' || project.status === 'SCHEDULED')
+  const canInvite = isOwner && project.status !== 'ARCHIVED'
+  const hasOwnerActions = canSchedule || canPublish || canInvite
+
+  const authorName = authorData?.author.name ?? 'Autor'
+  const coauthors = members
+    .filter((member) => member.status === 'ACCEPTED')
+    .map((member) => ({ id: member.userId, name: member.name }))
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border px-4">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink render={<Link href="/projetos" />}>Projetos</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Vitrine</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </header>
-
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-8 p-4 py-8">
-        {coverUrl ? (
-          <div className="relative aspect-video w-full overflow-hidden border border-border">
-            <Image src={coverUrl} alt={`Capa de ${project.title}`} fill unoptimized className="object-cover" />
-          </div>
-        ) : (
-          <div className="aspect-video w-full bg-muted" aria-hidden />
-        )}
+        <ProjectCoverFrame
+          coverUrl={coverUrl}
+          alt={`Capa de ${project.title}`}
+          tagLabel={projectTags[0]?.name}
+          priority
+        />
 
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0 flex-1 space-y-3">
@@ -120,14 +113,10 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             <p className="text-xs text-muted-foreground">
               Publicado em {new Date(project.createdAt).toLocaleString('pt-BR')}
             </p>
-            <p className="text-sm text-muted-foreground">
-              <Link href={`/p/${project.authorId}`} className="underline-offset-4 hover:underline">
-                Ver perfil do autor
-              </Link>
-            </p>
+            <ProjectAuthors author={{ id: project.authorId, name: authorName }} coauthors={coauthors} />
           </div>
 
-          {project.status === 'PUBLISHED' && (
+          {isAuthenticated && project.status === 'PUBLISHED' && (
             <div className="flex flex-col items-end gap-2">
               <div className="flex flex-wrap items-center justify-end gap-2">
                 <ProjectStarButton
@@ -142,6 +131,20 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               </div>
               {rating.teacherAverage !== null && (
                 <p className="text-sm text-muted-foreground">
+                  Overall docente{' '}
+                  <span className="font-semibold tabular-nums text-foreground">{rating.teacherAverage.toFixed(2)}</span>
+                </p>
+              )}
+            </div>
+          )}
+
+          {!isAuthenticated && project.status === 'PUBLISHED' && (
+            <div className="flex flex-col items-end gap-1 text-sm text-muted-foreground">
+              <p>
+                Estrelas <span className="font-semibold tabular-nums text-foreground">{rating.starsCount}</span>
+              </p>
+              {rating.teacherAverage !== null && (
+                <p>
                   Overall docente{' '}
                   <span className="font-semibold tabular-nums text-foreground">{rating.teacherAverage.toFixed(2)}</span>
                 </p>
@@ -217,7 +220,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               ratingsCount={rating.teacherRatingsCount}
             />
 
-            {canRate && criteriaForForm.criteria.length > 0 && (
+            {canRate && user && criteriaForForm.criteria.length > 0 && (
               <ProjectTeacherRatingForm
                 projectId={project.id}
                 projectSlug={project.slug}
@@ -237,25 +240,27 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           </div>
         )}
 
-        {canSchedule && (
-          <div className="border border-border p-4">
-            <FormScheduleProject projectId={project.id} projectSlug={project.slug} />
+        {hasOwnerActions && (
+          <div className="grid gap-4 lg:grid-cols-3">
+            {canSchedule && (
+              <div className="border border-border p-4">
+                <FormScheduleProject projectId={project.id} projectSlug={project.slug} />
+              </div>
+            )}
+
+            {canPublish && (
+              <div className="border border-border p-4">
+                <FormPublishProject projectId={project.id} projectSlug={project.slug} />
+              </div>
+            )}
+
+            {canInvite && (
+              <div className="border border-border p-4">
+                <FormInviteProjectMember projectId={project.id} projectSlug={project.slug} />
+              </div>
+            )}
           </div>
         )}
-
-        {canPublish && (
-          <div className="border border-border p-4">
-            <FormPublishProject projectId={project.id} projectSlug={project.slug} />
-          </div>
-        )}
-
-        <ProjectMembersSection
-          projectId={project.id}
-          projectSlug={project.slug}
-          projectStatus={project.status}
-          isOwner={isOwner}
-          currentUserId={user.id}
-        />
       </div>
     </div>
   )

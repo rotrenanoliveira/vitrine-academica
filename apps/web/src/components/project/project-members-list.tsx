@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import type { ProjectMemberListItem, ProjectMemberStatus } from '@/utils/project-member-types'
 
 const statusLabels: Record<ProjectMemberStatus, string> = {
@@ -26,7 +27,12 @@ export function ProjectMembersList({ members, isOwner }: ProjectMembersListProps
         <ul className="divide-y divide-border border border-border">
           {members.map((member) => (
             <li key={member.id} className="flex items-center justify-between gap-4 px-4 py-3">
-              <span className="min-w-0 truncate text-sm font-medium">{member.name}</span>
+              <Link
+                href={`/p/${member.userId}`}
+                className="min-w-0 truncate text-sm font-medium underline-offset-4 hover:underline"
+              >
+                {member.name}
+              </Link>
               {isOwner && <span className="shrink-0 text-xs text-muted-foreground">{statusLabels[member.status]}</span>}
             </li>
           ))}

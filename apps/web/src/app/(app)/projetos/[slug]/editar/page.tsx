@@ -16,6 +16,7 @@ import { requireUser } from '@/server/auth/require-user'
 import { getProjectBySlug } from '@/server/http/routes/projects/get-project-by-slug'
 import { listProjectMembers } from '@/server/http/routes/projects/list-project-members'
 import { getCachedTags } from '@/server/http/routes/tags/fetch-tags'
+import { resolveProjectCoverUrl } from '@/server/projects/resolve-project-cover-url'
 
 export const metadata: Metadata = {
   title: 'Editar projeto',
@@ -29,7 +30,11 @@ export default async function EditProjectPage({ params }: PageProps) {
   const { slug } = await params
   const user = await requireUser()
   const { project } = await getProjectBySlug(slug)
-  const [{ tags }, { members }] = await Promise.all([getCachedTags(), listProjectMembers({ projectId: project.id })])
+  const [{ tags }, { members }, currentCoverUrl] = await Promise.all([
+    getCachedTags(),
+    listProjectMembers({ projectId: project.id }),
+    resolveProjectCoverUrl(project),
+  ])
 
   const isOwner = user.id === project.authorId
   const isCoauthor = members.some((member) => member.userId === user.id)
@@ -63,7 +68,7 @@ export default async function EditProjectPage({ params }: PageProps) {
       <div className="flex flex-1 items-start justify-center px-4 py-8">
         <div className="w-full max-w-lg space-y-8">
           <div className="border border-border p-6">
-            <FormUpdateProject project={project} canChangeStatus={isOwner} />
+            <FormUpdateProject project={project} canChangeStatus={isOwner} currentCoverUrl={currentCoverUrl} />
           </div>
           {isOwner && (
             <div className="border border-border p-6">
