@@ -12,7 +12,9 @@ import { DrizzlePromotionsRepository } from '@/infra/database/repositories/drizz
 import { startAdvanceEventPhaseJob } from '../jobs/advance-event-phase-job'
 import { startExpirePromotionsJob } from '../jobs/expire-promotions-job'
 import { startPublishScheduledProjectsJob } from '../jobs/publish-scheduled-projects-job'
+import { startNewsletterScheduler } from '../jobs/start-newsletter-scheduler'
 import { app } from './app'
+import { makePublicationNotifier } from './factories/newsletter/make-publication-notifier'
 
 //Ligando a função que publica sozinho os projetos de acordo com os horários do agendamento
 function startScheduler() {
@@ -22,12 +24,13 @@ function startScheduler() {
     new DrizzleProjectsRepository(db),
     new DrizzleProjectScheduledRepository(db),
     registerLog,
+    makePublicationNotifier(),
   )
 
   startPublishScheduledProjectsJob({
     publishScheduledProjects,
-    onPublished: (total) => app.log.info(`[Agendador]: ${total} projeto(s) publicado(s)`),
-    onError: (error) => app.log.error({ err: error }, '[Agendador]: falha ao publicar os projetos agendados'),
+    onPublished: (total) => app.log.info(`[Scheduled]: ${total} projeto(s) publicado(s)`),
+    onError: (error) => app.log.error({ err: error }, '[Scheduled]: falha ao publicar os projetos agendados'),
   })
 
   const advanceDueEventPhases = new AdvanceDueEventPhasesUseCase(new DrizzleEventsRepository(db), registerLog)
@@ -51,6 +54,10 @@ function startScheduler() {
 
   app.log.info(
     '[Agendador]: ligado, verifica projetos agendados, fases de eventos e promoções vencidas a cada 30 segundos',
+  startNewsletterScheduler(app.log)
+
+  app.log.info(
+    '[Scheduled]: ligado, verifica projetos agendados, fases de eventos e avisos da newsletter a cada 30 segundos',
   )
 }
 
