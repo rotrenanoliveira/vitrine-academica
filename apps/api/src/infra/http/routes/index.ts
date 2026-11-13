@@ -7,19 +7,20 @@ import { deleteAttachmentRoute } from './attachments/delete-attachment'
 import { getAttachmentRoute } from './attachments/get-attachment'
 import { uploadAttachmentRoute } from './attachments/upload-attachment'
 import { authenticateWithAccessCodeRoute } from './auth/authenticate-with-access-code'
+import { getMeRoute } from './auth/get-me'
+import { logoutRoute } from './auth/logout'
+import { requestAccessCodeRoute } from './auth/request-access-code'
 import { applyToCallRoute } from './call-applications/apply-to-call'
 import { decideCallApplicationRoute } from './call-applications/decide-call-application'
 import { fetchCallApplicationsRoute } from './call-applications/fetch-call-applications'
 import { fetchMyCallApplicationsRoute } from './call-applications/fetch-my-call-applications'
-import { getMeRoute } from './auth/get-me'
-import { logoutRoute } from './auth/logout'
-import { requestAccessCodeRoute } from './auth/request-access-code'
 import { closeCallRoute } from './calls/close-call'
 import { fetchCallsRoute } from './calls/fetch-calls'
 import { fetchMyCallsRoute } from './calls/fetch-my-calls'
 import { getCallByIdRoute } from './calls/get-call-by-id'
 import { registerCallRoute } from './calls/register-call'
 import { updateCallRoute } from './calls/update-call'
+import { getCurationRoute } from './curation/get-curation'
 import { createEventRoute } from './events/create-event'
 import { editEventNameRoute } from './events/edit-event-name'
 import { fetchApprovedParticipantsRoute } from './events/fetch-approved-participants'
@@ -53,6 +54,8 @@ import { rejectInstitutionMembershipRequestRoute } from './institutions-membersh
 import { requestInstitutionMembershipRoute } from './institutions-membership/request-institution-membership'
 import { updateInstitutionMemberRoleRoute } from './institutions-membership/update-institution-member-role'
 import { updateInstitutionMemberStatusRoute } from './institutions-membership/update-institution-member-status'
+import { getMyPointsBalanceRoute } from './points/get-my-points-balance'
+import { listMyPointTransactionsRoute } from './points/list-my-point-transactions'
 import { deactivatePreferenceTagRoute } from './preference-tags/deactivate-preference-tag'
 import { fetchUserPreferenceTagsRoute } from './preference-tags/fetch-user-preference-tags'
 import { registerPreferenceTagRoute } from './preference-tags/register-preference-tag'
@@ -91,7 +94,6 @@ import { deleteUserAccountRoute } from './users/delete-user-account'
 import { exportUserDataRoute } from './users/export-user-data'
 import { findUserByIdRoute } from './users/find-user-by-id'
 import { registerUserRoute } from './users/register-user'
-import { getCurationRoute } from './curation/get-curation'
 
 /**
  * Routes prefix: /api/v1
@@ -251,6 +253,12 @@ export async function routes(app: FastifyInstance) {
   /** Curation routes */
   /** GET /curation */
   await app.register(getCurationRoute)
+
+  /** Points routes */
+  /** GET /points/me */
+  await app.register(getMyPointsBalanceRoute)
+  /** GET /points/me/transactions */
+  await app.register(listMyPointTransactionsRoute)
 
   /** Institutions routes */
   /** POST /institutions */
