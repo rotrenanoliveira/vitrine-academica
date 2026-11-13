@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { LogoutButton } from '@/components/auth/logout-button'
+import { MySubscriptionsList } from '@/components/newsletter/my-subscriptions-list'
 import { FormRegisterPreferenceTags } from '@/components/preference-tag/form-register-preference-tags'
 import { Button } from '@/components/ui/button'
 import { DeleteUserAccountButton } from '@/components/user/delete-user-account-button'
@@ -48,6 +49,14 @@ export default async function AccountPage() {
             <LogoutButton />
           </div>
         </div>
+
+        <section className="space-y-4 border-t border-border pt-6">
+          <h2 className="font-heading text-xl font-semibold">Autores que acompanho</h2>
+          <p className="text-sm text-muted-foreground">
+            Receba um e-mail quando estes autores publicarem novos projetos.
+          </p>
+          <MySubscriptionsList />
+        </section>
 
         <section className="space-y-4 border-t border-border pt-6">
           <h2 className="font-heading text-xl font-semibold">Tags preferidas</h2>

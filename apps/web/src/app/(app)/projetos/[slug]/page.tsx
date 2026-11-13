@@ -119,6 +119,11 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             <p className="text-xs text-muted-foreground">
               Publicado em {new Date(project.createdAt).toLocaleString('pt-BR')}
             </p>
+            <p className="text-sm text-muted-foreground">
+              <Link href={`/p/${project.authorId}`} className="underline-offset-4 hover:underline">
+                Ver perfil do autor
+              </Link>
+            </p>
           </div>
 
           {project.status === 'PUBLISHED' && (
