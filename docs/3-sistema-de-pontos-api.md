@@ -102,6 +102,8 @@ Resposta 200:
 
 O e-mail de quem promoveu nunca é exposto.
 
+Se quem promoveu excluir a conta, a promoção continua na lista até o fim da validade, e `promoter.name` vem com o nome anonimizado pela exclusão de conta. Os pontos já foram debitados e não voltam. O front deve esperar que esse nome possa vir anonimizado.
+
 ## Campo `featured` nos projetos
 
 Três rotas devolvem `featured` (booleano) em cada projeto: `GET /projects/:projectId` (no objeto `project`), `GET /projects/published` e `GET /users/:userId/projects-of-interest` (a home personalizada), ambas em `projects`.

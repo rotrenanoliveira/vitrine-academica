@@ -18,7 +18,7 @@ export async function promoteProjectRoute(app: FastifyInstance) {
         tags: ['points'],
         summary: 'Promover projeto',
         description:
-          'Promove um projeto publicado de outra pessoa gastando pontos do usuário autenticado. O débito e a promoção são gravados juntos. A mesma pessoa não pode ter duas promoções ativas no mesmo projeto',
+          'Promove um projeto publicado de outra pessoa gastando pontos do usuário autenticado. O débito e a promoção são gravados juntos. A mesma pessoa não pode ter duas promoções ativas no mesmo projeto. Erros: 400 (projeto não publicado), 403 (próprio projeto ou usuário inativo), 404 (projeto inexistente), 409 (saldo insuficiente ou promoção ativa duplicada)',
         params: z.object({
           projectId: z.uuid().describe('O ID do projeto'),
         }),
