@@ -2,12 +2,12 @@
 
 import { cache } from 'react'
 import { fetcher } from '@/utils/fetcher'
-import type { Project } from '@/utils/type'
+import type { ProjectListItem } from '@/utils/type'
 import { api } from '../../api-client'
 
 export async function fetchApprovedParticipants(eventId: string) {
   const [response, responseError] = await fetcher(
-    api.get<{ projects: Project[] }>(`api/v1/events/${eventId}/participants`, { cache: 'no-store' }).json(),
+    api.get<{ projects: ProjectListItem[] }>(`api/v1/events/${eventId}/participants`, { cache: 'no-store' }).json(),
   )
 
   if (responseError) throw new Error(responseError.message)
