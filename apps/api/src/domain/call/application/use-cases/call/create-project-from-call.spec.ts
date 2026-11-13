@@ -4,6 +4,7 @@ import { makeCallSkill } from '@tests/factories/make-call-skill'
 import { makeProject } from '@tests/factories/make-project'
 import { InMemoryAuditLogsRepository } from '@tests/repositories/in-memory-audit-logs-repository'
 import { InMemoryCallApplicationsRepository } from '@tests/repositories/in-memory-call-applications-repository'
+import { InMemoryCallProjectCreationRepository } from '@tests/repositories/in-memory-call-project-creation-repository'
 import { InMemoryCallSkillsRepository } from '@tests/repositories/in-memory-call-skills-repository'
 import { InMemoryCallsRepository } from '@tests/repositories/in-memory-calls-repository'
 import { InMemoryProjectMembersRepository } from '@tests/repositories/in-memory-project-members-repository'
@@ -24,6 +25,7 @@ let callApplicationsRepository: InMemoryCallApplicationsRepository
 let projectsRepository: InMemoryProjectsRepository
 let projectTagsRepository: InMemoryProjectTagsRepository
 let projectMembersRepository: InMemoryProjectMembersRepository
+let callProjectCreationRepository: InMemoryCallProjectCreationRepository
 let auditLogsRepository: InMemoryAuditLogsRepository
 let sut: CreateProjectFromCallUseCase
 
@@ -57,16 +59,20 @@ describe('(UC) - Create Project From Call', () => {
     projectsRepository = new InMemoryProjectsRepository()
     projectTagsRepository = new InMemoryProjectTagsRepository()
     projectMembersRepository = new InMemoryProjectMembersRepository()
+    callProjectCreationRepository = new InMemoryCallProjectCreationRepository(
+      callsRepository,
+      projectsRepository,
+      projectTagsRepository,
+      projectMembersRepository,
+    )
     auditLogsRepository = new InMemoryAuditLogsRepository()
     const registerLog = new RegisterLogUseCase(auditLogsRepository)
 
     sut = new CreateProjectFromCallUseCase(
-      callsRepository,
       callSkillsRepository,
       callApplicationsRepository,
       projectsRepository,
-      projectTagsRepository,
-      projectMembersRepository,
+      callProjectCreationRepository,
       registerLog,
     )
   })
@@ -214,5 +220,36 @@ describe('(UC) - Create Project From Call', () => {
     expect(auditLogsRepository.items).toHaveLength(1)
     expect(auditLogsRepository.items[0].action).toBe(AuditLogAction.CREATE)
     expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.SUCCESS)
+  })
+
+  it('should not create anything nor register a log when saving the project fails', async () => {
+    const call = addCall()
+    addSkill(call)
+    addApplication(call, CallApplicationStatus.APPROVED)
+    vi.spyOn(callProjectCreationRepository, 'createProjectFromCall').mockRejectedValueOnce(new Error('falha de teste'))
+
+    await expect(sut.execute({ call, actorId: call.authorId.toString() })).rejects.toThrow('falha de teste')
+
+    expect(projectsRepository.items).toHaveLength(0)
+    expect(projectTagsRepository.items).toHaveLength(0)
+    expect(projectMembersRepository.items).toHaveLength(0)
+    expect(auditLogsRepository.items).toHaveLength(0)
+  })
+
+  it('should create the project on the next attempt after a failure', async () => {
+    const call = addCall()
+    addSkill(call)
+    const approved = addApplication(call, CallApplicationStatus.APPROVED)
+    vi.spyOn(callProjectCreationRepository, 'createProjectFromCall').mockRejectedValueOnce(new Error('falha de teste'))
+
+    await expect(sut.execute({ call, actorId: call.authorId.toString() })).rejects.toThrow('falha de teste')
+    const result = await sut.execute({ call, actorId: call.authorId.toString() })
+
+    expect(result.isRight()).toBeTruthy()
+    expect(projectsRepository.items).toHaveLength(1)
+    expect(projectTagsRepository.items).toHaveLength(1)
+    expect(projectMembersRepository.items).toHaveLength(1)
+    expect(projectMembersRepository.items[0].userId.toString()).toBe(approved.toString())
+    expect(auditLogsRepository.items).toHaveLength(1)
   })
 })

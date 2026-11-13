@@ -7,12 +7,11 @@ import { env } from '@/environment-variables'
 import { db } from '@/infra/database/drizzle/client'
 import { DrizzleAuditLogsRepository } from '@/infra/database/repositories/drizzle-audit-logs-repository'
 import { DrizzleCallApplicationsRepository } from '@/infra/database/repositories/drizzle-call-applications-repository'
+import { DrizzleCallProjectCreationRepository } from '@/infra/database/repositories/drizzle-call-project-creation-repository'
 import { DrizzleCallSkillsRepository } from '@/infra/database/repositories/drizzle-call-skills-repository'
 import { DrizzleCallsRepository } from '@/infra/database/repositories/drizzle-calls-repository'
 import { DrizzleEventsRepository } from '@/infra/database/repositories/drizzle-events-repository'
-import { DrizzleProjectMembersRepository } from '@/infra/database/repositories/drizzle-project-members-repository'
 import { DrizzleProjectScheduledRepository } from '@/infra/database/repositories/drizzle-project-scheduled-repository'
-import { DrizzleProjectTagsRepository } from '@/infra/database/repositories/drizzle-project-tags-repository'
 import { DrizzleProjectsRepository } from '@/infra/database/repositories/drizzle-projects-repository'
 import { startAdvanceEventPhaseJob } from '../jobs/advance-event-phase-job'
 import { startCloseExpiredCallsJob } from '../jobs/close-expired-calls-job'
@@ -52,12 +51,10 @@ function startScheduler() {
   const callsRepository = new DrizzleCallsRepository(db)
 
   const createProjectFromCall = new CreateProjectFromCallUseCase(
-    callsRepository,
     new DrizzleCallSkillsRepository(db),
     new DrizzleCallApplicationsRepository(db),
     new DrizzleProjectsRepository(db),
-    new DrizzleProjectTagsRepository(db),
-    new DrizzleProjectMembersRepository(db),
+    new DrizzleCallProjectCreationRepository(db),
     registerLog,
   )
 

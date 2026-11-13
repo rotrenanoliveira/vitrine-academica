@@ -4,6 +4,7 @@ import { makeCallSkill } from '@tests/factories/make-call-skill'
 import { makeProject } from '@tests/factories/make-project'
 import { InMemoryAuditLogsRepository } from '@tests/repositories/in-memory-audit-logs-repository'
 import { InMemoryCallApplicationsRepository } from '@tests/repositories/in-memory-call-applications-repository'
+import { InMemoryCallProjectCreationRepository } from '@tests/repositories/in-memory-call-project-creation-repository'
 import { InMemoryCallSkillsRepository } from '@tests/repositories/in-memory-call-skills-repository'
 import { InMemoryCallsRepository } from '@tests/repositories/in-memory-calls-repository'
 import { InMemoryProjectMembersRepository } from '@tests/repositories/in-memory-project-members-repository'
@@ -29,6 +30,7 @@ let projectsRepository: InMemoryProjectsRepository
 let projectTagsRepository: InMemoryProjectTagsRepository
 let projectMembersRepository: InMemoryProjectMembersRepository
 let auditLogsRepository: InMemoryAuditLogsRepository
+let callProjectCreationRepository: InMemoryCallProjectCreationRepository
 let sut: CloseCallUseCase
 
 describe('(UC) - Close Call', () => {
@@ -41,13 +43,17 @@ describe('(UC) - Close Call', () => {
     projectMembersRepository = new InMemoryProjectMembersRepository()
     auditLogsRepository = new InMemoryAuditLogsRepository()
     const registerLog = new RegisterLogUseCase(auditLogsRepository)
-    const createProjectFromCall = new CreateProjectFromCallUseCase(
+    callProjectCreationRepository = new InMemoryCallProjectCreationRepository(
       callsRepository,
-      callSkillsRepository,
-      callApplicationsRepository,
       projectsRepository,
       projectTagsRepository,
       projectMembersRepository,
+    )
+    const createProjectFromCall = new CreateProjectFromCallUseCase(
+      callSkillsRepository,
+      callApplicationsRepository,
+      projectsRepository,
+      callProjectCreationRepository,
       registerLog,
     )
     sut = new CloseCallUseCase(callsRepository, createProjectFromCall, registerLog)
@@ -183,5 +189,19 @@ describe('(UC) - Close Call', () => {
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(InvalidCallStatusError)
     }
+  })
+  it('should keep the call open and create nothing when the project creation fails', async () => {
+    const { call } = makeCall()
+    callsRepository.items.push(call)
+    vi.spyOn(callProjectCreationRepository, 'createProjectFromCall').mockRejectedValueOnce(new Error('falha de teste'))
+
+    await expect(sut.execute({ callId: call.id.toString(), authorId: call.authorId.toString() })).rejects.toThrow(
+      'falha de teste',
+    )
+
+    expect(call.status).toBe(CallStatus.OPEN)
+    expect(projectsRepository.items).toHaveLength(0)
+    expect(projectTagsRepository.items).toHaveLength(0)
+    expect(projectMembersRepository.items).toHaveLength(0)
   })
 })

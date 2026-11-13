@@ -3,6 +3,7 @@ import { makeCallApplication } from '@tests/factories/make-call-application'
 import { makeCallSkill } from '@tests/factories/make-call-skill'
 import { InMemoryAuditLogsRepository } from '@tests/repositories/in-memory-audit-logs-repository'
 import { InMemoryCallApplicationsRepository } from '@tests/repositories/in-memory-call-applications-repository'
+import { InMemoryCallProjectCreationRepository } from '@tests/repositories/in-memory-call-project-creation-repository'
 import { InMemoryCallSkillsRepository } from '@tests/repositories/in-memory-call-skills-repository'
 import { InMemoryCallsRepository } from '@tests/repositories/in-memory-calls-repository'
 import { InMemoryProjectMembersRepository } from '@tests/repositories/in-memory-project-members-repository'
@@ -25,6 +26,7 @@ let projectsRepository: InMemoryProjectsRepository
 let projectTagsRepository: InMemoryProjectTagsRepository
 let projectMembersRepository: InMemoryProjectMembersRepository
 let auditLogsRepository: InMemoryAuditLogsRepository
+let callProjectCreationRepository: InMemoryCallProjectCreationRepository
 let sut: CloseExpiredCallsUseCase
 
 const now = new Date('2026-09-09T10:00:00.000Z')
@@ -46,13 +48,17 @@ describe('(UC) - Close Expired Calls', () => {
     projectMembersRepository = new InMemoryProjectMembersRepository()
     auditLogsRepository = new InMemoryAuditLogsRepository()
     const registerLog = new RegisterLogUseCase(auditLogsRepository)
-    const createProjectFromCall = new CreateProjectFromCallUseCase(
+    callProjectCreationRepository = new InMemoryCallProjectCreationRepository(
       callsRepository,
-      callSkillsRepository,
-      callApplicationsRepository,
       projectsRepository,
       projectTagsRepository,
       projectMembersRepository,
+    )
+    const createProjectFromCall = new CreateProjectFromCallUseCase(
+      callSkillsRepository,
+      callApplicationsRepository,
+      projectsRepository,
+      callProjectCreationRepository,
       registerLog,
     )
 
@@ -165,10 +171,10 @@ describe('(UC) - Close Expired Calls', () => {
     expect(auditLogsRepository.items.every((log) => log.status === AuditLogStatus.SUCCESS)).toBe(true)
   })
 
-  it('should keep closing the other calls when one of them fails and leave the failed one open', async () => {
+  it('should keep closing the other calls when one of them fails and leave the failed one open without leftovers', async () => {
     const failing = addCall(new Date('2026-09-07T12:00:00.000Z'))
     const healthy = addCall(new Date('2026-09-08T12:00:00.000Z'))
-    vi.spyOn(projectsRepository, 'create').mockRejectedValueOnce(new Error('falha de teste'))
+    vi.spyOn(callProjectCreationRepository, 'createProjectFromCall').mockRejectedValueOnce(new Error('falha de teste'))
 
     const result = await sut.execute({ date: now })
 
@@ -180,13 +186,15 @@ describe('(UC) - Close Expired Calls', () => {
     }
     expect(failing.status).toBe(CallStatus.OPEN)
     expect(healthy.status).toBe(CallStatus.CLOSED)
+    expect(projectsRepository.items).toHaveLength(1)
+    expect(projectsRepository.items[0].title).toBe(healthy.title)
     expect(auditLogsRepository.items.filter((log) => log.status === AuditLogStatus.FAILURE)).toHaveLength(1)
   })
 
   it('should close the failed call on the next run', async () => {
     const failing = addCall(new Date('2026-09-07T12:00:00.000Z'))
     addCall(new Date('2026-09-08T12:00:00.000Z'))
-    vi.spyOn(projectsRepository, 'create').mockRejectedValueOnce(new Error('falha de teste'))
+    vi.spyOn(callProjectCreationRepository, 'createProjectFromCall').mockRejectedValueOnce(new Error('falha de teste'))
 
     await sut.execute({ date: now })
     const result = await sut.execute({ date: now })

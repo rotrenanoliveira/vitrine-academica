@@ -1,8 +1,6 @@
 import { type Either, right } from '@/core/either'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
 import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
-import type { ProjectMembersRepository } from '@/domain/project/application/repositories/project-members-repository'
-import type { ProjectTagsRepository } from '@/domain/project/application/repositories/project-tags-repository'
 import type { ProjectsRepository } from '@/domain/project/application/repositories/projects-repositories'
 import { Project, ProjectStatus } from '@/domain/project/enterprise/entities/project'
 import { ProjectMember, ProjectMemberStatus } from '@/domain/project/enterprise/entities/project-member'
@@ -10,8 +8,8 @@ import { ProjectTag } from '@/domain/project/enterprise/entities/project-tag'
 import type { Call } from '../../../enterprise/entities/call'
 import { CallApplicationStatus } from '../../../enterprise/entities/call-application'
 import type { CallApplicationsRepository } from '../../repositories/call-applications-repository'
+import type { CallProjectCreationRepository } from '../../repositories/call-project-creation-repository'
 import type { CallSkillsRepository } from '../../repositories/call-skills-repository'
-import type { CallsRepository } from '../../repositories/calls-repository'
 
 interface CreateProjectFromCallUseCaseRequest {
   call: Call
@@ -22,12 +20,10 @@ type CreateProjectFromCallUseCaseResponse = Either<never, { project: Project }>
 
 export class CreateProjectFromCallUseCase {
   constructor(
-    private readonly callsRepository: CallsRepository,
     private readonly callSkillsRepository: CallSkillsRepository,
     private readonly callApplicationsRepository: CallApplicationsRepository,
     private readonly projectsRepository: ProjectsRepository,
-    private readonly projectTagsRepository: ProjectTagsRepository,
-    private readonly projectMembersRepository: ProjectMembersRepository,
+    private readonly callProjectCreationRepository: CallProjectCreationRepository,
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
@@ -58,24 +54,19 @@ export class CreateProjectFromCallUseCase {
       tags: [...tagIds.keys()],
     })
 
-    await this.projectsRepository.create(project)
+    const projectTags = [...tagIds.values()].map((tagId) => ProjectTag.create({ projectId: project.id, tagId }))
 
-    for (const tagId of tagIds.values()) {
-      await this.projectTagsRepository.create(ProjectTag.create({ projectId: project.id, tagId }))
-    }
-
-    for (const application of approvedApplications) {
-      await this.projectMembersRepository.create(
-        ProjectMember.create({
-          projectId: project.id,
-          userId: application.applicantId,
-          status: ProjectMemberStatus.ACCEPTED,
-        }),
-      )
-    }
+    const projectMembers = approvedApplications.map((application) =>
+      ProjectMember.create({
+        projectId: project.id,
+        userId: application.applicantId,
+        status: ProjectMemberStatus.ACCEPTED,
+      }),
+    )
 
     call.linkProject(project.id)
-    await this.callsRepository.save(call)
+
+    await this.callProjectCreationRepository.createProjectFromCall({ project, projectTags, projectMembers, call })
 
     await this.registerLog.execute({
       actorId,
