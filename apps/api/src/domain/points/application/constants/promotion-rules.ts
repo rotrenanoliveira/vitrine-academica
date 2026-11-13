@@ -1,0 +1,3 @@
+export const PROMOTION_COST = 1000
+
+export const PROMOTION_DURATION_DAYS = 7

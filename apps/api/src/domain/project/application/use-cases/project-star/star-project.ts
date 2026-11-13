@@ -5,6 +5,7 @@ import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entiti
 import type { UsersRepository } from '@/domain/identity/application/repositories/users-repository'
 import { UserStatus } from '@/domain/identity/enterprise/entities/user'
 import type { InstitutionMembersRepository } from '@/domain/institution/application/repositories/institution-members-repository'
+import type { GrantStarPointsUseCase } from '@/domain/points/application/use-cases/point-transaction/grant-star-points'
 import { ProjectStatus } from '../../../enterprise/entities/project'
 import { ProjectStar } from '../../../enterprise/entities/project-star'
 import { CannotRateOwnProjectError } from '../../_errors/cannot-rate-own-project-error'
@@ -41,6 +42,7 @@ export class StarProjectUseCase {
     private readonly projectStarsRepository: ProjectStarsRepository,
     private readonly usersRepository: UsersRepository,
     private readonly institutionMembersRepository: InstitutionMembersRepository,
+    private readonly grantStarPoints: GrantStarPointsUseCase,
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
@@ -145,7 +147,11 @@ export class StarProjectUseCase {
       weight,
     })
 
-    await this.projectStarsRepository.create(projectStar)
+    await this.grantStarPoints.execute({
+      projectStar,
+      authorId: project.author.toString(),
+      sessionId,
+    })
 
     await this.log({
       actorId: userId,
