@@ -72,9 +72,13 @@ describe('(E2E) - GET /api/v1/calls/:callId', () => {
     })
   })
 
-  it('should not be able to get a call without authentication', async () => {
-    const response = await request(app.server).get(`/api/v1/calls/${new UniqueEntityId().toString()}`)
+  it('should be able to get a call without authentication', async () => {
+    const { user: author } = await makeUserOnDatabase()
+    const { call } = await makeCallOnDatabase({ authorId: author.id })
 
-    expect(response.status).toBe(401)
+    const response = await request(app.server).get(`/api/v1/calls/${call.id.toString()}`)
+
+    expect(response.status).toBe(200)
+    expect(response.body.call.id).toBe(call.id.toString())
   })
 })
