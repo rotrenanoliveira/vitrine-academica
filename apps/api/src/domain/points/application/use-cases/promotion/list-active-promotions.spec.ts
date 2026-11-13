@@ -5,6 +5,7 @@ import { InMemoryPointTransactionsRepository } from '@tests/repositories/in-memo
 import { InMemoryProjectsRepository } from '@tests/repositories/in-memory-projects-repository'
 import { InMemoryPromotionsRepository } from '@tests/repositories/in-memory-promotions-repository'
 import { InMemoryUsersRepository } from '@tests/repositories/in-memory-users-repository'
+import { UserStatus } from '@/domain/identity/enterprise/entities/user'
 import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
 import { type PromotionProps, PromotionStatus } from '../../../enterprise/entities/promotion'
 import { ListActivePromotionsUseCase } from './list-active-promotions'
@@ -82,7 +83,19 @@ describe('(UC) - List Active Promotions', () => {
 
     expect(result.value.items).toEqual([])
   })
+  it('should keep listing an active promotion whose promoter has deleted the account', async () => {
+    const { user, promotion } = setupPromotion()
 
+    user.name = 'Conta anonimizada'
+    user.status = UserStatus.DELETED
+
+    const result = await sut.execute()
+
+    expect(result.value.items).toHaveLength(1)
+    expect(result.value.items[0].promotion.id.toString()).toBe(promotion.id.toString())
+    expect(result.value.items[0].promoter.status).toBe(UserStatus.DELETED)
+    expect(result.value.items[0].promoter.name).toBe('Conta anonimizada')
+  })
   it('should list the newest promotions first', async () => {
     const older = setupPromotion({ createdAt: new Date(Date.now() - 2 * DAY_IN_MS) })
     const newer = setupPromotion({ createdAt: new Date(Date.now() - DAY_IN_MS) })

@@ -5,6 +5,7 @@ import { makeProjectOnDatabase } from '@tests/factories/make-project'
 import { makePromotionOnDatabase } from '@tests/factories/make-promotion'
 import { makeUserOnDatabase } from '@tests/factories/make-user'
 import request from 'supertest'
+import { UserStatus } from '@/domain/identity/enterprise/entities/user'
 import { PromotionStatus } from '@/domain/points/enterprise/entities/promotion'
 import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
 
@@ -134,6 +135,26 @@ describe('(E2E) - GET /api/v1/promotions/active', () => {
         (entry: { promotion: { id: string } }) => entry.promotion.id === promotion.id.toString(),
       ),
     ).toBe(false)
+  })
+
+  it('should keep listing an active promotion whose promoter has deleted the account', async () => {
+    const { accessToken } = await authenticateUser()
+    const { user: author } = await makeUserOnDatabase()
+    const { user: promoter } = await makeUserOnDatabase({
+      name: 'Conta anonimizada',
+      status: UserStatus.DELETED,
+    })
+    const { project } = await makeProjectOnDatabase({ author: author.id, status: ProjectStatus.PUBLISHED })
+    const { promotion } = await makePromotionOnDatabase({ projectId: project.id, promoterId: promoter.id })
+
+    const response = await listActive(accessToken)
+
+    const item = response.body.items.find(
+      (entry: { promotion: { id: string } }) => entry.promotion.id === promotion.id.toString(),
+    )
+
+    expect(response.status).toBe(200)
+    expect(item.promoter).toEqual({ id: promoter.id.toString(), name: 'Conta anonimizada' })
   })
 
   it('should list the newest promotions first', async () => {
