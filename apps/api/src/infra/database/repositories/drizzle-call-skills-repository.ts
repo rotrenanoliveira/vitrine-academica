@@ -30,6 +30,16 @@ export class DrizzleCallSkillsRepository implements CallSkillsRepository {
     return rows.map(DrizzleCallSkillMapper.toDomain)
   }
 
+  async findManyByTagIds(tagIds: string[]): Promise<CallSkill[]> {
+    if (tagIds.length === 0) {
+      return []
+    }
+
+    const rows = await this.db.select().from(callSkills).where(inArray(callSkills.tagId, tagIds))
+
+    return rows.map(DrizzleCallSkillMapper.toDomain)
+  }
+
   async createMany(skills: CallSkill[]): Promise<void> {
     if (skills.length === 0) {
       return

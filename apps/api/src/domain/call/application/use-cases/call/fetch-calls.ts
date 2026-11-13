@@ -7,7 +7,7 @@ import type { CallSkillsRepository } from '../../repositories/call-skills-reposi
 import type { CallsRepository } from '../../repositories/calls-repository'
 
 interface FetchCallsUseCaseRequest {
-  tagId?: string
+  tagIds?: string[]
   date?: Date
 }
 
@@ -20,17 +20,18 @@ export class FetchCallsUseCase {
     private readonly tagsRepository: TagsRepository,
   ) {}
 
-  async execute({ tagId, date = new Date() }: FetchCallsUseCaseRequest = {}): Promise<FetchCallsUseCaseResponse> {
+  async execute({ tagIds, date = new Date() }: FetchCallsUseCaseRequest = {}): Promise<FetchCallsUseCaseResponse> {
     let calls: Call[]
 
-    if (tagId) {
-      const tag = await this.tagsRepository.findById(tagId)
+    if (tagIds && tagIds.length > 0) {
+      const uniqueTagIds = [...new Set(tagIds)]
+      const tags = await this.tagsRepository.findManyByIds(uniqueTagIds)
 
-      if (!tag) {
+      if (tags.length !== uniqueTagIds.length) {
         return left(new TagNotFoundError())
       }
 
-      const taggedSkills = await this.callSkillsRepository.findManyByTagId(tagId)
+      const taggedSkills = await this.callSkillsRepository.findManyByTagIds(uniqueTagIds)
       const callIds = [...new Set(taggedSkills.map((skill) => skill.callId.toString()))]
       const taggedCalls = await this.callsRepository.findManyByIds(callIds)
 

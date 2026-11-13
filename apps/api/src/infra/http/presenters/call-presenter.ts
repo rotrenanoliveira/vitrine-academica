@@ -31,4 +31,17 @@ export class CallPresenter {
       skills: skills.map(CallPresenter.skillToHTTP),
     }
   }
+
+  static toHTTPListItem(call: Call, skills: string[], projectSlug: string | null) {
+    return {
+      id: call.id.toString(),
+      authorId: call.authorId.toString(),
+      title: call.title,
+      description: call.description,
+      applicationDeadline: call.applicationDeadline.toISOString(),
+      status: call.status,
+      projectSlug,
+      skills,
+    }
+  }
 }
