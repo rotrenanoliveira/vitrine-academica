@@ -7,9 +7,11 @@ import { makeAttachmentOnDatabase, makeAttachmentOnStorage } from '@tests/factor
 import { makeInstitutionOnDatabase } from '@tests/factories/make-institution'
 import { makeInstitutionMemberOnDatabase } from '@tests/factories/make-institution-member'
 import { makeInstitutionMembershipRequestOnDatabase } from '@tests/factories/make-institution-membership-request'
+import { makePointTransactionOnDatabase } from '@tests/factories/make-point-transaction'
 import { makePreferenceTagOnDatabase } from '@tests/factories/make-preference-tag'
 import { makeProjectOnDatabase } from '@tests/factories/make-project'
 import { makeProjectScheduledOnDatabase } from '@tests/factories/make-project-scheduled'
+import { makeProjectStarOnDatabase } from '@tests/factories/make-project-star'
 import { makeProjectTagOnDatabase } from '@tests/factories/make-project-tag'
 import { makeRatingCriterionOnDatabase } from '@tests/factories/make-rating-criterion'
 import { makeSessionOnDatabase } from '@tests/factories/make-session'
@@ -27,6 +29,7 @@ import {
   InstitutionMembershipRequestStatus,
 } from '@/domain/institution/enterprise/entities/institution-membership-request'
 import { InstitutionOrigin, InstitutionType } from '@/domain/institution/enterprise/entities/institutions'
+import { PointTransactionReason, PointTransactionType } from '@/domain/points/enterprise/entities/point-transaction'
 import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
 import { Attachment } from '@/domain/storage/enterprise/entities/attachment'
 import { PreferenceTagStatus } from '@/domain/tag/enterprise/entities/preference-tag'
@@ -464,8 +467,50 @@ async function seed() {
   console.log(`Membership requests: ${requests.length}`)
   console.log(`Projects: ${projects.length}`)
   console.log(`Project tags: ${projectTags.length}`)
+
+  console.log('\nCriando estrelas e pontos...')
+
+  const starSeeds = [
+    { project: projects[0], starrer: users[1], weight: 5, daysAgo: 4 },
+    { project: projects[0], starrer: users[3], weight: 1, daysAgo: 3 },
+    { project: projects[1], starrer: users[2], weight: 5, daysAgo: 2 },
+    { project: projects[1], starrer: users[4], weight: 1, daysAgo: 1 },
+  ]
+
+  for (const starSeed of starSeeds) {
+    const ratedAt = new Date(Date.now() - starSeed.daysAgo * 24 * 60 * 60 * 1000)
+
+    const { projectStar } = await makeProjectStarOnDatabase({
+      projectId: starSeed.project?.id,
+      userId: starSeed.starrer?.id,
+      weight: starSeed.weight,
+      ratedAt,
+      createdAt: ratedAt,
+    })
+
+    await makePointTransactionOnDatabase({
+      userId: starSeed.project?.author,
+      type: PointTransactionType.CREDIT,
+      amount: projectStar.weight,
+      reason: PointTransactionReason.STAR_RECEIVED,
+      referenceId: projectStar.id,
+      createdAt: ratedAt,
+    })
+  }
+
+  await makePointTransactionOnDatabase({
+    userId: users[0]?.id,
+    type: PointTransactionType.CREDIT,
+    amount: 1000,
+    reason: PointTransactionReason.STAR_RECEIVED,
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+  })
+
+  console.log(`  ✓ ${starSeeds.length} estrelas, ${starSeeds.length + 1} transações de pontos`)
   console.log(`Preference tags: ${preferenceTags.length}`)
   console.log(`Project scheduled: ${schedules.length}`)
+  console.log(`Project stars: ${starSeeds.length}`)
+  console.log(`Point transactions: ${starSeeds.length + 1}`)
   console.log(`Sessions: ${sessions.length}`)
   console.log(`Access codes: ${accessCodes.length}`)
   console.log('────────────────────────────────────')
