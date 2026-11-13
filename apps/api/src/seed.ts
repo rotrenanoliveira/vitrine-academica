@@ -13,6 +13,7 @@ import { makeProjectOnDatabase } from '@tests/factories/make-project'
 import { makeProjectScheduledOnDatabase } from '@tests/factories/make-project-scheduled'
 import { makeProjectStarOnDatabase } from '@tests/factories/make-project-star'
 import { makeProjectTagOnDatabase } from '@tests/factories/make-project-tag'
+import { makePromotionOnDatabase } from '@tests/factories/make-promotion'
 import { makeRatingCriterionOnDatabase } from '@tests/factories/make-rating-criterion'
 import { makeSessionOnDatabase } from '@tests/factories/make-session'
 import { makeTagOnDatabase } from '@tests/factories/make-tag'
@@ -29,6 +30,7 @@ import {
   InstitutionMembershipRequestStatus,
 } from '@/domain/institution/enterprise/entities/institution-membership-request'
 import { InstitutionOrigin, InstitutionType } from '@/domain/institution/enterprise/entities/institutions'
+import { PROMOTION_COST, PROMOTION_DURATION_DAYS } from '@/domain/points/application/constants/promotion-rules'
 import { PointTransactionReason, PointTransactionType } from '@/domain/points/enterprise/entities/point-transaction'
 import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
 import { Attachment } from '@/domain/storage/enterprise/entities/attachment'
@@ -501,16 +503,36 @@ async function seed() {
   await makePointTransactionOnDatabase({
     userId: users[0]?.id,
     type: PointTransactionType.CREDIT,
-    amount: 1000,
+    amount: PROMOTION_COST * 2,
     reason: PointTransactionReason.STAR_RECEIVED,
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
   })
 
-  console.log(`  ✓ ${starSeeds.length} estrelas, ${starSeeds.length + 1} transações de pontos`)
+  const promotionCreatedAt = new Date(Date.now() - 24 * 60 * 60 * 1000)
+
+  const { promotion } = await makePromotionOnDatabase({
+    projectId: projects[1]?.id,
+    promoterId: users[0]?.id,
+    cost: PROMOTION_COST,
+    createdAt: promotionCreatedAt,
+    expiresAt: new Date(promotionCreatedAt.getTime() + PROMOTION_DURATION_DAYS * 24 * 60 * 60 * 1000),
+  })
+
+  await makePointTransactionOnDatabase({
+    userId: users[0]?.id,
+    type: PointTransactionType.DEBIT,
+    amount: promotion.cost,
+    reason: PointTransactionReason.PROMOTION,
+    referenceId: promotion.id,
+    createdAt: promotionCreatedAt,
+  })
+
+  console.log(`  ✓ ${starSeeds.length} estrelas, ${starSeeds.length + 2} transações de pontos, 1 promoção`)
   console.log(`Preference tags: ${preferenceTags.length}`)
   console.log(`Project scheduled: ${schedules.length}`)
   console.log(`Project stars: ${starSeeds.length}`)
-  console.log(`Point transactions: ${starSeeds.length + 1}`)
+  console.log(`Point transactions: ${starSeeds.length + 2}`)
+  console.log('Promotions: 1')
   console.log(`Sessions: ${sessions.length}`)
   console.log(`Access codes: ${accessCodes.length}`)
   console.log('────────────────────────────────────')
