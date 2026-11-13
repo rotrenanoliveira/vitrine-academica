@@ -26,7 +26,8 @@ export async function actionSubscribeToAuthor(data: FormData) {
   }
 
   revalidatePath(`/p/${authorId}`)
-  revalidatePath('/conta')
+  revalidatePath('/me')
+  revalidatePath('/me/autores')
 
   return { success: true, message: 'Você agora acompanha este autor.' }
 }

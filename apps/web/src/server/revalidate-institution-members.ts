@@ -2,7 +2,8 @@ import { revalidatePath, updateTag } from 'next/cache'
 
 export function revalidateInstitutionMembers(slug?: string) {
   updateTag('institution-members')
-  revalidatePath('/instituicoes/minhas')
+  revalidatePath('/me')
+  revalidatePath('/me/instituicoes')
 
   if (slug) {
     revalidatePath(`/instituicoes/${slug}`)

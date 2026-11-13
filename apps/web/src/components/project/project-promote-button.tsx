@@ -90,7 +90,7 @@ export function ProjectPromoteButton({ projectId, projectSlug, disabled, classNa
               {!canAfford ? (
                 <p className="text-muted-foreground">
                   Saldo insuficiente.{' '}
-                  <Link href="/conta" className="underline underline-offset-4 hover:text-foreground">
+                  <Link href="/me/pontos" className="underline underline-offset-4 hover:text-foreground">
                     Ver como obter pontos
                   </Link>
                   .

@@ -54,7 +54,8 @@ export async function actionRateProjectByCriteria(data: FormData) {
   }
 
   revalidateProjects(projectSlug)
-  revalidatePath('/projetos/avaliados')
+  revalidatePath('/me')
+  revalidatePath('/me/avaliacoes')
 
   return { success: true, message: 'Avaliação docente salva.' }
 }

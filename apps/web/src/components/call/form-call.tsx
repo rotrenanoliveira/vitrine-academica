@@ -29,7 +29,7 @@ export function FormCall({ tags, call }: FormCallProps) {
   const [_, handleSubmit, isPending] = useFormState(call ? actionUpdateCall : actionRegisterCall, {
     onSuccess: (message) => {
       toast.success(message)
-      router.push(call ? `/chamados/${call.id}` : '/chamados/meus')
+      router.push(call ? `/chamados/${call.id}` : '/me/chamados')
       router.refresh()
     },
     onError: (message) => {

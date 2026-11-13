@@ -30,7 +30,8 @@ export async function actionUnsubscribeFromAuthor(data: FormData) {
   if (authorId) {
     revalidatePath(`/p/${authorId}`)
   }
-  revalidatePath('/conta')
+  revalidatePath('/me')
+  revalidatePath('/me/autores')
 
   return { success: true, message: 'Acompanhamento cancelado.' }
 }

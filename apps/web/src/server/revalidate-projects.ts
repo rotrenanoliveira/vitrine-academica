@@ -6,6 +6,8 @@ export function revalidateProjects(slug?: string) {
   revalidatePath('/projetos')
   revalidatePath('/projetos/promovidos')
   revalidatePath('/projetos/novo')
+  revalidatePath('/me')
+  revalidatePath('/me/projetos')
 
   if (slug) {
     revalidatePath(`/projetos/${slug}`)

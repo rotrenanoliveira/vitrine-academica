@@ -2,6 +2,7 @@
 
 import { Loading03Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -16,10 +17,13 @@ type ProjectInvitationActionsProps = {
 
 export function ProjectInvitationActions({ invitationId, projectId, projectSlug }: ProjectInvitationActionsProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
 
   const options = {
     onSuccess: (message?: string) => {
       toast.success(message)
+      void queryClient.invalidateQueries({ queryKey: ['me', 'invitations'] })
+      void queryClient.invalidateQueries({ queryKey: ['me', 'projects'] })
       router.refresh()
     },
     onError: (message: string) => {

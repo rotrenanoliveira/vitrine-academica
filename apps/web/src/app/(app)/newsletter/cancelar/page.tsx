@@ -30,8 +30,8 @@ export default async function NewsletterCancelPage({ searchParams }: PageProps) 
               O link de cancelamento está incompleto ou inválido. Use o link enviado no e-mail ou gerencie seus
               acompanhamentos na conta.
             </p>
-            <Button nativeButton={false} variant="outline" render={<Link href="/conta" />}>
-              Ir para minha conta
+            <Button nativeButton={false} variant="outline" render={<Link href="/me" />}>
+              Ir para meu perfil
             </Button>
           </div>
         )}

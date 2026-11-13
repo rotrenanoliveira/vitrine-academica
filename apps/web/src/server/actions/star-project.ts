@@ -29,7 +29,8 @@ export async function actionStarProject(data: FormData) {
   }
 
   revalidateProjects(projectSlug)
-  revalidatePath('/projetos/apoiados')
+  revalidatePath('/me')
+  revalidatePath('/me/pontos')
 
   return { success: true, message: 'Projeto apoiado com estrela.' }
 }

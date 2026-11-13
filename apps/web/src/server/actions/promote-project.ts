@@ -31,7 +31,8 @@ export async function actionPromoteProject(data: FormData) {
   revalidateProjects(projectSlug)
   revalidatePath('/')
   revalidatePath('/projetos/promovidos')
-  revalidatePath('/conta')
+  revalidatePath('/me')
+  revalidatePath('/me/pontos')
 
   return { success: true, message: 'Projeto promovido com sucesso.' }
 }
