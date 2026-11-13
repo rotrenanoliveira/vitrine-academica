@@ -222,11 +222,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
 
         {isOwner && (
           <div>
-            <Button
-              nativeButton={false}
-              variant="outline"
-              render={<Link href={`/projetos/${project.slug}/editar`} />}
-            >
+            <Button nativeButton={false} variant="outline" render={<Link href={`/projetos/${project.slug}/editar`} />}>
               Gerenciar / Editar
             </Button>
           </div>

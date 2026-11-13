@@ -197,8 +197,6 @@ describe('(E2E) - GET /api/v1/curation', () => {
     ])
   })
 
-
-
   it('curadoria: deve filtrar por título', async () => {
     const { project: match } = await createProject({ title: 'Robótica Avançada' })
     const { project: other } = await createProject({ title: 'História Medieval' })

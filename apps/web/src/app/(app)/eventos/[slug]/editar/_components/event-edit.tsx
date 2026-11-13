@@ -28,7 +28,6 @@ function EventEditSkeleton() {
       <Skeleton className="h-28 w-full max-w-lg rounded-none" />
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 3 }, (_, index) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholders
           <Skeleton key={index} className="h-56 w-full rounded-none bg-[#ebe6de]" />
         ))}
       </div>

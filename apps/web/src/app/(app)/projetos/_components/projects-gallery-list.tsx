@@ -11,7 +11,6 @@ function ProjectsGallerySkeleton() {
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
       {Array.from({ length: 6 }, (_, index) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: just for skeleton
         <div key={index} className="overflow-hidden bg-transparent p-0">
           <div className="p-2">
             <div className="border border-[#252422]/30 bg-[#e6e0d7] p-2 shadow-[5px_5px_0_rgba(37,36,34,0.08)]">

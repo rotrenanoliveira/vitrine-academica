@@ -14,7 +14,6 @@ function InstitutionEventsSkeleton() {
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
       {Array.from({ length: 6 }, (_, index) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: just for skeleton
         <Skeleton key={index} className="min-h-56 rounded-none bg-[#ebe6de]" />
       ))}
     </div>

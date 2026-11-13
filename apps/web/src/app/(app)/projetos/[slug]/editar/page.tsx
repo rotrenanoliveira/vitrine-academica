@@ -29,10 +29,7 @@ export default async function EditProjectPage({ params }: PageProps) {
   const { slug } = await params
   const user = await requireUser()
   const { project } = await getProjectBySlug(slug)
-  const [{ tags }, { members }] = await Promise.all([
-    getCachedTags(),
-    listProjectMembers({ projectId: project.id }),
-  ])
+  const [{ tags }, { members }] = await Promise.all([getCachedTags(), listProjectMembers({ projectId: project.id })])
 
   const isOwner = user.id === project.authorId
   const isCoauthor = members.some((member) => member.userId === user.id)

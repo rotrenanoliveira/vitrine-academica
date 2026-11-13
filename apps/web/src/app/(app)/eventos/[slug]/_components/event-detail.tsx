@@ -30,7 +30,6 @@ function EventDetailSkeleton() {
         <Skeleton className="h-6 w-32 rounded-none" />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }, (_, index) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholders
             <Skeleton key={index} className="min-h-56 rounded-none bg-[#ebe6de]" />
           ))}
         </div>
@@ -175,7 +174,6 @@ export function EventDetail({ slug, userId }: { slug: string; userId?: string })
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 3 }, (_, index) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholders
               <Skeleton key={index} className="min-h-56 rounded-none bg-[#ebe6de]" />
             ))}
           </div>

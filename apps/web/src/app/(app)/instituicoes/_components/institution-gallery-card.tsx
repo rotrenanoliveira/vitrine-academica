@@ -28,9 +28,7 @@ export function InstitutionGalleryCard({ institution }: InstitutionGalleryCardPr
           <h3 className="line-clamp-2 font-semibold text-xl leading-tight tracking-[-0.03em] group-hover:underline">
             {institution.name}
           </h3>
-          {description ? (
-            <p className="mt-3 line-clamp-4 text-sm leading-6 text-[#252422]/65">{description}</p>
-          ) : null}
+          {description ? <p className="mt-3 line-clamp-4 text-sm leading-6 text-[#252422]/65">{description}</p> : null}
           {institution.domain ? (
             <p className="mt-auto pt-5 text-sm text-[#252422]/55">{institution.domain}</p>
           ) : (

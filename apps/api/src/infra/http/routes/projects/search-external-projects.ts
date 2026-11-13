@@ -39,10 +39,7 @@ export async function searchExternalProjectsRoute(app: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      return searchExternalProjectsController.handle(
-        { query: request.query.q, page: request.query.page },
-        reply,
-      )
+      return searchExternalProjectsController.handle({ query: request.query.q, page: request.query.page }, reply)
     },
   )
 }

@@ -19,25 +19,16 @@ export function ExternalProjectGalleryCard({ project }: ExternalProjectGalleryCa
           {project.publishedIn || 'OpenAlex'}
         </p>
         <h3 className="line-clamp-2 font-semibold text-xl leading-tight tracking-[-0.03em]">
-          <a
-            href={project.externalUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:underline"
-          >
+          <a href={project.externalUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
             {project.title}
           </a>
         </h3>
-        {bodyText ? (
-          <p className="mt-3 line-clamp-4 text-sm leading-6 text-[#252422]/65">{bodyText}</p>
-        ) : null}
+        {bodyText ? <p className="mt-3 line-clamp-4 text-sm leading-6 text-[#252422]/65">{bodyText}</p> : null}
         <Button
           variant="link"
           nativeButton={false}
           className="mt-auto h-auto justify-between p-0 pt-5 group text-[#252422] no-underline hover:no-underline"
-          render={
-            <a href={project.externalUrl} target="_blank" rel="noopener noreferrer" />
-          }
+          render={<a href={project.externalUrl} target="_blank" rel="noopener noreferrer" />}
           aria-label={`Abrir trabalho ${project.title}`}
         >
           <span className="group-hover:underline">Abrir trabalho</span>

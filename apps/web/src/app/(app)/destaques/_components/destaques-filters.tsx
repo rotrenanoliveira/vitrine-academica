@@ -45,7 +45,12 @@ type DestaquesFiltersProps = {
   months: number
 }
 
-export function DestaquesFilters({ title: initialTitle, institutionId, tagIds, months: initialMonths }: DestaquesFiltersProps) {
+export function DestaquesFilters({
+  title: initialTitle,
+  institutionId,
+  tagIds,
+  months: initialMonths,
+}: DestaquesFiltersProps) {
   const router = useRouter()
   const pathname = usePathname()
   const tagsAnchor = useComboboxAnchor()
@@ -123,7 +128,9 @@ export function DestaquesFilters({ title: initialTitle, institutionId, tagIds, m
     router.push(pathname)
   }
 
-  const hasActiveFilters = Boolean(initialTitle || institutionId || (tagIds && tagIds.length > 0) || initialMonths !== 3)
+  const hasActiveFilters = Boolean(
+    initialTitle || institutionId || (tagIds && tagIds.length > 0) || initialMonths !== 3,
+  )
 
   return (
     <form method="get" onSubmit={handleSubmit} className="flex flex-wrap items-start gap-4">

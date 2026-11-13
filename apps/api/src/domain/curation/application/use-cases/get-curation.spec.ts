@@ -75,8 +75,6 @@ describe('(UC) - Get Curation', () => {
     }
   })
 
-
-
   it('deve usar 3 meses como período padrão', async () => {
     await sut.execute({ now })
 

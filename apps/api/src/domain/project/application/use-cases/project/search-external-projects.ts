@@ -21,10 +21,7 @@ type SearchExternalProjectsResponse = Either<
 export class SearchExternalProjectsUseCase {
   constructor(private externalProjectsSearch: ExternalProjectsSearch) {}
 
-  async execute({
-    query,
-    page = 1,
-  }: SearchExternalProjectsRequest): Promise<SearchExternalProjectsResponse> {
+  async execute({ query, page = 1 }: SearchExternalProjectsRequest): Promise<SearchExternalProjectsResponse> {
     const result = await this.externalProjectsSearch.search(query, page)
 
     if (!result) {

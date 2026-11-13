@@ -32,6 +32,4 @@ export async function searchExternalProjects({ q, page = 1 }: Params) {
   return response
 }
 
-export const getCachedSearchExternalProjects = cache(async (q: string, page = 1) =>
-  searchExternalProjects({ q, page }),
-)
+export const getCachedSearchExternalProjects = cache(async (q: string, page = 1) => searchExternalProjects({ q, page }))

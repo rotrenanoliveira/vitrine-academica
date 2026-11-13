@@ -1,10 +1,4 @@
-import {
-  createLoader,
-  parseAsInteger,
-  parseAsString,
-  type SearchParams,
-  type UrlKeys,
-} from 'nuqs/server'
+import { createLoader, parseAsInteger, parseAsString, type SearchParams, type UrlKeys } from 'nuqs/server'
 
 export const externalProjectsSearchParams = {
   query: parseAsString,

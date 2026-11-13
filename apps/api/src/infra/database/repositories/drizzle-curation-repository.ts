@@ -1,5 +1,8 @@
 import { and, desc, eq, gte, ilike, inArray, type SQL } from 'drizzle-orm'
-import type { CurationFilters, CurationRepository } from '@/domain/curation/application/repositories/curation-repository'
+import type {
+  CurationFilters,
+  CurationRepository,
+} from '@/domain/curation/application/repositories/curation-repository'
 import type { Project } from '@/domain/project/enterprise/entities/project'
 import type { DrizzleClient } from '../drizzle/client'
 import { DrizzleProjectMapper } from '../drizzle/mappers/drizzle-project-mapper'
@@ -50,8 +53,7 @@ export class DrizzleCurationRepository implements CurationRepository {
       .groupBy(projects.id)
       .orderBy(desc(projects.createdAt))
 
-    const rows =
-      filters.limit === undefined ? await baseQuery : await baseQuery.limit(filters.limit)
+    const rows = filters.limit === undefined ? await baseQuery : await baseQuery.limit(filters.limit)
 
     return rows.map((row) => DrizzleProjectMapper.toDomain(row.project))
   }
@@ -65,8 +67,7 @@ export class DrizzleCurationRepository implements CurationRepository {
       .groupBy(projects.id)
       .orderBy(desc(projects.createdAt))
 
-    const rows =
-      filters.limit === undefined ? await baseQuery : await baseQuery.limit(filters.limit)
+    const rows = filters.limit === undefined ? await baseQuery : await baseQuery.limit(filters.limit)
 
     return rows.map((row) => DrizzleProjectMapper.toDomain(row.project))
   }

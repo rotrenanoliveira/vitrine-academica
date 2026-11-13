@@ -1,4 +1,7 @@
-import type { CurationFilters, CurationRepository } from '@/domain/curation/application/repositories/curation-repository'
+import type {
+  CurationFilters,
+  CurationRepository,
+} from '@/domain/curation/application/repositories/curation-repository'
 import type { Project } from '@/domain/project/enterprise/entities/project'
 
 export class InMemoryCurationRepository implements CurationRepository {

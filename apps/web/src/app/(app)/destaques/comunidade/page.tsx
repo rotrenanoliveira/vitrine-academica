@@ -38,13 +38,7 @@ export default async function DestaquesComunidadePage({ searchParams }: PageProp
     <div className="space-y-6">
       <DestaquesHeader />
       <DestaquesFilters title={title} institutionId={institutionId} tagIds={tagIds} months={months} />
-      <DestaquesTypeList
-        type="community"
-        title={title}
-        institutionId={institutionId}
-        tagIds={tagIds}
-        months={months}
-      />
+      <DestaquesTypeList type="community" title={title} institutionId={institutionId} tagIds={tagIds} months={months} />
     </div>
   )
 }

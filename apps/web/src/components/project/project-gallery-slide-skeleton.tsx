@@ -2,6 +2,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export function ProjectGallerySlideSkeleton() {
   return (
+    // biome-ignore lint/a11y/useAriaPropsSupportedByRole: aria-label
     <div className="flex flex-col gap-10" aria-busy="true" aria-label="Carregando projetos">
       <div className="relative">
         <div className="border border-[#252422]/35 bg-[#e6e0d7] p-2 shadow-[10px_10px_0_rgba(37,36,34,0.10)] sm:p-3">

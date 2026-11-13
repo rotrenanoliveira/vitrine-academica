@@ -21,7 +21,6 @@ export function ProjectGallerySlide({ projects, tags = [] }: ProjectGallerySlide
   const [activeIndex, setActiveIndex] = useState(0)
   const total = projects.length
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Restarts the timer when the active index changes
   useEffect(() => {
     if (total <= 1) return
 

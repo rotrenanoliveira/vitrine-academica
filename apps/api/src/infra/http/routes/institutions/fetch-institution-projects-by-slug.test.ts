@@ -36,9 +36,7 @@ describe('(E2E) - GET /api/v1/institutions/slug/:slug/projects', () => {
       status: InstitutionMemberStatus.ACTIVE,
     })
 
-    const response = await request(app.server).get(
-      `/api/v1/institutions/slug/${institution.slug.value}/projects`,
-    )
+    const response = await request(app.server).get(`/api/v1/institutions/slug/${institution.slug.value}/projects`)
 
     expect(response.status).toBe(200)
     expect(response.body.total).toBe(1)
@@ -109,9 +107,7 @@ describe('(E2E) - GET /api/v1/institutions/slug/:slug/projects', () => {
       status: InstitutionMemberStatus.FINISHED,
     })
 
-    const response = await request(app.server).get(
-      `/api/v1/institutions/slug/${institution.slug.value}/projects`,
-    )
+    const response = await request(app.server).get(`/api/v1/institutions/slug/${institution.slug.value}/projects`)
 
     expect(response.status).toBe(200)
     expect(response.body.total).toBe(0)
@@ -136,9 +132,7 @@ describe('(E2E) - GET /api/v1/institutions/slug/:slug/projects', () => {
       status: InstitutionMemberStatus.ACTIVE,
     })
 
-    const response = await request(app.server).get(
-      `/api/v1/institutions/slug/${institution.slug.value}/projects`,
-    )
+    const response = await request(app.server).get(`/api/v1/institutions/slug/${institution.slug.value}/projects`)
 
     expect(response.status).toBe(200)
     expect(response.body.total).toBe(1)
