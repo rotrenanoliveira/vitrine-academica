@@ -180,9 +180,10 @@ describe('(E2E) - GET /api/v1/promotions/active', () => {
     expect(ids.indexOf(newer.id.toString())).toBeLessThan(ids.indexOf(older.id.toString()))
   })
 
-  it('should not be able to list promotions without authentication', async () => {
+  it('should be able to list promotions without authentication', async () => {
     const response = await request(app.server).get('/api/v1/promotions/active')
 
-    expect(response.status).toBe(401)
+    expect(response.status).toBe(200)
+    expect(response.body.items).toEqual(expect.any(Array))
   })
 })
