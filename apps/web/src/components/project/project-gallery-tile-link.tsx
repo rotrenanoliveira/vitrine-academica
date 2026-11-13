@@ -15,22 +15,19 @@ export function ProjectGalleryTileLink({ href, label, className, size = 'md' }: 
   const iconSize = size === 'sm' ? 'size-5' : 'size-6'
 
   return (
-    <Link href={href} aria-label={label} className={cn('group/tile relative inline-flex shrink-0', boxSize, className)}>
-      <span className={cn('absolute inset-0 translate-x-1.5 translate-y-1.5 bg-[#c6c0b8]', boxSize)} aria-hidden />
-      <span
-        className={cn(
-          'relative flex items-center justify-center bg-[#333333] text-[#f4f1eb] transition-colors duration-300 group-hover/tile:bg-[#2a2a2a]',
-          boxSize,
-        )}
-      >
-        <HugeiconsIcon
-          icon={ArrowUpRight01Icon}
-          className={cn(
-            iconSize,
-            'transition-transform duration-300 group-hover/tile:translate-x-0.5 group-hover/tile:-translate-y-0.5',
-          )}
-        />
-      </span>
+    <Link
+      href={href}
+      aria-label={label}
+      className={cn(
+        'group/tile inline-flex shrink-0 items-center justify-center bg-[#252422] text-[#f4f1eb] shadow-none transition-[background-color,box-shadow,transform] duration-200 hover:bg-[#252422]/85 hover:shadow-[6px_6px_0_rgba(37,36,34,0.18)]',
+        boxSize,
+        className,
+      )}
+    >
+      <HugeiconsIcon
+        icon={ArrowUpRight01Icon}
+        className={cn(iconSize, 'transition-transform duration-200 group-hover/tile:scale-125')}
+      />
     </Link>
   )
 }

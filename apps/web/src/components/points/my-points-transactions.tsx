@@ -26,10 +26,14 @@ function MyPointsTransactionsSkeleton() {
   )
 }
 
-export function MyPointsTransactions() {
+type MyPointsTransactionsProps = {
+  limit?: number
+}
+
+export function MyPointsTransactions({ limit = 5 }: MyPointsTransactionsProps) {
   const { data, isPending, isError } = useQuery({
-    queryKey: ['me', 'points', 'transactions', { limit: 5 }],
-    queryFn: () => listMyPointTransactions({ limit: 5 }),
+    queryKey: ['me', 'points', 'transactions', { limit }],
+    queryFn: () => listMyPointTransactions({ limit }),
   })
 
   if (isPending) {
