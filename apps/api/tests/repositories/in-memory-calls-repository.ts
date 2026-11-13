@@ -5,6 +5,10 @@ function newestFirst(a: Call, b: Call) {
   return b.createdAt.getTime() - a.createdAt.getTime()
 }
 
+function earliestDeadlineFirst(a: Call, b: Call) {
+  return a.applicationDeadline.getTime() - b.applicationDeadline.getTime()
+}
+
 export class InMemoryCallsRepository implements CallsRepository {
   public items: Call[] = []
 
@@ -18,6 +22,10 @@ export class InMemoryCallsRepository implements CallsRepository {
 
   async findManyOpen(now: Date): Promise<Call[]> {
     return this.items.filter((call) => call.isAcceptingApplications(now)).sort(newestFirst)
+  }
+
+  async findManyExpiredOpen(now: Date): Promise<Call[]> {
+    return this.items.filter((call) => call.isOpen() && call.isExpired(now)).sort(earliestDeadlineFirst)
   }
 
   async findManyByAuthorId(authorId: string): Promise<Call[]> {
