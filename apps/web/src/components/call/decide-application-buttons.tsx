@@ -39,7 +39,7 @@ export function DecideApplicationButtons({ callId, applicationId }: DecideApplic
       <Button type="button" disabled={isPending} onClick={() => handleDecision('APPROVED')}>
         Aprovar
       </Button>
-      <Button type="button" variant="outline" disabled={isPending} onClick={() => handleDecision('REJECTED')}>
+      <Button type="button" variant="destructive" disabled={isPending} onClick={() => handleDecision('REJECTED')}>
         Rejeitar
       </Button>
     </div>

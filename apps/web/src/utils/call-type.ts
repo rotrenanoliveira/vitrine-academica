@@ -1,5 +1,3 @@
-import type { InstitutionMemberRole } from './type'
-
 export type CallStatus = 'OPEN' | 'CLOSED'
 export type CallApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 export type CallDecision = 'APPROVED' | 'REJECTED'
@@ -30,6 +28,17 @@ export type CallWithSkills = Call & {
   skills: CallSkill[]
 }
 
+export type CallListItem = {
+  id: string
+  authorId: string
+  title: string
+  description: string
+  applicationDeadline: string
+  status: CallStatus
+  projectSlug: string | null
+  skills: string[]
+}
+
 export type CallApplication = {
   id: string
   callId: string
@@ -41,18 +50,15 @@ export type CallApplication = {
   updatedAt: string | null
 }
 
-export type CallApplicant = {
+export type CallApplicationWithApplicant = {
   id: string
-  name: string
-  memberships: {
-    institutionId: string
-    institutionName: string
-    role: InstitutionMemberRole
-  }[]
-}
-
-export type CallApplicationWithApplicant = CallApplication & {
-  applicant: CallApplicant
+  callId: string
+  applicantId: string
+  message: string | null
+  status: CallApplicationStatus
+  decidedAt: string | null
+  createdAt: string
+  applicantName: string
 }
 
 export type CallSummary = Pick<Call, 'id' | 'title' | 'status' | 'applicationDeadline'>
