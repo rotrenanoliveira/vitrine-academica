@@ -109,3 +109,8 @@ Três rotas devolvem `featured` (booleano) em cada projeto: `GET /projects/:proj
 `true` quando o projeto tem ao menos uma promoção ativa (status `ACTIVE` e dentro da validade). Use para mostrar a etiqueta de "promovido". Para saber quem promoveu e até quando, use `GET /promotions/active`.
 
 As demais rotas que devolvem projetos (por exemplo `GET /projects/me` e `GET /me/starred-projects`) ainda não trazem o campo.
+
+
+## Encerramento das promoções
+
+Uma promoção termina sozinha quando a validade passa: um processo interno, que roda a cada 30 segundos, muda o status dela para `EXPIRED`. Isso não depende de nenhuma rota. Mesmo antes desse processo rodar, a promoção vencida já deixa de aparecer em `GET /promotions/active` e o `featured` do projeto volta a `false`, porque essas consultas olham a data de validade.

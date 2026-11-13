@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, inArray, lte, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, gt, inArray, lte, sql } from 'drizzle-orm'
 import type {
   CreatePromotionWithDebitResult,
   PromotionsRepository,
@@ -91,5 +91,25 @@ export class DrizzlePromotionsRepository implements PromotionsRepository {
       )
 
     return rows.map((row) => row.projectId)
+  }
+
+  async findManyDueForExpiration(now: Date): Promise<Promotion[]> {
+    const rows = await this.db
+      .select()
+      .from(promotions)
+      .where(and(eq(promotions.status, 'ACTIVE'), lte(promotions.expiresAt, now)))
+      .orderBy(asc(promotions.expiresAt))
+
+    return rows.map(DrizzlePromotionMapper.toDomain)
+  }
+
+  async tryExpire(promotionId: string, now: Date): Promise<boolean> {
+    const rows = await this.db
+      .update(promotions)
+      .set({ status: 'EXPIRED' })
+      .where(and(eq(promotions.id, promotionId), eq(promotions.status, 'ACTIVE'), lte(promotions.expiresAt, now)))
+      .returning({ id: promotions.id })
+
+    return rows.length > 0
   }
 }

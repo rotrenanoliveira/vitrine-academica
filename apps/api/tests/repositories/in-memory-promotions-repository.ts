@@ -3,7 +3,7 @@ import type {
   PromotionsRepository,
 } from '@/domain/points/application/repositories/promotions-repository'
 import type { PointTransaction } from '@/domain/points/enterprise/entities/point-transaction'
-import type { Promotion } from '@/domain/points/enterprise/entities/promotion'
+import { type Promotion, PromotionStatus } from '@/domain/points/enterprise/entities/promotion'
 import type { InMemoryPointTransactionsRepository } from './in-memory-point-transactions-repository'
 
 export class InMemoryPromotionsRepository implements PromotionsRepository {
@@ -47,5 +47,28 @@ export class InMemoryPromotionsRepository implements PromotionsRepository {
       .map((item) => item.projectId.toString())
 
     return [...new Set(ids)]
+  }
+
+  async findManyDueForExpiration(now: Date): Promise<Promotion[]> {
+    return this.items
+      .filter((item) => item.status === PromotionStatus.ACTIVE && item.expiresAt.getTime() <= now.getTime())
+      .sort((a, b) => a.expiresAt.getTime() - b.expiresAt.getTime())
+  }
+
+  async tryExpire(promotionId: string, now: Date): Promise<boolean> {
+    const item = this.items.find(
+      (promotion) =>
+        promotion.id.toString() === promotionId &&
+        promotion.status === PromotionStatus.ACTIVE &&
+        promotion.expiresAt.getTime() <= now.getTime(),
+    )
+
+    if (!item) {
+      return false
+    }
+
+    item.expire()
+
+    return true
   }
 }

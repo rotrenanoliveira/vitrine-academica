@@ -50,6 +50,18 @@ export class Promotion extends Entity<PromotionProps> {
     return this.props.status === PromotionStatus.ACTIVE && this.props.expiresAt.getTime() > now.getTime()
   }
 
+  expire() {
+    if (this.props.status === PromotionStatus.EXPIRED) {
+      return
+    }
+
+    this.props.status = PromotionStatus.EXPIRED
+    this.touch()
+  }
+
+  private touch() {
+    this.props.updatedAt = new Date()
+  }
   static create(props: Optional<PromotionProps, 'createdAt' | 'status'>, id?: UniqueEntityId) {
     return new Promotion(
       {

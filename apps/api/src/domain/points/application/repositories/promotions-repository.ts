@@ -10,4 +10,6 @@ export interface PromotionsRepository {
   createWithDebit(promotion: Promotion, debit: PointTransaction): Promise<CreatePromotionWithDebitResult>
   findManyActive(now: Date): Promise<Promotion[]>
   findActiveProjectIds(projectIds: string[], now: Date): Promise<string[]>
+  findManyDueForExpiration(now: Date): Promise<Promotion[]>
+  tryExpire(promotionId: string, now: Date): Promise<boolean>
 }
