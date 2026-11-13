@@ -2,13 +2,16 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { LogoutButton } from '@/components/auth/logout-button'
 import { MySubscriptionsList } from '@/components/newsletter/my-subscriptions-list'
+import { MyPointsTransactions } from '@/components/points/my-points-transactions'
 import { FormRegisterPreferenceTags } from '@/components/preference-tag/form-register-preference-tags'
 import { Button } from '@/components/ui/button'
 import { DeleteUserAccountButton } from '@/components/user/delete-user-account-button'
 import { ExportUserDataButton } from '@/components/user/export-user-data-button'
 import { requireUser } from '@/server/auth/require-user'
+import { getCachedMyPointsBalance } from '@/server/http/routes/points/get-my-points-balance'
 import { getCachedUserPreferenceTags } from '@/server/http/routes/preference-tags/fetch-user-preference-tags'
 import { getCachedTags } from '@/server/http/routes/tags/fetch-tags'
+import { PROMOTION_COST, PROMOTION_DURATION_DAYS } from '@/utils/point-type'
 
 export const metadata: Metadata = {
   title: 'Minha conta',
@@ -16,7 +19,11 @@ export const metadata: Metadata = {
 
 export default async function AccountPage() {
   const user = await requireUser()
-  const [{ tags }, { preferenceTags }] = await Promise.all([getCachedTags(), getCachedUserPreferenceTags(user.id)])
+  const [{ tags }, { preferenceTags }, { balance }] = await Promise.all([
+    getCachedTags(),
+    getCachedUserPreferenceTags(user.id),
+    getCachedMyPointsBalance(),
+  ])
 
   const selectedTagIds = preferenceTags
     .filter((preference) => preference.status === 'ACTIVE')
@@ -49,6 +56,31 @@ export default async function AccountPage() {
             <LogoutButton />
           </div>
         </div>
+
+        <section className="space-y-4 border-t border-border pt-6">
+          <h2 className="font-heading text-xl font-semibold">Pontos</h2>
+          <p className="text-3xl font-semibold tabular-nums tracking-tight">{balance}</p>
+          <div className="space-y-2 text-sm text-muted-foreground">
+            <p>
+              Você ganha pontos quando o seu projeto (ou um projeto em que é coautor com convite aceito) recebe a
+              primeira estrela de alguém. Remover e dar a estrela de novo não gera pontos novos.
+            </p>
+            <p>
+              O peso da estrela é <span className="font-medium text-foreground">1</span> para usuário comum e aluno, e{' '}
+              <span className="font-medium text-foreground">5</span> para professor ou docente com vínculo institucional
+              ativo.
+            </p>
+            <p>
+              Promover um projeto custa{' '}
+              <span className="font-medium text-foreground tabular-nums">{PROMOTION_COST}</span> pontos e permanece em
+              destaque por {PROMOTION_DURATION_DAYS} dias.
+            </p>
+          </div>
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium">Movimentações recentes</h3>
+            <MyPointsTransactions />
+          </div>
+        </section>
 
         <section className="space-y-4 border-t border-border pt-6">
           <h2 className="font-heading text-xl font-semibold">Autores que acompanho</h2>

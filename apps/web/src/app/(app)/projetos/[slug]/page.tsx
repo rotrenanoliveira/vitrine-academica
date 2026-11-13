@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { FormPublishProject } from '@/components/project/form-publish-project'
 import { FormScheduleProject } from '@/components/project/form-schedule-project'
 import { ProjectMembersSection } from '@/components/project/project-members-section'
+import { ProjectPromoteButton } from '@/components/project/project-promote-button'
 import { ProjectStarButton } from '@/components/project/project-star-button'
 import { ProjectTeacherRatingForm } from '@/components/project/project-teacher-rating-form'
 import { ProjectTeacherVotesTable } from '@/components/project/project-teacher-votes-table'
@@ -128,14 +129,17 @@ export default async function ProjectDetailPage({ params }: PageProps) {
 
           {project.status === 'PUBLISHED' && (
             <div className="flex flex-col items-end gap-2">
-              <ProjectStarButton
-                projectId={project.id}
-                projectSlug={project.slug}
-                starred={starred}
-                starsCount={rating.starsCount}
-                disabled={isOwner}
-                variant="detail"
-              />
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <ProjectStarButton
+                  projectId={project.id}
+                  projectSlug={project.slug}
+                  starred={starred}
+                  starsCount={rating.starsCount}
+                  disabled={isOwner}
+                  variant="detail"
+                />
+                <ProjectPromoteButton projectId={project.id} projectSlug={project.slug} disabled={isOwner} />
+              </div>
               {rating.teacherAverage !== null && (
                 <p className="text-sm text-muted-foreground">
                   Overall docente{' '}
