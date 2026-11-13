@@ -33,5 +33,5 @@ export function HomeProjectsGallery() {
     )
   }
 
-  return <ProjectGallery projects={projects} featuredCount={5} />
+  return <ProjectGallery projects={projects} featuredCount={5} showPromoted />
 }

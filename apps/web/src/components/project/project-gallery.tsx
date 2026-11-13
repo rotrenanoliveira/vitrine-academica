@@ -1,4 +1,5 @@
 import type { ProjectListItem, Tag } from '@/utils/type'
+import { HomePromotedProjects } from './home-promoted-projects'
 import { ProjectGalleryCards } from './project-gallery-cards'
 import { ProjectGallerySlide } from './project-gallery-slide'
 
@@ -14,6 +15,7 @@ type ProjectGalleryProps = {
   featuredCount?: number
   cardsTitle?: string
   cardsDescription?: string
+  showPromoted?: boolean
 }
 
 export function ProjectGallery({
@@ -22,6 +24,7 @@ export function ProjectGallery({
   featuredCount = 5,
   cardsTitle,
   cardsDescription,
+  showPromoted = false,
 }: ProjectGalleryProps) {
   if (projects.length === 0) {
     return <p className="text-sm text-[#252422]/65">Nenhum projeto publicado no momento.</p>
@@ -37,6 +40,7 @@ export function ProjectGallery({
       </h2>
       <div className="mx-auto flex max-w-7xl flex-col gap-10">
         <ProjectGallerySlide projects={featuredProjects} tags={tags} />
+        {showPromoted ? <HomePromotedProjects /> : null}
         <ProjectGalleryCards projects={otherProjects} tags={tags} title={cardsTitle} description={cardsDescription} />
       </div>
     </section>
