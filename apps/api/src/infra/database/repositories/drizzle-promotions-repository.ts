@@ -1,4 +1,4 @@
-import { and, eq, lte, sql } from 'drizzle-orm'
+import { and, desc, eq, gt, lte, sql } from 'drizzle-orm'
 import type {
   CreatePromotionWithDebitResult,
   PromotionsRepository,
@@ -66,5 +66,15 @@ export class DrizzlePromotionsRepository implements PromotionsRepository {
 
       return { status: 'CREATED' }
     })
+  }
+
+  async findManyActive(now: Date): Promise<Promotion[]> {
+    const rows = await this.db
+      .select()
+      .from(promotions)
+      .where(and(eq(promotions.status, 'ACTIVE'), gt(promotions.expiresAt, now)))
+      .orderBy(desc(promotions.createdAt), desc(promotions.id))
+
+    return rows.map(DrizzlePromotionMapper.toDomain)
   }
 }

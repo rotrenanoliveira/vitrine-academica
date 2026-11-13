@@ -50,8 +50,59 @@ Resposta 200:
 
 Erros: 400 (`limit` fora de 1 a 100) e 401.
 
-## Ainda não implementado (proposta, pode mudar)
+## POST /projects/:projectId/promotions
 
-- Promover um projeto: custo de 1000 pontos, duração de 7 dias (duração provisória). Só projeto publicado, não pode ser o próprio projeto, precisa de saldo, e a mesma pessoa não pode ter duas promoções ativas no mesmo projeto.
-- Rotas previstas: `POST /projects/:projectId/promotions` e `GET /promotions/active`.
-- Etiqueta de "promovido" nos projetos: o formato (campo `featured` ou objeto com quem promoveu e quando expira) ainda será definido com o front.
+Promove o projeto gastando pontos do usuário logado. Sem corpo. O custo (1000 pontos) é debitado na mesma operação que cria a promoção, que dura 7 dias (duração ainda provisória).
+
+Resposta 201:
+
+```json
+{
+  "promotion": {
+    "id": "uuid",
+    "projectId": "uuid",
+    "promoterId": "uuid",
+    "cost": 1000,
+    "status": "ACTIVE",
+    "expiresAt": "2026-11-20T10:00:00.000Z",
+    "createdAt": "2026-11-13T10:00:00.000Z"
+  }
+}
+```
+
+Regras e erros (todos com `{ "message": "..." }` em português, para mostrar direto na tela):
+
+| Status | Quando |
+| --- | --- |
+| 400 | O projeto não está publicado |
+| 401 | Sem login |
+| 403 | É o seu próprio projeto (autor ou coautor com convite aceito) ou o usuário não está ativo |
+| 404 | O projeto não existe |
+| 409 | Saldo insuficiente (a mensagem informa o custo e o saldo) ou você já tem uma promoção ativa neste projeto |
+
+Pessoas diferentes podem promover o mesmo projeto. Depois de promover, o saldo e o histórico (`GET /points/me` e `GET /points/me/transactions`) já refletem o débito, com `reason: "PROMOTION"` e `referenceId` igual ao id da promoção.
+
+## GET /promotions/active
+
+Promoções ativas (status `ACTIVE`, dentro da validade e de projetos publicados), da mais recente à mais antiga. Exige login.
+
+Resposta 200:
+
+```json
+{
+  "items": [
+    {
+      "promotion": { "id": "uuid", "projectId": "uuid", "promoterId": "uuid", "cost": 1000, "status": "ACTIVE", "expiresAt": "...", "createdAt": "..." },
+      "project": { "id": "uuid", "title": "...", "description": "...", "authorId": "uuid", "status": "PUBLISHED", "attachments": [], "tags": [], "createdAt": "..." },
+      "promoter": { "id": "uuid", "name": "Nome de quem promoveu" }
+    }
+  ]
+}
+```
+
+O e-mail de quem promoveu nunca é exposto.
+
+## Ainda não implementado
+
+- Campo booleano `featured` nas respostas de projeto (página do projeto, home personalizada e lista de projetos publicados), para o front mostrar a etiqueta de "promovido".
+- Encerramento automático: uma promoção vencida deixa de aparecer em `GET /promotions/active` assim que passa da validade, sem depender de nenhuma rota.

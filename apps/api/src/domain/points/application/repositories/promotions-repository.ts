@@ -8,4 +8,5 @@ export type CreatePromotionWithDebitResult =
 
 export interface PromotionsRepository {
   createWithDebit(promotion: Promotion, debit: PointTransaction): Promise<CreatePromotionWithDebitResult>
+  findManyActive(now: Date): Promise<Promotion[]>
 }

@@ -34,4 +34,8 @@ export class InMemoryPromotionsRepository implements PromotionsRepository {
 
     return { status: 'CREATED' }
   }
+
+  async findManyActive(now: Date): Promise<Promotion[]> {
+    return this.items.filter((item) => item.isActive(now)).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+  }
 }

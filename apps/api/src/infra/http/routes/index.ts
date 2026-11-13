@@ -55,7 +55,9 @@ import { requestInstitutionMembershipRoute } from './institutions-membership/req
 import { updateInstitutionMemberRoleRoute } from './institutions-membership/update-institution-member-role'
 import { updateInstitutionMemberStatusRoute } from './institutions-membership/update-institution-member-status'
 import { getMyPointsBalanceRoute } from './points/get-my-points-balance'
+import { listActivePromotionsRoute } from './points/list-active-promotions'
 import { listMyPointTransactionsRoute } from './points/list-my-point-transactions'
+import { promoteProjectRoute } from './points/promote-project'
 import { deactivatePreferenceTagRoute } from './preference-tags/deactivate-preference-tag'
 import { fetchUserPreferenceTagsRoute } from './preference-tags/fetch-user-preference-tags'
 import { registerPreferenceTagRoute } from './preference-tags/register-preference-tag'
@@ -259,6 +261,10 @@ export async function routes(app: FastifyInstance) {
   await app.register(getMyPointsBalanceRoute)
   /** GET /points/me/transactions */
   await app.register(listMyPointTransactionsRoute)
+  /** POST /projects/:projectId/promotions */
+  await app.register(promoteProjectRoute)
+  /** GET /promotions/active */
+  await app.register(listActivePromotionsRoute)
 
   /** Institutions routes */
   /** POST /institutions */
