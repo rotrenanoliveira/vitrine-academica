@@ -11,7 +11,7 @@ export default defineConfig({
   clean: true,
   sourcemap: true,
   splitting: false,
-  noExternal: ['@vitrine-academica/permissions'],
+  noExternal: ['@vitrine-academica/permissions', 'dayjs'],
   dts: false,
   tsconfig: 'tsconfig.json',
   esbuildOptions(options) {

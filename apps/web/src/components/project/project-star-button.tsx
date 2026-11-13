@@ -2,6 +2,7 @@
 
 import { Loading03Icon, StarIcon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
+import { useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { MouseEvent } from 'react'
@@ -13,6 +14,7 @@ import { actionUnstarProject } from '@/server/actions/unstar-project'
 
 type ProjectStarButtonProps = {
   projectId: string
+  projectSlug: string
   starred: boolean
   starsCount?: number
   disabled?: boolean
@@ -38,6 +40,7 @@ function StarGlyph({ starred, pending, size = 'size-5' }: { starred: boolean; pe
 
 export function ProjectStarButton({
   projectId,
+  projectSlug,
   starred,
   starsCount,
   disabled,
@@ -46,10 +49,14 @@ export function ProjectStarButton({
   className,
 }: ProjectStarButtonProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const action = starred ? actionUnstarProject : actionStarProject
 
   const [_, handleSubmit, isPending] = useFormState(action, {
-    onSuccess: () => router.refresh(),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['me', 'starred-projects'] })
+      router.refresh()
+    },
   })
 
   function stopPropagation(event: MouseEvent) {
@@ -91,6 +98,7 @@ export function ProjectStarButton({
     return (
       <form onSubmit={handleSubmit} onClick={stopPropagation}>
         <input type="hidden" name="project-id" value={projectId} />
+        <input type="hidden" name="project-slug" value={projectSlug} />
         <Button
           type="submit"
           variant="ghost"
@@ -109,6 +117,7 @@ export function ProjectStarButton({
   return (
     <form onSubmit={handleSubmit} onClick={stopPropagation}>
       <input type="hidden" name="project-id" value={projectId} />
+      <input type="hidden" name="project-slug" value={projectSlug} />
       <Button
         type="submit"
         variant="outline"

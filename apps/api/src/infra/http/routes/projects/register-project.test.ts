@@ -2,6 +2,7 @@ import { appForTest as app } from '@tests/app'
 import { makeAccessCodeOnDatabase } from '@tests/factories/make-access-code'
 import { makeAccountOnDatabase } from '@tests/factories/make-account'
 import { makeProject } from '@tests/factories/make-project'
+import { makeTagOnDatabase } from '@tests/factories/make-tag'
 import { makeUserOnDatabase } from '@tests/factories/make-user'
 import request from 'supertest'
 
@@ -27,6 +28,7 @@ describe('(E2E) - POST /api/v1/projects', () => {
   it('deve ser possivel registrar um projeto autenticado', async () => {
     const { accessToken, user } = await authenticateUser()
     const { project } = makeProject({ author: user.id })
+    const { tag } = await makeTagOnDatabase()
 
     const response = await request(app.server)
       .post('/api/v1/projects')
@@ -34,6 +36,8 @@ describe('(E2E) - POST /api/v1/projects', () => {
       .send({
         title: project.title,
         description: project.description,
+        slug: project.slug,
+        tags: [tag.id.toString()],
       })
 
     expect(response.status).toBe(201)
@@ -41,21 +45,27 @@ describe('(E2E) - POST /api/v1/projects', () => {
       project: {
         id: expect.any(String),
         title: project.title,
+        slug: project.slug,
         description: project.description,
         authorId: user.id.toString(),
         status: 'SKETCH',
+        coverUrl: null,
         attachments: [],
-        tags: [],
+        tags: [tag.id.toString()],
         createdAt: expect.any(String),
       },
     })
   })
 
   it('não deve registrar projeto sem autenticação', async () => {
-    const response = await request(app.server).post('/api/v1/projects').send({
-      title: 'Título',
-      description: 'Descrição',
-    })
+    const response = await request(app.server)
+      .post('/api/v1/projects')
+      .send({
+        title: 'Título',
+        description: 'Descrição',
+        slug: 'titulo',
+        tags: ['00000000-0000-0000-0000-000000000001'],
+      })
 
     expect(response.status).toBe(401)
   })

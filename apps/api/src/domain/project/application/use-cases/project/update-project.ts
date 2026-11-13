@@ -15,6 +15,7 @@ interface UpdateProjectUseCaseRequest {
   title: string
   description: string
   status?: ProjectStatus
+  coverUrl?: string | null
   attachments?: string[]
 }
 
@@ -69,6 +70,7 @@ export class UpdateProjectUseCase {
     title,
     description,
     status,
+    coverUrl,
     attachments,
   }: UpdateProjectUseCaseRequest): Promise<UpdateProjectUseCaseResponse> {
     const project = await this.projectsRepository.findById(projectId)
@@ -123,6 +125,11 @@ export class UpdateProjectUseCase {
     if (isOwner && status !== undefined) {
       diff.status = { old: project.status, new: status }
       project.status = status
+    }
+
+    if (coverUrl !== undefined) {
+      diff.coverUrl = { old: project.coverUrl, new: coverUrl }
+      project.coverUrl = coverUrl
     }
 
     if (attachments !== undefined) {

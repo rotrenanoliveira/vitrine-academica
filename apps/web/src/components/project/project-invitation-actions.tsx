@@ -11,9 +11,10 @@ import { actionRespondProjectInvitation } from '@/server/actions/respond-project
 type ProjectInvitationActionsProps = {
   invitationId: string
   projectId: string
+  projectSlug: string
 }
 
-export function ProjectInvitationActions({ invitationId, projectId }: ProjectInvitationActionsProps) {
+export function ProjectInvitationActions({ invitationId, projectId, projectSlug }: ProjectInvitationActionsProps) {
   const router = useRouter()
 
   const options = {
@@ -36,6 +37,7 @@ export function ProjectInvitationActions({ invitationId, projectId }: ProjectInv
       <form onSubmit={handleAccept}>
         <input type="hidden" name="invitation-id" value={invitationId} />
         <input type="hidden" name="project-id" value={projectId} />
+        <input type="hidden" name="project-slug" value={projectSlug} />
         <input type="hidden" name="status" value="ACCEPTED" />
         <Button type="submit" disabled={isPending}>
           {!isAccepting && <span>Aceitar</span>}
@@ -46,6 +48,7 @@ export function ProjectInvitationActions({ invitationId, projectId }: ProjectInv
       <form onSubmit={handleReject}>
         <input type="hidden" name="invitation-id" value={invitationId} />
         <input type="hidden" name="project-id" value={projectId} />
+        <input type="hidden" name="project-slug" value={projectSlug} />
         <input type="hidden" name="status" value="REJECTED" />
         <Button type="submit" variant="outline" disabled={isPending}>
           {!isRejecting && <span>Recusar</span>}

@@ -7,6 +7,7 @@ import { revalidateProjects } from '../revalidate-projects'
 
 const rateProjectByCriteriaSchema = z.object({
   'project-id': z.uuid('Projeto inválido.'),
+  'project-slug': z.string().min(1, 'Slug inválido.'),
   scores: z.string().min(1, 'Informe as notas dos critérios.'),
 })
 
@@ -45,15 +46,15 @@ export async function actionRateProjectByCriteria(data: FormData) {
   }
 
   const projectId = formResult.data['project-id']
+  const projectSlug = formResult.data['project-slug']
   const [_, responseError] = await rateProjectByCriteria(projectId, scores)
 
   if (responseError) {
     return { success: false, message: responseError.message ?? 'Não foi possível salvar a avaliação.' }
   }
 
-  revalidateProjects(projectId)
+  revalidateProjects(projectSlug)
   revalidatePath('/projetos/avaliados')
-  revalidatePath(`/projetos/${projectId}`)
 
   return { success: true, message: 'Avaliação docente salva.' }
 }

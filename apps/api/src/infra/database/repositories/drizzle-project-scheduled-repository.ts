@@ -1,4 +1,4 @@
-import { and, asc, eq, gt, gte, lt, lte } from 'drizzle-orm'
+import { and, asc, desc, eq, gt, gte, lt, lte } from 'drizzle-orm'
 import type { ProjectScheduledRepository } from '@/domain/project/application/repositories/project-scheduled-repository'
 import type { ProjectScheduled } from '@/domain/project/enterprise/entities/project-scheduled'
 import type { DrizzleClient } from '../drizzle/client'
@@ -45,7 +45,7 @@ export class DrizzleProjectScheduledRepository implements ProjectScheduledReposi
       .select()
       .from(projectScheduled)
       .where(and(gt(projectScheduled.publishedIn, from), lte(projectScheduled.publishedIn, to)))
-      .orderBy(asc(projectScheduled.publishedIn))
+      .orderBy(asc(projectScheduled.publishedIn), desc(projectScheduled.createdAt))
 
     return rows.map(DrizzleProjectScheduledMapper.toDomain)
   }
@@ -65,7 +65,7 @@ export class DrizzleProjectScheduledRepository implements ProjectScheduledReposi
       .select()
       .from(projectScheduled)
       .where(and(gte(projectScheduled.publishedIn, start), lt(projectScheduled.publishedIn, end)))
-      .orderBy(asc(projectScheduled.publishedIn))
+      .orderBy(asc(projectScheduled.publishedIn), desc(projectScheduled.createdAt))
 
     return rows.map(DrizzleProjectScheduledMapper.toDomain)
   }

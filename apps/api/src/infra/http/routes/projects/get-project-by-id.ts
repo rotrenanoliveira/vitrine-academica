@@ -3,6 +3,7 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 import { makeAuthenticateMiddleware } from '../../factories/auth/make-authenticate-middleware'
 import { makeGetProjectByIdController } from '../../factories/project/make-get-project-by-id-controller'
+import { projectHttpSchema } from '../../schemas/project-schemas'
 
 const projectSchema = z.object({
   id: z.string(),
@@ -33,7 +34,7 @@ export async function getProjectByIdRoute(app: FastifyInstance) {
         }),
         response: {
           200: z.object({
-            project: projectSchema,
+            project: projectHttpSchema,
           }),
           401: z.object({
             message: z.string(),

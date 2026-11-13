@@ -6,6 +6,7 @@ import { revalidateProjects } from '../revalidate-projects'
 
 const publishProjectSchema = z.object({
   'project-id': z.uuid('Projeto inválido.'),
+  'project-slug': z.string().min(1, 'Slug inválido.'),
 })
 
 export async function actionPublishProject(data: FormData) {
@@ -19,6 +20,7 @@ export async function actionPublishProject(data: FormData) {
   }
 
   const projectId = formResult.data['project-id']
+  const projectSlug = formResult.data['project-slug']
 
   const [_, responseError] = await publishProject({ projectId })
 
@@ -26,7 +28,7 @@ export async function actionPublishProject(data: FormData) {
     return { success: false, message: responseError.message ?? 'Não foi possível publicar o projeto.' }
   }
 
-  revalidateProjects(projectId)
+  revalidateProjects(projectSlug)
 
   return { success: true, message: 'Projeto publicado.' }
 }

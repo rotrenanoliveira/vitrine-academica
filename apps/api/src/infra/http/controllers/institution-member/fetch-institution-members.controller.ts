@@ -2,7 +2,7 @@ import type { FastifyReply } from 'fastify'
 import { InstitutionNotFoundError } from '@/domain/institution/application/_errors/institution-not-found-error'
 import { NotAllowedToManageInstitutionError } from '@/domain/institution/application/_errors/not-allowed-to-manage-institution-error'
 import type { FetchInstitutionMembersUseCase } from '@/domain/institution/application/use-cases/institution-member/fetch-institution-members'
-import { InstitutionMemberPresenter } from '../../presenters/institution-member-presenter'
+import { InstitutionMemberListItemPresenter } from '../../presenters/institution-member-list-item-presenter'
 
 interface FetchInstitutionMembersParams {
   institutionId: string
@@ -37,7 +37,7 @@ export class FetchInstitutionMembersController {
     }
 
     return reply.status(200).send({
-      members: result.value.members.map(InstitutionMemberPresenter.toHTTP),
+      members: result.value.members.map(InstitutionMemberListItemPresenter.toHTTP),
     })
   }
 }

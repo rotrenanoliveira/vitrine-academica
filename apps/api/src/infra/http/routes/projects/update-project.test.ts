@@ -2,10 +2,10 @@ import { appForTest as app } from '@tests/app'
 import { makeAccessCodeOnDatabase } from '@tests/factories/make-access-code'
 import { makeAccountOnDatabase } from '@tests/factories/make-account'
 import { makeProjectOnDatabase } from '@tests/factories/make-project'
+import { makeProjectMemberOnDatabase } from '@tests/factories/make-project-member'
 import { makeUserOnDatabase } from '@tests/factories/make-user'
 import request from 'supertest'
 import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
-import { makeProjectMemberOnDatabase } from '@tests/factories/make-project-member'
 import { ProjectMemberStatus } from '@/domain/project/enterprise/entities/project-member'
 import { db } from '@/infra/database/drizzle/client'
 import { DrizzleProjectsRepository } from '@/infra/database/repositories/drizzle-projects-repository'
@@ -107,7 +107,6 @@ describe('(E2E) - PUT /api/v1/projects/:projectId', () => {
 
     expect(response.status).toBe(403)
   })
-
 
   it('deve permitir ao coautor que aceitou o convite editar o projeto', async () => {
     const { accessToken, user } = await authenticateUser()

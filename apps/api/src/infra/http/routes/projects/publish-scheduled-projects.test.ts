@@ -28,9 +28,11 @@ describe('(E2E) - POST /api/v1/projects/publish-scheduled', () => {
         {
           id: project.id.toString(),
           title: project.title,
+          slug: project.slug,
           description: project.description,
           authorId: user.id.toString(),
           status: 'PUBLISHED',
+          coverUrl: null,
           attachments: [],
           tags: [],
           createdAt: expect.any(String),

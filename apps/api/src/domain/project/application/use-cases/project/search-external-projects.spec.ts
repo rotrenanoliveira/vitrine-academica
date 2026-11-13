@@ -26,11 +26,29 @@ describe('(UC) - Search External Projects', () => {
     const result = await sut.execute({ query: 'Engenharia de Software' })
 
     expect(externalProjectsSearch.lastQuery).toBe('Engenharia de Software')
+    expect(externalProjectsSearch.lastPage).toBe(1)
     expect(result.isRight()).toBe(true)
 
     if (result.isRight()) {
       expect(result.value.projects).toHaveLength(1)
       expect(result.value.projects[0].title).toBe('PFC Teste')
+      expect(result.value.page).toBe(1)
+      expect(result.value.perPage).toBe(30)
+      expect(result.value.hasNextPage).toBe(false)
+    }
+  })
+
+  it('repassa a página solicitada ao serviço externo', async () => {
+    externalProjectsSearch.hasNextPage = true
+
+    const result = await sut.execute({ query: 'Engenharia de Software', page: 2 })
+
+    expect(externalProjectsSearch.lastPage).toBe(2)
+    expect(result.isRight()).toBe(true)
+
+    if (result.isRight()) {
+      expect(result.value.page).toBe(2)
+      expect(result.value.hasNextPage).toBe(true)
     }
   })
 

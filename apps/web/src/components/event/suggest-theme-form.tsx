@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { actionSuggestEventTheme } from '@/server/actions/suggest-event-theme'
 
 export function SuggestThemeForm({ eventId, eventSlug }: { eventId: string; eventSlug: string }) {
-  const router = useRouter()
+  const queryClient = useQueryClient()
   const [pending, startTransition] = useTransition()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -33,12 +33,13 @@ export function SuggestThemeForm({ eventId, eventSlug }: { eventId: string; even
       toast.success(result.message)
       setTitle('')
       setDescription('')
-      router.refresh()
+      await queryClient.invalidateQueries({ queryKey: ['event-theme-selection', eventSlug] })
     })
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="w-full max-w-xl space-y-4 border border-border p-4">
+      <h2 className="text-lg font-medium">Sugerir tema</h2>
       <div className="space-y-2">
         <Label htmlFor="theme-title">Título</Label>
         <Input id="theme-title" value={title} onChange={(e) => setTitle(e.target.value)} required disabled={pending} />

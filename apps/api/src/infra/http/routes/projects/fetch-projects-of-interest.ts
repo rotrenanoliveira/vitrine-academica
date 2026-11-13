@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 import { makeFetchProjectsOfInterestController } from '../../factories/project-tag/make-fetch-projects-of-interest-controller'
+import { projectHttpSchema } from '../../schemas/project-schemas'
 
 const projectSchema = z.object({
   id: z.string(),
@@ -30,7 +31,7 @@ export async function fetchProjectsOfInterestRoute(app: FastifyInstance) {
         }),
         response: {
           200: z.object({
-            projects: z.array(projectSchema),
+            projects: z.array(projectHttpSchema),
           }),
           404: z.object({
             message: z.string(),

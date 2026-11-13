@@ -80,6 +80,8 @@ function startScheduler() {
 
   app.log.info(
     '[Agendador]: ligado, verifica projetos agendados, fases de eventos e promoções vencidas a cada 30 segundos',
+  )
+
   startNewsletterScheduler(app.log)
 
   app.log.info(

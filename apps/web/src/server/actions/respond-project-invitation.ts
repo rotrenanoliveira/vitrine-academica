@@ -7,6 +7,7 @@ import { revalidateProjectMembers } from '../revalidate-project-members'
 const respondProjectInvitationSchema = z.object({
   'invitation-id': z.uuid('Convite inválido.'),
   'project-id': z.uuid('Projeto inválido.'),
+  'project-slug': z.string().min(1, 'Slug inválido.'),
   status: z.enum(['ACCEPTED', 'REJECTED'], 'Resposta inválida.'),
 })
 
@@ -21,7 +22,7 @@ export async function actionRespondProjectInvitation(data: FormData) {
   }
 
   const invitationId = formResult.data['invitation-id']
-  const projectId = formResult.data['project-id']
+  const projectSlug = formResult.data['project-slug']
   const status = formResult.data.status
 
   const [_, responseError] = await respondProjectInvitation({ invitationId, status })
@@ -30,7 +31,7 @@ export async function actionRespondProjectInvitation(data: FormData) {
     return { success: false, message: responseError.message ?? 'Não foi possível responder ao convite.' }
   }
 
-  revalidateProjectMembers(projectId)
+  revalidateProjectMembers(projectSlug)
 
   return { success: true, message: status === 'ACCEPTED' ? 'Convite aceito.' : 'Convite recusado.' }
 }

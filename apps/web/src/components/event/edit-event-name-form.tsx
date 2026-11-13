@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -17,7 +17,7 @@ export function EditEventNameForm({
   eventSlug: string
   initialName: string | null
 }) {
-  const router = useRouter()
+  const queryClient = useQueryClient()
   const [pending, startTransition] = useTransition()
   const [name, setName] = useState(initialName ?? '')
 
@@ -30,12 +30,12 @@ export function EditEventNameForm({
         return
       }
       toast.success(result.message)
-      router.refresh()
+      await queryClient.invalidateQueries({ queryKey: ['event-theme-selection'] })
     })
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex max-w-lg flex-wrap items-end gap-3">
+    <form onSubmit={onSubmit} className="flex max-w-lg flex-wrap items-end gap-3 border border-border p-4">
       <div className="min-w-64 flex-1 space-y-2">
         <Label htmlFor="edit-event-name">Título de exibição</Label>
         <Input

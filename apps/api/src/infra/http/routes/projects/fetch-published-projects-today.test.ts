@@ -36,12 +36,18 @@ describe('(E2E) - GET /api/v1/projects/published/today', () => {
     const response = await request(app.server).get('/api/v1/projects/published/today')
 
     expect(response.status).toBe(200)
+    expect(response.body.total).toBe(1)
     expect(response.body.projects).toEqual([
       expect.objectContaining({
         id: launchedToday.id.toString(),
-        status: 'PUBLISHED',
+        title: launchedToday.title,
+        description: launchedToday.description,
+        coverUrl: null,
+        tags: expect.any(Array),
+        createdAt: expect.any(String),
       }),
     ])
+    expect(response.body.projects[0]).not.toHaveProperty('status')
   })
 
   it('listar hoje: com projeto agendado para hoje, deve retornar 200 sem publicar o projeto', async () => {

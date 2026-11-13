@@ -10,6 +10,7 @@ import type { ProjectTeacherRating, RatingCriterion } from '@/utils/type'
 
 type ProjectTeacherRatingFormProps = {
   projectId: string
+  projectSlug: string
   criteria: RatingCriterion[]
   initialRating: ProjectTeacherRating | null
   teacherName: string
@@ -17,6 +18,7 @@ type ProjectTeacherRatingFormProps = {
 
 export function ProjectTeacherRatingForm({
   projectId,
+  projectSlug,
   criteria,
   initialRating,
   teacherName,
@@ -76,6 +78,7 @@ export function ProjectTeacherRatingForm({
       </div>
 
       <input type="hidden" name="project-id" value={projectId} />
+      <input type="hidden" name="project-slug" value={projectSlug} />
       <input type="hidden" name="scores" value={scoresPayload} />
 
       <div className="overflow-x-auto">

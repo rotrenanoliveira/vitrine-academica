@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Suspense } from 'react'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,20 +11,14 @@ import {
 import { Button } from '@/components/ui/button'
 import { requireUser } from '@/server/auth/require-user'
 import { MyMembershipsList } from './_components/my-memberships-list'
-import { loadMyMembershipsFilters, type SearchParams } from './search-params'
 
 export const metadata: Metadata = {
   title: 'Minhas instituições',
   description: 'Instituições das quais você faz parte.',
 }
 
-type PageProps = {
-  searchParams: Promise<SearchParams>
-}
-
-export default async function MyInstitutionsPage({ searchParams }: PageProps) {
-  const user = await requireUser()
-  const filters = await loadMyMembershipsFilters(searchParams)
+export default async function MyInstitutionsPage() {
+  await requireUser()
 
   return (
     <div className="flex flex-1 flex-col">
@@ -54,9 +47,7 @@ export default async function MyInstitutionsPage({ searchParams }: PageProps) {
           </Button>
         </div>
 
-        <Suspense fallback={<p className="text-sm text-muted-foreground">Carregando membresias…</p>}>
-          <MyMembershipsList userId={user.id} filters={filters} />
-        </Suspense>
+        <MyMembershipsList />
       </div>
     </div>
   )

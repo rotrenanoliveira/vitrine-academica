@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 import { makeFetchPublishedProjectsController } from '../../factories/project/make-fetch-published-projects-controller'
+import { projectHttpSchema } from '../../schemas/project-schemas'
 
 const projectSchema = z.object({
   id: z.string(),
@@ -27,7 +28,7 @@ export async function fetchPublishedProjectsRoute(app: FastifyInstance) {
         description: 'Lista todos os projetos com status PUBLISHED',
         response: {
           200: z.object({
-            projects: z.array(projectSchema),
+            projects: z.array(projectHttpSchema),
           }),
         },
       },

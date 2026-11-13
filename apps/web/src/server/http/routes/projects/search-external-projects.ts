@@ -7,13 +7,21 @@ import { api } from '../../api-client'
 
 type Params = {
   q: string
+  page?: number
 }
 
-export async function searchExternalProjects({ q }: Params) {
+type SearchExternalProjectsResponse = {
+  projects: ExternalProject[]
+  page: number
+  perPage: number
+  hasNextPage: boolean
+}
+
+export async function searchExternalProjects({ q, page = 1 }: Params) {
   const [response, responseError] = await fetcher(
     api
-      .get<{ projects: ExternalProject[] }>('api/v1/projects/external-search', {
-        searchParams: { q },
+      .get<SearchExternalProjectsResponse>('api/v1/projects/external-search', {
+        searchParams: { q, page },
         cache: 'no-store',
       })
       .json(),
@@ -24,4 +32,4 @@ export async function searchExternalProjects({ q }: Params) {
   return response
 }
 
-export const getCachedSearchExternalProjects = cache(async (q: string) => searchExternalProjects({ q }))
+export const getCachedSearchExternalProjects = cache(async (q: string, page = 1) => searchExternalProjects({ q, page }))

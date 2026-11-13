@@ -6,6 +6,7 @@ import { revalidateProjectMembers } from '../revalidate-project-members'
 
 const inviteProjectMemberSchema = z.object({
   'project-id': z.uuid('Projeto inválido.'),
+  'project-slug': z.string().min(1, 'Slug inválido.'),
   email: z.email('Informe um e-mail válido.'),
 })
 
@@ -20,6 +21,7 @@ export async function actionInviteProjectMember(data: FormData) {
   }
 
   const projectId = formResult.data['project-id']
+  const projectSlug = formResult.data['project-slug']
   const email = formResult.data.email
 
   const [_, responseError] = await inviteProjectMember({ projectId, email })
@@ -28,7 +30,7 @@ export async function actionInviteProjectMember(data: FormData) {
     return { success: false, message: responseError.message ?? 'Não foi possível enviar o convite.' }
   }
 
-  revalidateProjectMembers(projectId)
+  revalidateProjectMembers(projectSlug)
 
   return { success: true, message: 'Convite enviado.' }
 }

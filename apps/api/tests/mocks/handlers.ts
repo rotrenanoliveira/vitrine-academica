@@ -18,7 +18,10 @@ export const handlers = [
     const search = url.searchParams.get('search')
 
     if (search === 'query sem resultados') {
-      return HttpResponse.json({ results: [] })
+      return HttpResponse.json({
+        results: [],
+        meta: { count: 0, page: 1, per_page: 30 },
+      })
     }
 
     return HttpResponse.json({
@@ -37,6 +40,7 @@ export const handlers = [
           },
         },
       ],
+      meta: { count: 1, page: 1, per_page: 30 },
     })
   }),
 

@@ -1,32 +1,48 @@
 import { type Either, right } from '@/core/either'
-import type { Event, EventPhase } from '../../../enterprise/entities/event'
-import type { EventsRepository } from '../../repositories/events-repository'
+import type { EventPhase, ParticipationScope } from '../../../enterprise/entities/event'
+import type { EventListItem, EventsRepository } from '../../repositories/events-repository'
 
 interface FetchPublicEventsUseCaseRequest {
   page?: number
   perPage?: number
-  institutionId?: string
-  phase?: EventPhase
+  institutionIds?: string[]
+  phases?: EventPhase[]
+  participationScope?: ParticipationScope
 }
 
-type FetchPublicEventsUseCaseResponse = Either<never, { events: Event[] }>
+type FetchPublicEventsUseCaseResponse = Either<
+  never,
+  {
+    events: EventListItem[]
+    total: number
+    page: number
+    perPage: number
+  }
+>
 
 export class FetchPublicEventsUseCase {
   constructor(private readonly eventsRepository: EventsRepository) {}
 
   async execute({
     page = 1,
-    perPage = 20,
-    institutionId,
-    phase,
+    perPage = 30,
+    institutionIds,
+    phases,
+    participationScope,
   }: FetchPublicEventsUseCaseRequest = {}): Promise<FetchPublicEventsUseCaseResponse> {
-    const events = await this.eventsRepository.findManyPublic({
+    const result = await this.eventsRepository.findManyPublic({
       page,
       perPage,
-      institutionId,
-      phase,
+      institutionIds,
+      phases,
+      participationScope,
     })
 
-    return right({ events })
+    return right({
+      events: result.items,
+      total: result.total,
+      page,
+      perPage,
+    })
   }
 }

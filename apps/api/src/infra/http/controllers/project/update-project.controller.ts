@@ -14,6 +14,7 @@ interface UpdateProjectBody {
   title: string
   description: string
   status?: ProjectStatus
+  coverUrl?: string | null
   attachments?: string[]
 }
 
@@ -22,7 +23,7 @@ export class UpdateProjectController {
 
   async handle(
     { projectId, authorId }: UpdateProjectParams,
-    { title, description, status, attachments }: UpdateProjectBody,
+    { title, description, status, coverUrl, attachments }: UpdateProjectBody,
     reply: FastifyReply,
   ) {
     const result = await this.updateProject.execute({
@@ -31,6 +32,7 @@ export class UpdateProjectController {
       title,
       description,
       status,
+      coverUrl,
       attachments,
     })
 

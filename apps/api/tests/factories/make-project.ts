@@ -1,14 +1,18 @@
 const { faker } = require('@faker-js/faker/locale/pt_BR')
 
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
+import { Slug } from '@/core/entities/value-objects/slug'
 import { Project, type ProjectProps } from '@/domain/project/enterprise/entities/project'
 import { db } from '@/infra/database/drizzle/client'
 import { DrizzleProjectsRepository } from '@/infra/database/repositories/drizzle-projects-repository'
 
 export function makeProject(override: Partial<ProjectProps> = {}, id?: UniqueEntityId) {
+  const title = override.title ?? faker.lorem.sentence()
+
   const project = Project.create(
     {
-      title: faker.lorem.sentence(),
+      title,
+      slug: Slug.createFromText(title).value,
       description: faker.lorem.paragraph(),
       author: new UniqueEntityId(),
       ...override,

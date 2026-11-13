@@ -7,6 +7,7 @@ import { revalidateProjects } from '../revalidate-projects'
 
 const updateProjectSchema = z.object({
   'project-id': z.uuid('Projeto inválido.'),
+  'project-slug': z.string().min(1, 'Slug inválido.'),
   title: z.string().min(1, 'Informe o título.').max(200),
   description: z.string().min(1, 'Informe a descrição.'),
   status: projectStatusSchema,
@@ -23,6 +24,7 @@ export async function actionUpdateProject(data: FormData) {
   }
 
   const id = formResult.data['project-id']
+  const slug = formResult.data['project-slug']
   const [_, responseError] = await updateProject({
     id,
     title: formResult.data.title,
@@ -34,7 +36,7 @@ export async function actionUpdateProject(data: FormData) {
     return { success: false, message: responseError.message ?? 'Não foi possível atualizar o projeto.' }
   }
 
-  revalidateProjects(id)
+  revalidateProjects(slug)
 
   return { success: true, message: 'Projeto atualizado.' }
 }

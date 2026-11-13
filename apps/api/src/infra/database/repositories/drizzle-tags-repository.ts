@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 import type { TagsRepository } from '@/domain/tag/application/repositories/tags-repository'
 import type { Tag } from '@/domain/tag/enterprise/entities/tag'
 import type { DrizzleClient } from '../drizzle/client'
@@ -32,6 +32,16 @@ export class DrizzleTagsRepository implements TagsRepository {
     }
 
     return DrizzleTagMapper.toDomain(row)
+  }
+
+  async findManyByIds(ids: string[]): Promise<Tag[]> {
+    if (ids.length === 0) {
+      return []
+    }
+
+    const rows = await this.db.select().from(tags).where(inArray(tags.id, ids))
+
+    return rows.map(DrizzleTagMapper.toDomain)
   }
 
   async create(tag: Tag): Promise<void> {

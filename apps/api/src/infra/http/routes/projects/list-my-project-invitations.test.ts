@@ -60,6 +60,7 @@ describe('(E2E) - GET /api/v1/projects/invitations/me', () => {
           project: {
             id: project.id.toString(),
             title: 'Projeto de teste',
+            slug: project.slug,
           },
           owner: {
             id: owner.id.toString(),

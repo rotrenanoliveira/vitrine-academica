@@ -30,7 +30,7 @@ export function FormUpdateProject({ project, canChangeStatus = true }: FormUpdat
   const [_, handleSubmit, isPending] = useFormState(actionUpdateProject, {
     onSuccess: (message) => {
       toast.success(message)
-      router.push(`/projetos/${project.id}`)
+      router.push(`/projetos/${project.slug}`)
       router.refresh()
     },
     onError: (message) => {
@@ -42,6 +42,7 @@ export function FormUpdateProject({ project, canChangeStatus = true }: FormUpdat
     <form className="space-y-4" onSubmit={handleSubmit}>
       <h2 className="font-heading text-2xl font-semibold">Editar projeto</h2>
       <input type="hidden" name="project-id" value={project.id} />
+      <input type="hidden" name="project-slug" value={project.slug} />
 
       <div className="space-y-2">
         <Label htmlFor="title">Título</Label>

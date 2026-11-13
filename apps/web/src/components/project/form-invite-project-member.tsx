@@ -13,9 +13,10 @@ import { actionInviteProjectMember } from '@/server/actions/invite-project-membe
 
 type FormInviteProjectMemberProps = {
   projectId: string
+  projectSlug: string
 }
 
-export function FormInviteProjectMember({ projectId }: FormInviteProjectMemberProps) {
+export function FormInviteProjectMember({ projectId, projectSlug }: FormInviteProjectMemberProps) {
   const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
 
@@ -38,6 +39,7 @@ export function FormInviteProjectMember({ projectId }: FormInviteProjectMemberPr
         Digite o e-mail de quem tem conta no site. A pessoa recebe o convite e escolhe se aceita.
       </p>
       <input type="hidden" name="project-id" value={projectId} />
+      <input type="hidden" name="project-slug" value={projectSlug} />
 
       <div className="space-y-2">
         <Label htmlFor="member-email">E-mail</Label>

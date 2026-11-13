@@ -2,17 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 import { makeFetchScheduledProjectsController } from '../../factories/project/make-fetch-scheduled-projects-controller'
-
-const projectSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  authorId: z.string(),
-  status: z.enum(['SKETCH', 'SCHEDULED', 'PUBLISHED', 'ARCHIVED']),
-  attachments: z.array(z.string()),
-  tags: z.array(z.string()),
-  createdAt: z.iso.datetime(),
-})
+import { projectListHttpSchema } from '../../schemas/project-schemas'
 
 export async function fetchScheduledProjectsRoute(app: FastifyInstance) {
   const fetchScheduledProjectsController = makeFetchScheduledProjectsController()
@@ -29,7 +19,7 @@ export async function fetchScheduledProjectsRoute(app: FastifyInstance) {
           200: z.object({
             scheduledProjects: z.array(
               z.object({
-                project: projectSchema,
+                project: projectListHttpSchema,
                 publishedIn: z.iso.datetime(),
               }),
             ),

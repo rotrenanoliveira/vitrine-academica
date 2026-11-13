@@ -13,3 +13,12 @@ export async function listMyStarredProjects() {
 
   return response
 }
+
+export async function fetchMyStarredProjectIds() {
+  try {
+    const { items } = await listMyStarredProjects()
+    return items.map((item) => item.project.id)
+  } catch {
+    return [] as string[]
+  }
+}

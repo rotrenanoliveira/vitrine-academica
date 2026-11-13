@@ -1,18 +1,8 @@
-import type { Project } from '@/utils/type'
+import type { ProjectListItem } from '@/utils/type'
 
-export interface TeacherCurationEntry {
-  project: Project
-  teacherAverage: number
-  teacherRatingsCount: number
-}
-
-export interface CommunityCurationEntry {
-  project: Project
-  weightedScore: number
-  starsCount: number
-}
+export type CurationScope = 'board' | 'community' | 'all'
 
 export interface Curation {
-  board: TeacherCurationEntry[]
-  community: CommunityCurationEntry[]
+  total: number
+  projects: ProjectListItem[]
 }

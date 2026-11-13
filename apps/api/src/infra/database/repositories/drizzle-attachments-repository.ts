@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 import type { AttachmentsRepository } from '@/domain/storage/application/repositories/attachments-repository'
 import type { Attachment } from '@/domain/storage/enterprise/entities/attachment'
 import type { DrizzleClient } from '../drizzle/client'
@@ -16,6 +16,16 @@ export class DrizzleAttachmentsRepository implements AttachmentsRepository {
     }
 
     return DrizzleAttachmentMapper.toDomain(row)
+  }
+
+  async findManyByIds(ids: string[]): Promise<Attachment[]> {
+    if (ids.length === 0) {
+      return []
+    }
+
+    const rows = await this.db.select().from(attachments).where(inArray(attachments.id, ids))
+
+    return rows.map(DrizzleAttachmentMapper.toDomain)
   }
 
   async findByKey(storageKey: string): Promise<Attachment | null> {

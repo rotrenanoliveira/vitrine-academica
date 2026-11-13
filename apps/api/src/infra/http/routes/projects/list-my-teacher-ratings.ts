@@ -3,17 +3,7 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 import { makeAuthenticateMiddleware } from '../../factories/auth/make-authenticate-middleware'
 import { makeListMyTeacherRatingsController } from '../../factories/project/make-list-my-teacher-ratings-controller'
-
-const projectSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  authorId: z.string(),
-  status: z.enum(['SKETCH', 'SCHEDULED', 'PUBLISHED', 'ARCHIVED']),
-  attachments: z.array(z.string()),
-  tags: z.array(z.string()),
-  createdAt: z.iso.datetime(),
-})
+import { projectHttpSchema } from '../../schemas/project-schemas'
 
 const teacherRatingSchema = z.object({
   id: z.string(),
@@ -47,7 +37,7 @@ export async function listMyTeacherRatingsRoute(app: FastifyInstance) {
           200: z.object({
             items: z.array(
               z.object({
-                project: projectSchema,
+                project: projectHttpSchema,
                 rating: teacherRatingSchema,
               }),
             ),

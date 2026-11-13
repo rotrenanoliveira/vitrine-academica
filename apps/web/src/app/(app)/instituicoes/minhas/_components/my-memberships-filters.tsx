@@ -16,7 +16,7 @@ const statusLabels = {
 export function MyMembershipsFilters() {
   const [filters, setFilters] = useQueryStates(myMembershipsSearchParams, {
     urlKeys: myMembershipsUrlKeys,
-    shallow: false,
+    shallow: true,
   })
 
   return (

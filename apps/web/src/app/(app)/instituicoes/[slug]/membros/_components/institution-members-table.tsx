@@ -43,7 +43,7 @@ export function InstitutionMembersTable({ data, institutionId, institutionSlug }
         {data.length > 0 ? (
           data.map((member) => (
             <TableRow key={member.id}>
-              <TableCell className="font-mono text-xs">{member.userId}</TableCell>
+              <TableCell className="capitalize">{member.name}</TableCell>
               <TableCell>{roleLabels[member.role]}</TableCell>
               <TableCell>{statusLabels[member.status]}</TableCell>
               <TableCell>{new Date(member.createdAt).toLocaleString('pt-BR')}</TableCell>

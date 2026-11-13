@@ -1,37 +1,9 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import type { Event } from '@/utils/type'
+import type { EventListItem } from '@/utils/type'
+import { eventActionLabel, eventHref, phaseLabels } from './event-utils'
 
-const phaseLabels: Record<Event['phase'], string> = {
-  THEME_SELECTION: 'Escolha de tema',
-  INSTITUTIONAL_SELECTION: 'Seleção institucional',
-  OPEN: 'Aberto',
-  CLOSED: 'Encerrado',
-}
-
-function eventHref(event: Event) {
-  switch (event.phase) {
-    case 'THEME_SELECTION':
-      return `/eventos/${event.slug}/escolha`
-    case 'INSTITUTIONAL_SELECTION':
-      return `/eventos/${event.slug}`
-    default:
-      return `/eventos/${event.slug}`
-  }
-}
-
-function eventActionLabel(event: Event) {
-  switch (event.phase) {
-    case 'THEME_SELECTION':
-      return 'Participar da escolha'
-    case 'INSTITUTIONAL_SELECTION':
-      return 'Aguardando tema'
-    default:
-      return 'Ver detalhes'
-  }
-}
-
-export function EventCard({ event, canManage = false }: { event: Event; canManage?: boolean }) {
+export function EventCard({ event, canManage = false }: { event: EventListItem; canManage?: boolean }) {
   const href = eventHref(event)
   const label = eventActionLabel(event)
   const isWaiting = event.phase === 'INSTITUTIONAL_SELECTION'
@@ -43,8 +15,9 @@ export function EventCard({ event, canManage = false }: { event: Event; canManag
         <h2 className="text-lg font-medium">{event.name ?? event.slug}</h2>
         <span className="text-muted-foreground text-sm">{phaseLabels[event.phase]}</span>
       </div>
+      {event.winner ? <p className="text-sm">Tema: {event.winner}</p> : null}
       <p className="text-muted-foreground text-sm">
-        De {new Date(event.startsAt).toLocaleDateString('pt-BR')} até{' '}
+        Seleção até {new Date(event.themeSelectionEndsAt).toLocaleDateString('pt-BR')} · encerra{' '}
         {new Date(event.endsAt).toLocaleDateString('pt-BR')}
       </p>
       <div className="flex flex-wrap gap-2">

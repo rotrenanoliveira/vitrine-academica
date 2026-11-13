@@ -2,6 +2,7 @@
 
 import { Loading03Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
@@ -22,6 +23,7 @@ type InstitutionStatusActionsProps = {
 
 export function InstitutionStatusActions({ institution }: InstitutionStatusActionsProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [isPending, startTransition] = useTransition()
   const [status, setStatus] = useState(institution.status)
 
@@ -44,6 +46,7 @@ export function InstitutionStatusActions({ institution }: InstitutionStatusActio
 
       if (result.success) {
         toast.success(result.message)
+        void queryClient.invalidateQueries({ queryKey: ['institutions'] })
         router.refresh()
         return
       }

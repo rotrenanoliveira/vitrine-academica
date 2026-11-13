@@ -3,139 +3,240 @@
   "dialect": "postgres",
   "id": "0939e344-6d3b-48f5-86cd-286747ac5f3a",
   "prevIds": [
-    "16f2852c-3579-4ca9-a825-bbf241fe3480",
-    "e36e88cd-42c8-4bc7-91c1-bc396ce82a7b",
-    "efbcb8bf-8b5d-471d-8190-69c7a488cbfe"
+    "e7f52c34-8a59-44e6-90b0-870a5c59762b"
   ],
   "ddl": [
     {
-      "values": ["CREATE", "UPDATE", "DELETE", "LOGIN", "LOGOUT", "EXPORT"],
+      "values": [
+        "CREATE",
+        "UPDATE",
+        "DELETE",
+        "LOGIN",
+        "LOGOUT",
+        "EXPORT"
+      ],
       "name": "audit_log_action_enum",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["SUCCESS", "FAILURE"],
+      "values": [
+        "SUCCESS",
+        "FAILURE"
+      ],
       "name": "audit_log_status_enum",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["ACTIVE", "UNSUBSCRIBED", "BOUNCED"],
+      "values": [
+        "ACTIVE",
+        "UNSUBSCRIBED",
+        "BOUNCED"
+      ],
       "name": "subscription_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["PENDING", "APPROVED", "REJECTED"],
+      "values": [
+        "PENDING",
+        "APPROVED",
+        "REJECTED"
+      ],
       "name": "call_application_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["OPEN", "CLOSED"],
+      "values": [
+        "OPEN",
+        "CLOSED"
+      ],
       "name": "call_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["PENDING", "APPROVED", "REJECTED"],
+      "values": [
+        "PENDING",
+        "APPROVED",
+        "REJECTED"
+      ],
       "name": "event_registration_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["PENDING", "APPROVED", "REJECTED", "HIDDEN"],
+      "values": [
+        "PENDING",
+        "APPROVED",
+        "REJECTED",
+        "HIDDEN"
+      ],
       "name": "event_theme_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["THEME_SELECTION", "INSTITUTIONAL_SELECTION", "OPEN", "CLOSED"],
+      "values": [
+        "THEME_SELECTION",
+        "INSTITUTIONAL_SELECTION",
+        "OPEN",
+        "CLOSED"
+      ],
       "name": "event_phase",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["GLOBAL", "INSTITUTION"],
+      "values": [
+        "GLOBAL",
+        "INSTITUTION"
+      ],
       "name": "participation_scope",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["STUDENT", "PROFESSOR", "TEACHER", "MANAGER", "ADMINISTRATIVE_OFFICE"],
+      "values": [
+        "STUDENT",
+        "PROFESSOR",
+        "TEACHER",
+        "MANAGER",
+        "ADMINISTRATIVE_OFFICE"
+      ],
       "name": "institution_member_role",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["ACTIVE", "INACTIVE", "SUSPENDED", "FINISHED", "PENDING", "REJECTED"],
+      "values": [
+        "ACTIVE",
+        "INACTIVE",
+        "SUSPENDED",
+        "FINISHED",
+        "PENDING",
+        "REJECTED"
+      ],
       "name": "institution_member_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["STUDENT", "PROFESSOR", "TEACHER", "MANAGER", "ADMINISTRATIVE_OFFICE"],
+      "values": [
+        "STUDENT",
+        "PROFESSOR",
+        "TEACHER",
+        "MANAGER",
+        "ADMINISTRATIVE_OFFICE"
+      ],
       "name": "institution_membership_request_role",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["PENDING", "APPROVED", "REJECTED"],
+      "values": [
+        "PENDING",
+        "APPROVED",
+        "REJECTED"
+      ],
       "name": "institution_membership_request_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["SEED", "USER_REGISTRATION", "ADMIN"],
+      "values": [
+        "SEED",
+        "USER_REGISTRATION",
+        "ADMIN"
+      ],
       "name": "institution_origin",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["ACTIVE", "INACTIVE", "SUSPENDED", "ARCHIVED"],
+      "values": [
+        "ACTIVE",
+        "INACTIVE",
+        "SUSPENDED",
+        "ARCHIVED"
+      ],
       "name": "institution_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["UNIVERSITY", "COLLEGE", "CENTER", "TECHNICAL_COLLEGE", "OTHER"],
+      "values": [
+        "UNIVERSITY",
+        "COLLEGE",
+        "CENTER",
+        "TECHNICAL_COLLEGE",
+        "OTHER"
+      ],
       "name": "institution_type",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["ACTIVE", "INACTIVE"],
+      "values": [
+        "ACTIVE",
+        "INACTIVE"
+      ],
       "name": "preference_tag_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["PENDING", "ACCEPTED", "REJECTED"],
+      "values": [
+        "PENDING",
+        "ACCEPTED",
+        "REJECTED"
+      ],
       "name": "project_member_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["SKETCH", "SCHEDULED", "PUBLISHED", "ARCHIVED"],
+      "values": [
+        "SKETCH",
+        "SCHEDULED",
+        "PUBLISHED",
+        "ARCHIVED"
+      ],
       "name": "project_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["PENDING", "SENT", "FAILED"],
+      "values": [
+        "PENDING",
+        "SENT",
+        "FAILED"
+      ],
       "name": "notification_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["USER", "STUDENT", "PROFESSOR", "ADMIN"],
+      "values": [
+        "USER",
+        "STUDENT",
+        "PROFESSOR",
+        "ADMIN"
+      ],
       "name": "user_role",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["ACTIVE", "INACTIVE", "PENDING", "BLOCKED", "DELETED"],
+      "values": [
+        "ACTIVE",
+        "INACTIVE",
+        "PENDING",
+        "BLOCKED",
+        "DELETED"
+      ],
       "name": "user_status",
       "entityType": "enums",
       "schema": "public"
@@ -4138,10 +4239,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["account_id"],
+      "columns": [
+        "account_id"
+      ],
       "schemaTo": "public",
       "tableTo": "accounts",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "access_codes_account_id_accounts_id_fkey",
@@ -4151,10 +4256,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "accounts_user_id_users_id_fkey",
@@ -4164,10 +4273,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["session_id"],
+      "columns": [
+        "session_id"
+      ],
       "schemaTo": "public",
       "tableTo": "sessions",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "audit_logs_session_id_sessions_id_fkey",
@@ -4177,10 +4290,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["subscriber_id"],
+      "columns": [
+        "subscriber_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "author_subscriptions_subscriber_id_users_id_fkey",
@@ -4190,10 +4307,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["author_id"],
+      "columns": [
+        "author_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "author_subscriptions_author_id_users_id_fkey",
@@ -4203,10 +4324,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["call_id"],
+      "columns": [
+        "call_id"
+      ],
       "schemaTo": "public",
       "tableTo": "calls",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "call_applications_call_id_calls_id_fkey",
@@ -4216,10 +4341,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["applicant_id"],
+      "columns": [
+        "applicant_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "call_applications_applicant_id_users_id_fkey",
@@ -4229,10 +4358,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["call_id"],
+      "columns": [
+        "call_id"
+      ],
       "schemaTo": "public",
       "tableTo": "calls",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "call_skills_call_id_calls_id_fkey",
@@ -4242,10 +4375,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["tag_id"],
+      "columns": [
+        "tag_id"
+      ],
       "schemaTo": "public",
       "tableTo": "tags",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "call_skills_tag_id_tags_id_fkey",
@@ -4255,10 +4392,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["author_id"],
+      "columns": [
+        "author_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "calls_author_id_users_id_fkey",
@@ -4268,10 +4409,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["event_id"],
+      "columns": [
+        "event_id"
+      ],
       "schemaTo": "public",
       "tableTo": "events",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "event_registrations_event_id_events_id_fkey",
@@ -4281,10 +4426,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["project_id"],
+      "columns": [
+        "project_id"
+      ],
       "schemaTo": "public",
       "tableTo": "projects",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "event_registrations_project_id_projects_id_fkey",
@@ -4294,10 +4443,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["responsible_user_id"],
+      "columns": [
+        "responsible_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "event_registrations_responsible_user_id_users_id_fkey",
@@ -4307,10 +4460,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["reviewed_by_user_id"],
+      "columns": [
+        "reviewed_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "event_registrations_reviewed_by_user_id_users_id_fkey",
@@ -4320,10 +4477,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["event_id"],
+      "columns": [
+        "event_id"
+      ],
       "schemaTo": "public",
       "tableTo": "events",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "event_themes_event_id_events_id_fkey",
@@ -4333,10 +4494,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["author_id"],
+      "columns": [
+        "author_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "event_themes_author_id_users_id_fkey",
@@ -4346,10 +4511,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["moderated_by_user_id"],
+      "columns": [
+        "moderated_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "event_themes_moderated_by_user_id_users_id_fkey",
@@ -4359,10 +4528,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["event_id"],
+      "columns": [
+        "event_id"
+      ],
       "schemaTo": "public",
       "tableTo": "events",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "event_votes_event_id_events_id_fkey",
@@ -4372,10 +4545,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["theme_id"],
+      "columns": [
+        "theme_id"
+      ],
       "schemaTo": "public",
       "tableTo": "event_themes",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "event_votes_theme_id_event_themes_id_fkey",
@@ -4385,10 +4562,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "event_votes_user_id_users_id_fkey",
@@ -4398,10 +4579,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["institution_id"],
+      "columns": [
+        "institution_id"
+      ],
       "schemaTo": "public",
       "tableTo": "institutions",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "events_institution_id_institutions_id_fkey",
@@ -4411,10 +4596,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["institution_id"],
+      "columns": [
+        "institution_id"
+      ],
       "schemaTo": "public",
       "tableTo": "institutions",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "institution_members_institution_id_institutions_id_fkey",
@@ -4424,10 +4613,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "institution_members_user_id_users_id_fkey",
@@ -4437,10 +4630,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["institution_id"],
+      "columns": [
+        "institution_id"
+      ],
       "schemaTo": "public",
       "tableTo": "institutions",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "institution_membership_requests_DujJMog1KHVB_fkey",
@@ -4450,10 +4647,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "institution_membership_requests_user_id_users_id_fkey",
@@ -4463,10 +4664,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["proof_attachment_id"],
+      "columns": [
+        "proof_attachment_id"
+      ],
       "schemaTo": "public",
       "tableTo": "attachments",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "institution_membership_requests_XHj1S13LE2Ue_fkey",
@@ -4476,10 +4681,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["register_by"],
+      "columns": [
+        "register_by"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "institutions_register_by_users_id_fkey",
@@ -4489,10 +4698,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["tag_id"],
+      "columns": [
+        "tag_id"
+      ],
       "schemaTo": "public",
       "tableTo": "tags",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "preference_tags_tag_id_tags_id_fkey",
@@ -4502,10 +4715,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "preference_tags_user_id_users_id_fkey",
@@ -4515,10 +4732,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["project_id"],
+      "columns": [
+        "project_id"
+      ],
       "schemaTo": "public",
       "tableTo": "projects",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "project_members_project_id_projects_id_fkey",
@@ -4528,10 +4749,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "project_members_user_id_users_id_fkey",
@@ -4541,10 +4766,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["project_id"],
+      "columns": [
+        "project_id"
+      ],
       "schemaTo": "public",
       "tableTo": "projects",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "project_scheduled_project_id_projects_id_fkey",
@@ -4554,10 +4783,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["project_id"],
+      "columns": [
+        "project_id"
+      ],
       "schemaTo": "public",
       "tableTo": "projects",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "project_stars_project_id_projects_id_fkey",
@@ -4567,10 +4800,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "project_stars_user_id_users_id_fkey",
@@ -4580,10 +4817,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["project_id"],
+      "columns": [
+        "project_id"
+      ],
       "schemaTo": "public",
       "tableTo": "projects",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "project_tags_project_id_projects_id_fkey",
@@ -4593,10 +4834,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["tag_id"],
+      "columns": [
+        "tag_id"
+      ],
       "schemaTo": "public",
       "tableTo": "tags",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "project_tags_tag_id_tags_id_fkey",
@@ -4606,10 +4851,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["project_id"],
+      "columns": [
+        "project_id"
+      ],
       "schemaTo": "public",
       "tableTo": "projects",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "project_teacher_ratings_project_id_projects_id_fkey",
@@ -4619,10 +4868,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["teacher_id"],
+      "columns": [
+        "teacher_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "project_teacher_ratings_teacher_id_users_id_fkey",
@@ -4632,10 +4885,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["author_id"],
+      "columns": [
+        "author_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "projects_author_id_users_id_fkey",
@@ -4645,10 +4902,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["subscription_id"],
+      "columns": [
+        "subscription_id"
+      ],
       "schemaTo": "public",
       "tableTo": "author_subscriptions",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "publication_notifications_zI1Dp19doTzk_fkey",
@@ -4658,10 +4919,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["project_id"],
+      "columns": [
+        "project_id"
+      ],
       "schemaTo": "public",
       "tableTo": "projects",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "publication_notifications_project_id_projects_id_fkey",
@@ -4671,10 +4936,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["account_id"],
+      "columns": [
+        "account_id"
+      ],
       "schemaTo": "public",
       "tableTo": "accounts",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "sessions_account_id_accounts_id_fkey",
@@ -4684,10 +4953,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "sessions_user_id_users_id_fkey",
@@ -4697,10 +4970,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["rating_id"],
+      "columns": [
+        "rating_id"
+      ],
       "schemaTo": "public",
       "tableTo": "project_teacher_ratings",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "teacher_rating_items_rating_id_project_teacher_ratings_id_fkey",
@@ -4710,10 +4987,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["criterion_id"],
+      "columns": [
+        "criterion_id"
+      ],
       "schemaTo": "public",
       "tableTo": "rating_criteria",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "teacher_rating_items_criterion_id_rating_criteria_id_fkey",
@@ -4722,7 +5003,9 @@
       "table": "teacher_rating_items"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "access_codes_pkey",
       "schema": "public",
@@ -4730,7 +5013,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "accounts_pkey",
       "schema": "public",
@@ -4738,7 +5023,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "attachments_pkey",
       "schema": "public",
@@ -4746,7 +5033,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "audit_logs_pkey",
       "schema": "public",
@@ -4754,7 +5043,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "author_subscriptions_pkey",
       "schema": "public",
@@ -4762,7 +5053,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "call_applications_pkey",
       "schema": "public",
@@ -4770,7 +5063,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "call_skills_pkey",
       "schema": "public",
@@ -4778,7 +5073,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "calls_pkey",
       "schema": "public",
@@ -4786,7 +5083,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "event_registrations_pkey",
       "schema": "public",
@@ -4794,7 +5093,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "event_themes_pkey",
       "schema": "public",
@@ -4802,7 +5103,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "event_votes_pkey",
       "schema": "public",
@@ -4810,7 +5113,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "events_pkey",
       "schema": "public",
@@ -4818,7 +5123,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "institution_members_pkey",
       "schema": "public",
@@ -4826,7 +5133,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "institution_membership_requests_pkey",
       "schema": "public",
@@ -4834,7 +5143,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "institutions_pkey",
       "schema": "public",
@@ -4842,7 +5153,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "preference_tags_pkey",
       "schema": "public",
@@ -4850,7 +5163,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "project_members_pkey",
       "schema": "public",
@@ -4858,7 +5173,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "project_scheduled_pkey",
       "schema": "public",
@@ -4866,7 +5183,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "project_stars_pkey",
       "schema": "public",
@@ -4874,7 +5193,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "project_tags_pkey",
       "schema": "public",
@@ -4882,7 +5203,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "project_teacher_ratings_pkey",
       "schema": "public",
@@ -4890,7 +5213,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "projects_pkey",
       "schema": "public",
@@ -4898,7 +5223,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "publication_notifications_pkey",
       "schema": "public",
@@ -4906,7 +5233,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "rating_criteria_pkey",
       "schema": "public",
@@ -4914,7 +5243,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "sessions_pkey",
       "schema": "public",
@@ -4922,7 +5253,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "tags_pkey",
       "schema": "public",
@@ -4930,7 +5263,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "teacher_rating_items_pkey",
       "schema": "public",
@@ -4938,7 +5273,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "users_pkey",
       "schema": "public",
@@ -4947,7 +5284,9 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "nullsNotDistinct": false,
       "name": "accounts_user_id_key",
       "schema": "public",
@@ -4956,12 +5295,40 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["email"],
+      "columns": [
+        "email"
+      ],
       "nullsNotDistinct": false,
       "name": "users_email_key",
       "schema": "public",
       "table": "users",
       "entityType": "uniques"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "slug",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "projects"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "cover_url",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "projects"
     }
   ],
   "renames": []
