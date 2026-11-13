@@ -21,6 +21,21 @@ export class EventPresenter {
       updatedAt: event.updatedAt?.toISOString() ?? null,
     }
   }
+
+  static toListHTTP(event: Event, winner: string | null, institutionName: string) {
+    return {
+      id: event.id.toString(),
+      institutionId: event.institutionId.toString(),
+      institutionName,
+      slug: event.slug,
+      name: event.name,
+      participationScope: event.participationScope,
+      phase: event.phase,
+      themeSelectionEndsAt: event.themeSelectionEndsAt.toISOString(),
+      endsAt: event.endsAt.toISOString(),
+      winner,
+    }
+  }
 }
 
 export class ThemePresenter {

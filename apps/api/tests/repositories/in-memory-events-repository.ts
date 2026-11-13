@@ -1,12 +1,16 @@
 import type {
+  EventListItem,
   EventsRepository,
   FetchInstitutionEventsParams,
   FetchPublicEventsParams,
+  FetchPublicEventsResult,
 } from '@/domain/event/application/repositories/events-repository'
 import { type Event, EventPhase, ParticipationScope } from '@/domain/event/enterprise/entities/event'
 
 export class InMemoryEventsRepository implements EventsRepository {
   public items: Event[] = []
+  public themeTitlesById = new Map<string, string>()
+  public institutionNamesById = new Map<string, string>()
 
   async findById(id: string): Promise<Event | null> {
     return this.items.find((event) => event.id.toString() === id) ?? null
@@ -16,44 +20,71 @@ export class InMemoryEventsRepository implements EventsRepository {
     return this.items.find((event) => event.slug === slug) ?? null
   }
 
-  async findManyPublic(params: FetchPublicEventsParams = {}): Promise<Event[]> {
+  private toListItem(event: Event): EventListItem {
+    const winnerThemeId = event.winnerThemeId?.toString()
+    const institutionId = event.institutionId.toString()
+
+    return {
+      event,
+      winner: winnerThemeId ? (this.themeTitlesById.get(winnerThemeId) ?? null) : null,
+      institutionName: this.institutionNamesById.get(institutionId) ?? 'Instituição',
+    }
+  }
+
+  private isPubliclyVisible(event: Event, phases?: EventPhase[]): boolean {
+    if (phases && phases.length > 0) {
+      return phases.includes(event.phase)
+    }
+
+    const earlyPhase = event.phase === EventPhase.THEME_SELECTION || event.phase === EventPhase.INSTITUTIONAL_SELECTION
+
+    return event.isPubliclyListed() || (earlyPhase && event.participationScope === ParticipationScope.GLOBAL)
+  }
+
+  async findManyPublic(params: FetchPublicEventsParams = {}): Promise<FetchPublicEventsResult> {
     const page = params.page ?? 1
-    const perPage = params.perPage ?? 20
+    const perPage = params.perPage ?? 30
 
     const filtered = this.items
       .filter((event) => {
-        const earlyPhase =
-          event.phase === EventPhase.THEME_SELECTION || event.phase === EventPhase.INSTITUTIONAL_SELECTION
-        const visible =
-          event.isPubliclyListed() || (earlyPhase && event.participationScope === ParticipationScope.GLOBAL)
+        if (!this.isPubliclyVisible(event, params.phases)) return false
 
-        if (!visible) return false
-        if (params.institutionId && event.institutionId.toString() !== params.institutionId) {
+        if (
+          params.institutionIds &&
+          params.institutionIds.length > 0 &&
+          !params.institutionIds.includes(event.institutionId.toString())
+        ) {
           return false
         }
-        if (params.phase && event.phase !== params.phase) return false
+
+        if (params.participationScope && event.participationScope !== params.participationScope) return false
         return true
       })
       .sort((a, b) => b.startsAt.getTime() - a.startsAt.getTime())
 
     const start = (page - 1) * perPage
-    return filtered.slice(start, start + perPage)
+
+    return {
+      total: filtered.length,
+      items: filtered.slice(start, start + perPage).map((event) => this.toListItem(event)),
+    }
   }
 
-  async findManyByInstitutionId(params: FetchInstitutionEventsParams): Promise<Event[]> {
+  async findManyByInstitutionId(params: FetchInstitutionEventsParams): Promise<EventListItem[]> {
     const page = params.page ?? 1
-    const perPage = params.perPage ?? 20
+    const perPage = params.perPage ?? 30
 
     const filtered = this.items
       .filter((event) => {
         if (event.institutionId.toString() !== params.institutionId) return false
         if (params.phase && event.phase !== params.phase) return false
+        if (params.participationScope && event.participationScope !== params.participationScope) return false
         return true
       })
       .sort((a, b) => b.startsAt.getTime() - a.startsAt.getTime())
 
     const start = (page - 1) * perPage
-    return filtered.slice(start, start + perPage)
+    return filtered.slice(start, start + perPage).map((event) => this.toListItem(event))
   }
 
   async findDueForThemeSelectionClose(now: Date): Promise<Event[]> {

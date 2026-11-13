@@ -1,6 +1,6 @@
 import type { FastifyReply } from 'fastify'
 import type { FetchInstitutionEventsUseCase } from '@/domain/event/application/use-cases/event/fetch-institution-events'
-import type { EventPhase } from '@/domain/event/enterprise/entities/event'
+import type { EventPhase, ParticipationScope } from '@/domain/event/enterprise/entities/event'
 import { InstitutionNotFoundError } from '@/domain/institution/application/_errors/institution-not-found-error'
 import { EventPresenter } from '../../presenters/event-presenter'
 
@@ -9,6 +9,7 @@ interface FetchInstitutionEventsQuery {
   page?: number
   perPage?: number
   phase?: EventPhase
+  participationScope?: ParticipationScope
 }
 
 export class FetchInstitutionEventsController {
@@ -28,7 +29,9 @@ export class FetchInstitutionEventsController {
     }
 
     return reply.status(200).send({
-      events: result.value.events.map(EventPresenter.toHTTP),
+      events: result.value.events.map(({ event, winner, institutionName }) =>
+        EventPresenter.toListHTTP(event, winner, institutionName),
+      ),
     })
   }
 }

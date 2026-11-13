@@ -23,6 +23,19 @@ export const eventHttpSchema = z.object({
   updatedAt: z.iso.datetime().nullable(),
 })
 
+export const eventListItemHttpSchema = z.object({
+  id: z.string(),
+  institutionId: z.string(),
+  institutionName: z.string(),
+  slug: z.string(),
+  name: z.string().nullable(),
+  participationScope: participationScopeSchema,
+  phase: eventPhaseSchema,
+  themeSelectionEndsAt: z.iso.datetime(),
+  endsAt: z.iso.datetime(),
+  winner: z.string().nullable(),
+})
+
 export const themeHttpSchema = z.object({
   id: z.string(),
   eventId: z.string(),
