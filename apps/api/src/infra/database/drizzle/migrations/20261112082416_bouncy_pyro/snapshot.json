@@ -3,9 +3,7 @@
   "dialect": "postgres",
   "id": "6c20d255-6c5e-4da8-bcce-51e45c8777ba",
   "prevIds": [
-    "16f2852c-3579-4ca9-a825-bbf241fe3480",
-    "e36e88cd-42c8-4bc7-91c1-bc396ce82a7b",
-    "efbcb8bf-8b5d-471d-8190-69c7a488cbfe"
+    "e7f52c34-8a59-44e6-90b0-870a5c59762b"
   ],
   "ddl": [
     {
@@ -5076,6 +5074,32 @@
       "schema": "public",
       "table": "users",
       "entityType": "uniques"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "slug",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "projects"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "cover_url",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "projects"
     }
   ],
   "renames": []

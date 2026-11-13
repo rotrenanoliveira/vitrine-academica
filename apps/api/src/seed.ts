@@ -521,26 +521,26 @@ async function seed() {
   console.log('\nCriando estrelas (comunidade)...')
   const projectStars = []
 
-  const starSeeds = [
-    { projectIndex: 0, userIndex: 2, weight: 5, active: true },
-    { projectIndex: 0, userIndex: 3, weight: 1, active: true },
-    { projectIndex: 1, userIndex: 3, weight: 1, active: true },
-    { projectIndex: 1, userIndex: 4, weight: 1, active: true },
-    { projectIndex: 1, userIndex: 5, weight: 1, active: true },
-    { projectIndex: 2, userIndex: 1, weight: 5, active: true },
-    { projectIndex: 3, userIndex: 0, weight: 1, active: false },
-  ] as const
+  // const starSeeds = [
+  //   { projectIndex: 0, userIndex: 2, weight: 5, active: true },
+  //   { projectIndex: 0, userIndex: 3, weight: 1, active: true },
+  //   { projectIndex: 1, userIndex: 3, weight: 1, active: true },
+  //   { projectIndex: 1, userIndex: 4, weight: 1, active: true },
+  //   { projectIndex: 1, userIndex: 5, weight: 1, active: true },
+  //   { projectIndex: 2, userIndex: 1, weight: 5, active: true },
+  //   { projectIndex: 3, userIndex: 0, weight: 1, active: false },
+  // ] as const
 
-  for (const seed of starSeeds) {
-    const { projectStar } = await makeProjectStarOnDatabase({
-      projectId: publishedToday[seed.projectIndex]!.id,
-      userId: users[seed.userIndex]!.id,
-      weight: seed.weight,
-      active: seed.active,
-    })
-    projectStars.push(projectStar)
-  }
-  console.log(`  ✓ ${projectStars.length} estrelas`)
+  // for (const seed of starSeeds) {
+  //   const { projectStar } = await makeProjectStarOnDatabase({
+  //     projectId: publishedToday[seed.projectIndex]!.id,
+  //     userId: users[seed.userIndex]!.id,
+  //     weight: seed.weight,
+  //     active: seed.active,
+  //   })
+  //   projectStars.push(projectStar)
+  // }
+  // console.log(`  ✓ ${projectStars.length} estrelas`)
 
   console.log('\nCriando sessões...')
   const sessions = []
