@@ -1,4 +1,5 @@
 {
+  "root": false,
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": {
     "enabled": true,
@@ -7,7 +8,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!node_modules", "!.next", "!dist", "!build"]
+    "includes": ["**", "!node_modules", "!.next", "!dist", "!build", "!**/*.json", "!**/*.css"]
   },
   "formatter": {
     "enabled": true,

@@ -1,8 +1,8 @@
 import { GetProjectByIdUseCase } from '@/domain/project/application/use-cases/project/get-project-by-id'
 import { db } from '@/infra/database/drizzle/client'
+import { DrizzleProjectMembersRepository } from '@/infra/database/repositories/drizzle-project-members-repository'
 import { DrizzleProjectsRepository } from '@/infra/database/repositories/drizzle-projects-repository'
 import { GetProjectByIdController } from '../../controllers/project/get-project-by-id.controller'
-import { DrizzleProjectMembersRepository } from '@/infra/database/repositories/drizzle-project-members-repository'
 
 export function makeGetProjectByIdController() {
   const projectsRepository = new DrizzleProjectsRepository(db)

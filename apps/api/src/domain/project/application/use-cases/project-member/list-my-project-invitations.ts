@@ -30,7 +30,6 @@ export class ListMyProjectInvitationsUseCase {
     userId,
     status,
   }: ListMyProjectInvitationsUseCaseRequest): Promise<ListMyProjectInvitationsUseCaseResponse> {
-
     const projectMembers = await this.projectMembersRepository.findManyByUserId(userId, status)
 
     if (projectMembers.length === 0) {

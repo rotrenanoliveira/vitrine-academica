@@ -125,9 +125,7 @@ describe('(E2E) - POST /api/v1/calls/:callId/applications/:applicationId/decisio
     const { accessToken } = await authenticateUser()
 
     const response = await request(app.server)
-      .post(
-        `/api/v1/calls/${new UniqueEntityId().toString()}/applications/${new UniqueEntityId().toString()}/decision`,
-      )
+      .post(`/api/v1/calls/${new UniqueEntityId().toString()}/applications/${new UniqueEntityId().toString()}/decision`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ decision: 'APPROVED' })
 
@@ -148,9 +146,7 @@ describe('(E2E) - POST /api/v1/calls/:callId/applications/:applicationId/decisio
 
   it('should not be able to decide an application without authentication', async () => {
     const response = await request(app.server)
-      .post(
-        `/api/v1/calls/${new UniqueEntityId().toString()}/applications/${new UniqueEntityId().toString()}/decision`,
-      )
+      .post(`/api/v1/calls/${new UniqueEntityId().toString()}/applications/${new UniqueEntityId().toString()}/decision`)
       .send({ decision: 'APPROVED' })
 
     expect(response.status).toBe(401)

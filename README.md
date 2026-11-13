@@ -1,60 +1,25 @@
-# Vitrine Acadêmica
+# GitHub Actions
 
-Plataforma para exibir projetos acadêmicos vinculados a instituições (universidades, escolas, etc.). O acesso é feito por código enviado por e-mail (sem senha).
+O CI da Vitrine Acadêmica está em [`.github/workflows/`](.github/workflows/). São três workflows independentes. Todos disparam em qualquer `push` e em pull requests para `main` e `production`. O nome exibido no GitHub é a mensagem do commit ou o título do pull request.
 
-Monorepo com API (`apps/api`) e frontend (`apps/web`).
+Cada job roda em `ubuntu-latest`, com Node.js 24, pnpm `11.25.0` e `pnpm install --frozen-lockfile`.
 
-# Entrega 28/09 - LGPD, Auditoria e Integração com API Externa
+| Workflow | Arquivo | O que executa |
+|----------|---------|----------------|
+| Biome Lint | [`run-biome-lint.yml`](.github/workflows/run-biome-lint.yml) | `pnpm exec biome check .` — lint e formatação do monorepo, com as regras de [`biome.json`](biome.json) |
+| Unit Tests | [`run-unit-tests.yml`](.github/workflows/run-unit-tests.yml) | `pnpm --filter @vitrine-academica/api test:unit:run` — Vitest no projeto `unit` (`**/*.spec.ts` da API) |
+| Integration Tests | [`run-e2e-tests.yml`](.github/workflows/run-e2e-tests.yml) | `pnpm --filter @vitrine-academica/api test:e2e:run` — Vitest no projeto `e2e` (`**/*.test.ts` e `**/*.e2e.spec.ts`) |
 
-Publicação dos documentos de conformidade e reforço de rastreabilidade e descoberta científica:
+Os testes unitários cobrem casos de uso e domínio, sem banco. Os de integração sobem a API com [supertest](https://github.com/ladjs/supertest) e o [MSW](https://mswjs.io/) (`apps/api/tests/mocks/setup-msw.ts`), em série e com timeout de 30s.
 
-- **Termos de Uso** e **Política de Privacidade**: páginas públicas com regras de acesso/perfis, inventário de dados, hipóteses legais da LGPD e direitos dos titulares.
-  - [Termos de Uso](https://vitrineacademica.com/termos-de-uso)
-  - [Política de Privacidade](https://vitrineacademica.com/politica-de-privacidade)
-- **Logs e auditoria**: trilha imutável de ações sensíveis (`CREATE`, `UPDATE`, `DELETE`, `LOGIN`, `LOGOUT`, `EXPORT`) com ator, sessão, recurso e status, alinhada à LGPD.
-- **OpenAlex API**: busca de trabalhos científicos externos na página [Pesquisas científicas](https://vitrineacademica.com/pesquisas-cientificas), via integração com a API pública OpenAlex. 
-- **Veja a nossa documentação desta implementação em:** [OpenAlex API](./docs/2-open-alex-api.md)
+O workflow de integração sobe um Postgres 18 como service container (`vitrine` / banco `vitrine_academica_test`, porta `5432`) e espera o healthcheck `pg_isready` antes dos testes. As variáveis da API (`DATABASE_URL`, `JWT_SECRET`, `COOKIE_SECRET`, Cloudflare R2, Resend e OpenAlex) são definidas no job com valores fictícios de teste. O frontend não entra nesses jobs.
 
-
-## Stack
-
-- **Monorepo:** pnpm + Turbo
-- **API:** Fastify, Zod, JWT, Drizzle ORM
-- **Web:** Next.js (App Router), React, Tailwind
-- **Banco:** PostgreSQL
-- **Serviços:** Cloudflare R2 (arquivos), Resend (e-mail)
-
-## Pré-requisitos
-
-- Node.js ≥ 24
-- pnpm 11
-- PostgreSQL acessível via `DATABASE_URL`
-
-## Como subir
-
-Na raiz do repositório:
+Os mesmos comandos rodam localmente:
 
 ```bash
-cp .env.example .env
-cp apps/web/.env.example apps/web/.env
+pnpm exec biome check .
+pnpm --filter @vitrine-academica/api test:unit:run
+pnpm --filter @vitrine-academica/api test:e2e:run
 ```
 
-Preencha o `.env` da raiz (API). Use `PORT=4000` para bater com o frontend, que aponta para `http://localhost:4000`. Também são necessários `DATABASE_URL`, `COOKIE_SECRET`, `JWT_SECRET` e as variáveis de Cloudflare R2 e Resend — veja [`.env.example`](.env.example).
-
-No `apps/web/.env`, mantenha `NEXT_PUBLIC_API_URL=http://localhost:4000` e adicione `NEXT_PUBLIC_ASSETS_URL` (URL pública dos assets no R2).
-
-```bash
-pnpm install
-pnpm --filter @vitrine-academica/api db:migrate
-pnpm --filter @vitrine-academica/api db:seed   # opcional
-pnpm dev
-```
-
-`pnpm dev` sobe API e web juntos via Turbo.
-
-| Serviço | URL |
-|---------|-----|
-| Web | http://localhost:3000 |
-| API | http://localhost:4000 |
-| Health | http://localhost:4000/health |
-| Swagger | http://localhost:4000/docs |
+Os scripts de teste da API carregam `../../.env.test`. Para a integração local, o Postgres precisa estar acessível pela `DATABASE_URL` desse arquivo. No CI, as variáveis do workflow cobrem esse ambiente.

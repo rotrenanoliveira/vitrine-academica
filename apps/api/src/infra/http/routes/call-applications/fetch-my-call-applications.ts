@@ -17,7 +17,8 @@ export async function fetchMyCallApplicationsRoute(app: FastifyInstance) {
       schema: {
         tags: ['call-applications'],
         summary: 'Listar minhas candidaturas',
-        description: 'Lista as candidaturas do usuário autenticado, da mais recente à mais antiga, com o chamado de cada uma',
+        description:
+          'Lista as candidaturas do usuário autenticado, da mais recente à mais antiga, com o chamado de cada uma',
         response: {
           200: z.object({
             applications: z.array(callApplicationWithCallSchema),

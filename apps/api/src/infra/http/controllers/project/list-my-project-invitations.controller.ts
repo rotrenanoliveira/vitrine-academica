@@ -14,7 +14,11 @@ interface ListMyProjectInvitationsQuery {
 export class ListMyProjectInvitationsController {
   constructor(private readonly listMyProjectInvitations: ListMyProjectInvitationsUseCase) {}
 
-  async handle({ userId }: ListMyProjectInvitationsParams, { status }: ListMyProjectInvitationsQuery, reply: FastifyReply) {
+  async handle(
+    { userId }: ListMyProjectInvitationsParams,
+    { status }: ListMyProjectInvitationsQuery,
+    reply: FastifyReply,
+  ) {
     const result = await this.listMyProjectInvitations.execute({ userId, status })
 
     if (result.isLeft()) {
