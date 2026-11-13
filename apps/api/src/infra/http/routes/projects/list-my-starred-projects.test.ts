@@ -56,9 +56,11 @@ describe('(E2E) - GET /api/v1/me/starred-projects', () => {
       project: {
         id: project.id.toString(),
         title: project.title,
+        slug: project.slug,
         description: project.description,
         authorId: author.id.toString(),
         status: 'PUBLISHED',
+        coverUrl: null,
         attachments: [],
         tags: [],
         createdAt: expect.any(String),

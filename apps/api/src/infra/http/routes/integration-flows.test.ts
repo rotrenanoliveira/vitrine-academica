@@ -27,38 +27,39 @@ describe('(E2E) - Fluxos entre recursos e headers', () => {
     const { accessToken } = await authenticateUser()
     const authorization = `Bearer ${accessToken}`
     const unique = Date.now()
-
-    const projectResponse = await request(app.server)
-      .post('/api/v1/projects')
-      .set('Authorization', authorization)
-      .send({ title: `Projeto do fluxo ${unique}`, description: 'Projeto criado pelo fluxo entre recursos' })
-    const projectId = projectResponse.body.project.id as string
-
-    const publishResponse = await request(app.server)
-      .post(`/api/v1/projects/${projectId}/publish-now`)
-      .set('Authorization', authorization)
+    const title = `Projeto do fluxo ${unique}`
+    const slug = `projeto-do-fluxo-${unique}`
 
     const tagResponse = await request(app.server)
       .post('/api/v1/tags')
       .send({ name: `Tag do fluxo ${unique}` })
     const tagId = tagResponse.body.tag.id as string
 
-    const associationResponse = await request(app.server)
-      .post(`/api/v1/projects/${projectId}/tags`)
+    const projectResponse = await request(app.server)
+      .post('/api/v1/projects')
       .set('Authorization', authorization)
-      .send({ tagId })
+      .send({
+        title,
+        description: 'Projeto criado pelo fluxo entre recursos',
+        slug,
+        tags: [tagId],
+      })
+    const projectId = projectResponse.body.project.id as string
+
+    const publishResponse = await request(app.server)
+      .post(`/api/v1/projects/${projectId}/publish-now`)
+      .set('Authorization', authorization)
 
     const listResponse = await request(app.server).get(`/api/v1/tags/${tagId}/projects`)
 
+    expect(tagResponse.status).toBe(201)
     expect(projectResponse.status).toBe(201)
     expect(publishResponse.status).toBe(200)
-    expect(tagResponse.status).toBe(201)
-    expect(associationResponse.status).toBe(201)
     expect(listResponse.status).toBe(200)
     expect(listResponse.body.projects).toHaveLength(1)
     expect(listResponse.body.projects[0]).toMatchObject({
       id: projectId,
-      title: `Projeto do fluxo ${unique}`,
+      title,
       status: 'PUBLISHED',
     })
   })
