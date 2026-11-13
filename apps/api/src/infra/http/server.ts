@@ -1,13 +1,21 @@
 import { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
+import { CloseExpiredCallsUseCase } from '@/domain/call/application/use-cases/call/close-expired-calls'
+import { CreateProjectFromCallUseCase } from '@/domain/call/application/use-cases/call/create-project-from-call'
 import { AdvanceDueEventPhasesUseCase } from '@/domain/event/application/use-cases/event/advance-due-event-phases'
 import { PublishScheduledProjectsUseCase } from '@/domain/project/application/use-cases/scheduled-project/publish-scheduled-projects'
 import { env } from '@/environment-variables'
 import { db } from '@/infra/database/drizzle/client'
 import { DrizzleAuditLogsRepository } from '@/infra/database/repositories/drizzle-audit-logs-repository'
+import { DrizzleCallApplicationsRepository } from '@/infra/database/repositories/drizzle-call-applications-repository'
+import { DrizzleCallSkillsRepository } from '@/infra/database/repositories/drizzle-call-skills-repository'
+import { DrizzleCallsRepository } from '@/infra/database/repositories/drizzle-calls-repository'
 import { DrizzleEventsRepository } from '@/infra/database/repositories/drizzle-events-repository'
+import { DrizzleProjectMembersRepository } from '@/infra/database/repositories/drizzle-project-members-repository'
 import { DrizzleProjectScheduledRepository } from '@/infra/database/repositories/drizzle-project-scheduled-repository'
+import { DrizzleProjectTagsRepository } from '@/infra/database/repositories/drizzle-project-tags-repository'
 import { DrizzleProjectsRepository } from '@/infra/database/repositories/drizzle-projects-repository'
 import { startAdvanceEventPhaseJob } from '../jobs/advance-event-phase-job'
+import { startCloseExpiredCallsJob } from '../jobs/close-expired-calls-job'
 import { startPublishScheduledProjectsJob } from '../jobs/publish-scheduled-projects-job'
 import { startNewsletterScheduler } from '../jobs/start-newsletter-scheduler'
 import { app } from './app'
@@ -41,10 +49,31 @@ function startScheduler() {
     onError: (error) => app.log.error({ err: error }, '[Event Scheduler]: falha ao avançar fases de eventos'),
   })
 
+  const callsRepository = new DrizzleCallsRepository(db)
+
+  const createProjectFromCall = new CreateProjectFromCallUseCase(
+    callsRepository,
+    new DrizzleCallSkillsRepository(db),
+    new DrizzleCallApplicationsRepository(db),
+    new DrizzleProjectsRepository(db),
+    new DrizzleProjectTagsRepository(db),
+    new DrizzleProjectMembersRepository(db),
+    registerLog,
+  )
+
+  const closeExpiredCalls = new CloseExpiredCallsUseCase(callsRepository, createProjectFromCall, registerLog)
+
+  startCloseExpiredCallsJob({
+    closeExpiredCalls,
+    onClosed: (total) => app.log.info(`[Calls Scheduler]: ${total} chamado(s) encerrado(s) por prazo vencido`),
+    onError: (error, callId) =>
+      app.log.error({ err: error, callId }, '[Calls Scheduler]: falha ao encerrar chamados com prazo vencido'),
+  })
+
   startNewsletterScheduler(app.log)
 
   app.log.info(
-    '[Scheduled]: ligado, verifica projetos agendados, fases de eventos e avisos da newsletter a cada 30 segundos',
+    '[Scheduled]: ligado, verifica projetos agendados, fases de eventos, chamados com prazo vencido e avisos da newsletter a cada 30 segundos',
   )
 }
 
