@@ -72,9 +72,11 @@ describe('(E2E) - GET /api/v1/promotions/active', () => {
       project: {
         id: project.id.toString(),
         title: project.title,
+        slug: project.slug,
         description: project.description,
         authorId: author.id.toString(),
         status: 'PUBLISHED',
+        coverUrl: project.coverUrl,
         attachments: [],
         tags: [],
         createdAt: expect.any(String),
@@ -84,6 +86,9 @@ describe('(E2E) - GET /api/v1/promotions/active', () => {
         name: promoter.name,
       },
     })
+    expect(response.body.page).toBe(1)
+    expect(response.body.limit).toBe(20)
+    expect(typeof response.body.total).toBe('number')
   })
 
   it('should not list a promotion whose validity has passed', async () => {
@@ -185,5 +190,74 @@ describe('(E2E) - GET /api/v1/promotions/active', () => {
 
     expect(response.status).toBe(200)
     expect(response.body.items).toEqual(expect.any(Array))
+    expect(response.body.page).toBe(1)
+    expect(response.body.limit).toBe(20)
+    expect(typeof response.body.total).toBe('number')
+  })
+
+  it('should paginate unique promoted projects', async () => {
+    const { accessToken } = await authenticateUser()
+    const created: string[] = []
+
+    for (let index = 0; index < 3; index++) {
+      const { project, promoter } = await makeProjectWithPromoter()
+      const { promotion } = await makePromotionOnDatabase({
+        projectId: project.id,
+        promoterId: promoter.id,
+        createdAt: new Date(Date.now() - (3 - index) * DAY_IN_MS),
+      })
+      created.push(promotion.id.toString())
+    }
+
+    const page1 = await request(app.server)
+      .get('/api/v1/promotions/active')
+      .query({ page: 1, limit: 2 })
+      .set('Authorization', `Bearer ${accessToken}`)
+
+    const page2 = await request(app.server)
+      .get('/api/v1/promotions/active')
+      .query({ page: 2, limit: 2 })
+      .set('Authorization', `Bearer ${accessToken}`)
+
+    expect(page1.status).toBe(200)
+    expect(page1.body.page).toBe(1)
+    expect(page1.body.limit).toBe(2)
+    expect(page1.body.total).toBeGreaterThanOrEqual(3)
+    expect(page1.body.items).toHaveLength(2)
+
+    expect(page2.status).toBe(200)
+    expect(page2.body.page).toBe(2)
+    expect(page2.body.limit).toBe(2)
+    expect(page2.body.items.length).toBeGreaterThanOrEqual(1)
+
+    const page1Ids = page1.body.items.map((entry: { promotion: { id: string } }) => entry.promotion.id)
+    const page2Ids = page2.body.items.map((entry: { promotion: { id: string } }) => entry.promotion.id)
+    expect(page1Ids.some((id: string) => page2Ids.includes(id))).toBe(false)
+  })
+
+  it('should keep only one entry when the same project has multiple active promotions', async () => {
+    const { accessToken } = await authenticateUser()
+    const { project, promoter: firstPromoter } = await makeProjectWithPromoter()
+    const { user: secondPromoter } = await makeUserOnDatabase()
+
+    const { promotion: older } = await makePromotionOnDatabase({
+      projectId: project.id,
+      promoterId: firstPromoter.id,
+      createdAt: new Date(Date.now() - 2 * DAY_IN_MS),
+    })
+    const { promotion: newer } = await makePromotionOnDatabase({
+      projectId: project.id,
+      promoterId: secondPromoter.id,
+      createdAt: new Date(Date.now() - DAY_IN_MS),
+    })
+
+    const response = await listActive(accessToken)
+    const matches = response.body.items.filter(
+      (entry: { project: { id: string } }) => entry.project.id === project.id.toString(),
+    )
+
+    expect(matches).toHaveLength(1)
+    expect(matches[0].promotion.id).toBe(newer.id.toString())
+    expect(matches[0].promotion.id).not.toBe(older.id.toString())
   })
 })

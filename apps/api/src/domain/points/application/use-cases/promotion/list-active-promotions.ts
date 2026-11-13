@@ -8,6 +8,8 @@ import type { PromotionsRepository } from '../../repositories/promotions-reposit
 
 interface ListActivePromotionsUseCaseRequest {
   now?: Date
+  page?: number
+  limit?: number
 }
 
 export interface ActivePromotionItem {
@@ -16,7 +18,15 @@ export interface ActivePromotionItem {
   promoter: User
 }
 
-type ListActivePromotionsUseCaseResponse = Either<never, { items: ActivePromotionItem[] }>
+type ListActivePromotionsUseCaseResponse = Either<
+  never,
+  {
+    items: ActivePromotionItem[]
+    total: number
+    page: number
+    limit: number
+  }
+>
 
 export class ListActivePromotionsUseCase {
   constructor(
@@ -27,11 +37,13 @@ export class ListActivePromotionsUseCase {
 
   async execute({
     now = new Date(),
+    page = 1,
+    limit = 20,
   }: ListActivePromotionsUseCaseRequest = {}): Promise<ListActivePromotionsUseCaseResponse> {
     const promotions = await this.promotionsRepository.findManyActive(now)
 
     if (promotions.length === 0) {
-      return right({ items: [] })
+      return right({ items: [], total: 0, page, limit })
     }
 
     const projects = await this.projectsRepository.findManyByIds(
@@ -44,19 +56,30 @@ export class ListActivePromotionsUseCase {
     const projectsById = new Map(projects.map((project) => [project.id.toString(), project]))
     const promotersById = new Map(promoters.map((promoter) => [promoter.id.toString(), promoter]))
 
-    const items = promotions
-      .map((promotion) => {
-        const project = projectsById.get(promotion.projectId.toString())
-        const promoter = promotersById.get(promotion.promoterId.toString())
+    const uniqueByProject = new Map<string, ActivePromotionItem>()
 
-        if (!project || !promoter || project.status !== ProjectStatus.PUBLISHED) {
-          return null
-        }
+    for (const promotion of promotions) {
+      const projectId = promotion.projectId.toString()
 
-        return { promotion, project, promoter }
-      })
-      .filter((item): item is ActivePromotionItem => item !== null)
+      if (uniqueByProject.has(projectId)) {
+        continue
+      }
 
-    return right({ items })
+      const project = projectsById.get(projectId)
+      const promoter = promotersById.get(promotion.promoterId.toString())
+
+      if (!project || !promoter || project.status !== ProjectStatus.PUBLISHED) {
+        continue
+      }
+
+      uniqueByProject.set(projectId, { promotion, project, promoter })
+    }
+
+    const allItems = Array.from(uniqueByProject.values())
+    const total = allItems.length
+    const start = (page - 1) * limit
+    const items = allItems.slice(start, start + limit)
+
+    return right({ items, total, page, limit })
   }
 }
