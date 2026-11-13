@@ -66,6 +66,7 @@ import { promoteProjectRoute } from './points/promote-project'
 import { deactivatePreferenceTagRoute } from './preference-tags/deactivate-preference-tag'
 import { fetchUserPreferenceTagsRoute } from './preference-tags/fetch-user-preference-tags'
 import { registerPreferenceTagRoute } from './preference-tags/register-preference-tag'
+import { fetchAuthorPublishedProjectsRoute } from './projects/fetch-author-published-projects'
 import { fetchMyProjectsRoute } from './projects/fetch-my-projects'
 import { fetchProjectsRoute } from './projects/fetch-projects'
 import { fetchProjectsOfInterestRoute } from './projects/fetch-projects-of-interest'
@@ -276,7 +277,9 @@ export async function routes(app: FastifyInstance) {
   await app.register(promoteProjectRoute)
   /** GET /promotions/active */
   await app.register(listActivePromotionsRoute)
-  /** Newsletter routes */
+  /** Newsletter / authors routes */
+  /** GET /authors/:authorId/projects */
+  await app.register(fetchAuthorPublishedProjectsRoute)
   /** POST /authors/:authorId/subscriptions */
   await app.register(subscribeToAuthorRoute)
   /** GET /subscriptions/me */
