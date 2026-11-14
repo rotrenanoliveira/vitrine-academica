@@ -24,6 +24,9 @@ describe('(E2E) - GET /api/v1/institutions/:institutionId/membership-requests', 
 
     expect(response.status).toBe(200)
     expect(response.body.requests.length).toBeGreaterThanOrEqual(1)
+    expect(response.body.requests).toEqual(
+      expect.arrayContaining([expect.objectContaining({ userId: requester.id.toString(), name: requester.name })]),
+    )
   })
 
   it('should not be able to fetch membership requests when not allowed', async () => {

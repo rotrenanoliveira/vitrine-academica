@@ -220,6 +220,7 @@ export const institutionMembershipRequestSchema = z.object({
   id: z.string(),
   institutionId: z.string(),
   userId: z.string(),
+  name: z.string().optional(),
   role: institutionMemberRoleSchema,
   status: institutionMembershipRequestStatusSchema,
   proofAttachmentId: z.string().nullable(),
