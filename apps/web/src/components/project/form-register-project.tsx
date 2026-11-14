@@ -45,7 +45,7 @@ export function FormRegisterProject({ variant = 'page', tags }: FormRegisterProj
       if (variant === 'sheet') {
         router.back()
       } else {
-        router.push('/projetos')
+        router.push('/me/projetos')
       }
       router.refresh()
     },

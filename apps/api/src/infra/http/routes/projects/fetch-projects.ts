@@ -24,10 +24,14 @@ export async function fetchProjectsRoute(app: FastifyInstance) {
           status: z.enum(['SKETCH', 'SCHEDULED', 'PUBLISHED', 'ARCHIVED']).optional(),
           title: z.string().optional(),
           tags: z.union([z.uuid(), z.array(z.uuid())]).optional(),
+          page: z.coerce.number().int().min(1).default(1).describe('Página da listagem'),
+          limit: z.coerce.number().int().min(1).max(100).default(100).describe('Quantidade de itens por página'),
         }),
         response: {
           200: z.object({
             total: z.number(),
+            page: z.number().int().min(1),
+            limit: z.number().int().min(1),
             projects: z.array(projectListHttpSchema),
           }),
           401: z.object({
@@ -50,6 +54,8 @@ export async function fetchProjectsRoute(app: FastifyInstance) {
           status: request.query.status ? ProjectStatus[request.query.status] : undefined,
           title: request.query.title,
           tagIds,
+          page: request.query.page,
+          limit: request.query.limit,
         },
         reply,
       )

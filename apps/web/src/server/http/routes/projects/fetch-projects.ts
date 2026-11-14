@@ -9,14 +9,18 @@ type FetchProjectsParams = {
   status?: ProjectStatus
   title?: string
   tags?: string | string[]
+  page?: number
+  limit?: number
 }
 
 type FetchProjectsResponse = {
   total: number
+  page: number
+  limit: number
   projects: ProjectListItem[]
 }
 
-export async function fetchProjects({ scope, status, title, tags }: FetchProjectsParams = {}) {
+export async function fetchProjects({ scope, status, title, tags, page = 1, limit = 100 }: FetchProjectsParams = {}) {
   const searchParams = new URLSearchParams()
 
   if (scope) searchParams.set('scope', scope)
@@ -27,6 +31,8 @@ export async function fetchProjects({ scope, status, title, tags }: FetchProject
       searchParams.append('tags', tag)
     }
   }
+  searchParams.set('page', page.toString())
+  searchParams.set('limit', limit.toString())
 
   const [response, responseError] = await fetcher(
     api.get<FetchProjectsResponse>('api/v1/projects', { cache: 'no-store', searchParams }).json(),

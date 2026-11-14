@@ -44,7 +44,7 @@ export function MembershipRequestsTable({ data, institutionId, institutionSlug }
         {data.length > 0 ? (
           data.map((request) => (
             <TableRow key={request.id}>
-              <TableCell className="font-mono text-xs">{request.userId}</TableCell>
+              <TableCell className="capitalize">{request.name ?? request.userId}</TableCell>
               <TableCell>{roleLabels[request.role]}</TableCell>
               <TableCell>{statusLabels[request.status]}</TableCell>
               <TableCell>

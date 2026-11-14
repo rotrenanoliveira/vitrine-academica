@@ -14,6 +14,8 @@ interface FetchProjectsRequest {
   status?: ProjectStatus
   title?: string
   tagIds?: string[]
+  page?: number
+  limit?: number
 }
 
 export class FetchProjectsController {
@@ -24,7 +26,7 @@ export class FetchProjectsController {
     private readonly tagsRepository: TagsRepository,
   ) {}
 
-  async handle({ userId, scope, status, title, tagIds }: FetchProjectsRequest, reply: FastifyReply) {
+  async handle({ userId, scope, status, title, tagIds, page, limit }: FetchProjectsRequest, reply: FastifyReply) {
     if (scope === 'user' && !userId) {
       return reply.status(401).send({
         message: 'Não autenticado.',
@@ -55,9 +57,11 @@ export class FetchProjectsController {
       status,
       title,
       tagIds: resolvedTagIds && resolvedTagIds.length > 0 ? resolvedTagIds : undefined,
+      page,
+      limit,
     })
 
-    const projects = result.value.projects
+    const { projects, total, page: currentPage, limit: currentLimit } = result.value
 
     const coverAttachmentIds = [
       ...new Set(
@@ -80,7 +84,9 @@ export class FetchProjectsController {
     const nameByTagId = new Map(tags.map((tag) => [tag.id.toString(), tag.name]))
 
     return reply.status(200).send({
-      total: projects.length,
+      total,
+      page: currentPage,
+      limit: currentLimit,
       projects: projects.map((project) => {
         const coverUrl = project.coverUrl ? (urlByAttachmentId.get(project.coverUrl) ?? null) : null
         const tagNames = project.tags
