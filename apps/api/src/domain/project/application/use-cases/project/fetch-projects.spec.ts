@@ -150,6 +150,33 @@ describe('(UC) - Fetch Projects', () => {
 
     if (result.isRight()) {
       expect(result.value.projects).toHaveLength(0)
+      expect(result.value.total).toBe(0)
+    }
+  })
+
+  it('should be able to paginate projects and return the total count', async () => {
+    const { project: first } = makeProject({
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+    })
+    const { project: second } = makeProject({
+      createdAt: new Date('2024-02-01T00:00:00.000Z'),
+    })
+    const { project: third } = makeProject({
+      createdAt: new Date('2024-03-01T00:00:00.000Z'),
+    })
+
+    projectsRepository.items.push(first, second, third)
+
+    const result = await sut.execute({ page: 2, limit: 1 })
+
+    expect(result.isRight()).toBeTruthy()
+
+    if (result.isRight()) {
+      expect(result.value.total).toBe(3)
+      expect(result.value.page).toBe(2)
+      expect(result.value.limit).toBe(1)
+      expect(result.value.projects).toHaveLength(1)
+      expect(result.value.projects[0]?.id.toString()).toBe(second.id.toString())
     }
   })
 })

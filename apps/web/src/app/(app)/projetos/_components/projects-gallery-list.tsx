@@ -6,6 +6,9 @@ import { ProjectGalleryCards } from '@/components/project/project-gallery-cards'
 import { Skeleton } from '@/components/ui/skeleton'
 import { fetchProjects } from '@/server/http/routes/projects/fetch-projects'
 import { projectsSearchParams, projectsUrlKeys } from '../search-params'
+import { ProjectsPagination } from './projects-pagination'
+
+const PAGE_LIMIT = 100
 
 function ProjectsGallerySkeleton() {
   return (
@@ -38,13 +41,16 @@ export function ProjectsGalleryList() {
 
   const title = filters.title?.trim() || undefined
   const tags = filters.tags && filters.tags.length > 0 ? filters.tags : undefined
+  const page = filters.page > 0 ? filters.page : 1
 
   const { data, isPending, isError } = useQuery({
-    queryKey: ['projects', { scope: 'all', status: 'PUBLISHED', title, tags }],
+    queryKey: ['projects', { scope: 'all', status: 'PUBLISHED', title, tags, page, limit: PAGE_LIMIT }],
     queryFn: () =>
       fetchProjects({
         scope: 'all',
         status: 'PUBLISHED',
+        page,
+        limit: PAGE_LIMIT,
         ...(title ? { title } : {}),
         ...(tags ? { tags } : {}),
       }),
@@ -62,11 +68,16 @@ export function ProjectsGalleryList() {
     return <p className="text-sm text-muted-foreground">Nenhum projeto encontrado.</p>
   }
 
+  const hasNextPage = data.page * data.limit < data.total
+
   return (
-    <ProjectGalleryCards
-      projects={data.projects}
-      title="Sala de Exposição"
-      description="Explore os projetos publicados no acervo."
-    />
+    <div className="flex flex-col gap-8">
+      <ProjectGalleryCards
+        projects={data.projects}
+        title="Sala de Exposição"
+        description="Explore os projetos publicados no acervo."
+      />
+      <ProjectsPagination page={data.page} hasNextPage={hasNextPage} />
+    </div>
   )
 }
