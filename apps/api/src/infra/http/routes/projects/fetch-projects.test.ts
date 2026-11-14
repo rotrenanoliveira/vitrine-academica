@@ -60,4 +60,38 @@ describe('(E2E) - GET /api/v1/projects', () => {
     expect(response.status).toBe(200)
     expect(response.body.total).toBe(2)
   })
+
+  it('should be able to paginate projects', async () => {
+    const { user } = await makeUserOnDatabase()
+    const titlePrefix = `Paginação ${user.id.toString().slice(0, 8)}`
+
+    await makeProjectOnDatabase({
+      author: user.id,
+      title: `${titlePrefix} A`,
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+    })
+    const { project: second } = await makeProjectOnDatabase({
+      author: user.id,
+      title: `${titlePrefix} B`,
+      createdAt: new Date('2024-02-01T00:00:00.000Z'),
+    })
+    await makeProjectOnDatabase({
+      author: user.id,
+      title: `${titlePrefix} C`,
+      createdAt: new Date('2024-03-01T00:00:00.000Z'),
+    })
+
+    const response = await request(app.server).get('/api/v1/projects').query({
+      title: titlePrefix,
+      page: 2,
+      limit: 1,
+    })
+
+    expect(response.status).toBe(200)
+    expect(response.body.total).toBe(3)
+    expect(response.body.page).toBe(2)
+    expect(response.body.limit).toBe(1)
+    expect(response.body.projects).toHaveLength(1)
+    expect(response.body.projects[0].id).toBe(second.id.toString())
+  })
 })

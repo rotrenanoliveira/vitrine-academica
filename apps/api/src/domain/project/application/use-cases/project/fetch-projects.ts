@@ -7,9 +7,19 @@ interface FetchProjectsUseCaseRequest {
   status?: ProjectStatus
   tagIds?: string[]
   title?: string
+  page?: number
+  limit?: number
 }
 
-type FetchProjectsUseCaseResponse = Either<never, { projects: Project[] }>
+type FetchProjectsUseCaseResponse = Either<
+  never,
+  {
+    projects: Project[]
+    total: number
+    page: number
+    limit: number
+  }
+>
 
 export class FetchProjectsUseCase {
   constructor(
@@ -17,7 +27,13 @@ export class FetchProjectsUseCase {
     private readonly projectTagsRepository: ProjectTagsRepository,
   ) {}
 
-  async execute({ status, tagIds, title }: FetchProjectsUseCaseRequest): Promise<FetchProjectsUseCaseResponse> {
+  async execute({
+    status,
+    tagIds,
+    title,
+    page = 1,
+    limit = 100,
+  }: FetchProjectsUseCaseRequest): Promise<FetchProjectsUseCaseResponse> {
     let ids: string[] | undefined
 
     if (tagIds) {
@@ -25,17 +41,26 @@ export class FetchProjectsUseCase {
       ids = [...new Set(projectTags.map((projectTag) => projectTag.projectId.toString()))]
 
       if (ids.length === 0) {
-        return right({ projects: [] })
+        return right({ projects: [], total: 0, page, limit })
       }
     }
 
     const normalizedTitle = title?.trim()
-    const projects = await this.projectsRepository.findMany({
+    const filters = {
       status,
       title: normalizedTitle ? normalizedTitle : undefined,
       ids,
-    })
+    }
 
-    return right({ projects })
+    const [total, projects] = await Promise.all([
+      this.projectsRepository.countMany(filters),
+      this.projectsRepository.findMany({
+        ...filters,
+        page,
+        limit,
+      }),
+    ])
+
+    return right({ projects, total, page, limit })
   }
 }
