@@ -13,7 +13,7 @@ const statusLabels = {
 export function MembershipRequestsFilters() {
   const [filters, setFilters] = useQueryStates(membershipRequestsSearchParams, {
     urlKeys: membershipRequestsUrlKeys,
-    shallow: false,
+    shallow: true,
   })
 
   return (

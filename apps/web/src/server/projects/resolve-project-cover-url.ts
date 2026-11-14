@@ -4,7 +4,7 @@ import type { Project } from '@/utils/type'
 import { getAttachment } from '../http/routes/attachments/get-attachment'
 
 export async function resolveProjectCoverUrl(project: Project): Promise<string | null> {
-  const coverAttachmentId = project.attachments[0]
+  const coverAttachmentId = project.coverUrl
 
   if (!coverAttachmentId) {
     return null

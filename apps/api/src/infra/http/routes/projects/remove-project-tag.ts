@@ -1,20 +1,9 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
-import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
 import { makeAuthenticateMiddleware } from '../../factories/auth/make-authenticate-middleware'
 import { makeRemoveProjectTagController } from '../../factories/project-tag/make-remove-project-tag-controller'
-
-const projectSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  authorId: z.string(),
-  status: z.nativeEnum(ProjectStatus),
-  attachments: z.array(z.string()),
-  tags: z.array(z.string()),
-  createdAt: z.iso.datetime(),
-})
+import { projectHttpSchema } from '../../schemas/project-schemas'
 
 export async function removeProjectTagRoute(app: FastifyInstance) {
   const removeProjectTagController = makeRemoveProjectTagController()
@@ -35,7 +24,7 @@ export async function removeProjectTagRoute(app: FastifyInstance) {
         }),
         response: {
           200: z.object({
-            project: projectSchema,
+            project: projectHttpSchema,
           }),
           400: z.object({
             message: z.string(),

@@ -2,6 +2,7 @@
 
 import { Loading03Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -11,14 +12,18 @@ import { actionRespondProjectInvitation } from '@/server/actions/respond-project
 type ProjectInvitationActionsProps = {
   invitationId: string
   projectId: string
+  projectSlug: string
 }
 
-export function ProjectInvitationActions({ invitationId, projectId }: ProjectInvitationActionsProps) {
+export function ProjectInvitationActions({ invitationId, projectId, projectSlug }: ProjectInvitationActionsProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
 
   const options = {
     onSuccess: (message?: string) => {
       toast.success(message)
+      void queryClient.invalidateQueries({ queryKey: ['me', 'invitations'] })
+      void queryClient.invalidateQueries({ queryKey: ['me', 'projects'] })
       router.refresh()
     },
     onError: (message: string) => {
@@ -36,6 +41,7 @@ export function ProjectInvitationActions({ invitationId, projectId }: ProjectInv
       <form onSubmit={handleAccept}>
         <input type="hidden" name="invitation-id" value={invitationId} />
         <input type="hidden" name="project-id" value={projectId} />
+        <input type="hidden" name="project-slug" value={projectSlug} />
         <input type="hidden" name="status" value="ACCEPTED" />
         <Button type="submit" disabled={isPending}>
           {!isAccepting && <span>Aceitar</span>}
@@ -46,6 +52,7 @@ export function ProjectInvitationActions({ invitationId, projectId }: ProjectInv
       <form onSubmit={handleReject}>
         <input type="hidden" name="invitation-id" value={invitationId} />
         <input type="hidden" name="project-id" value={projectId} />
+        <input type="hidden" name="project-slug" value={projectSlug} />
         <input type="hidden" name="status" value="REJECTED" />
         <Button type="submit" variant="outline" disabled={isPending}>
           {!isRejecting && <span>Recusar</span>}

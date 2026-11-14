@@ -4,8 +4,9 @@ export function revalidateCalls(id?: string) {
   updateTag('calls')
   revalidatePath('/chamados')
   revalidatePath('/chamados/novo')
-  revalidatePath('/chamados/meus')
-  revalidatePath('/chamados/candidaturas')
+  revalidatePath('/me')
+  revalidatePath('/me/chamados')
+  revalidatePath('/me/candidaturas')
 
   if (id) {
     revalidatePath(`/chamados/${id}`)

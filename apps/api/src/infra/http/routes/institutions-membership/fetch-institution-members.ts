@@ -22,7 +22,7 @@ export async function fetchInstitutionMembersRoute(app: FastifyInstance) {
         }),
         response: {
           200: z.object({
-            members: z.array(institutionMemberSchema),
+            members: z.array(institutionMemberSchema.extend({ name: z.string() })),
           }),
           401: messageSchema,
           403: messageSchema,

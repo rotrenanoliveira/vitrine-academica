@@ -6,11 +6,13 @@ export const projectStatusEnum = pgEnum('project_status', ['SKETCH', 'SCHEDULED'
 const projectsTable = pgTable('projects', {
   id: text().notNull().primaryKey(),
   title: text().notNull(),
+  slug: text().notNull(),
   description: text().notNull(),
   authorId: text('author_id')
     .notNull()
     .references(() => users.id),
   status: projectStatusEnum('status').notNull().default('SKETCH'),
+  coverUrl: text('cover_url'),
   attachments: text('attachments').array().notNull().default([]),
   tags: text('tags').array().notNull().default([]),
   createdAt: timestamp('created_at').notNull().defaultNow(),

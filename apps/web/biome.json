@@ -23,7 +23,9 @@
         "noStaticOnlyClass": "off"
       },
       "a11y": {
-        "noRedundantAlt": "off"
+        "noRedundantAlt": "off",
+        "useSemanticElements": "off",
+        "useKeyWithClickEvents": "off"
       },
       "correctness": {
         "noUnusedImports": "warn",

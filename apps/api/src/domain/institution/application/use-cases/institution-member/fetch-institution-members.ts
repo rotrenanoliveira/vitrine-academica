@@ -1,4 +1,6 @@
 import { type Either, left, right } from '@/core/either'
+import type { UsersRepository } from '@/domain/identity/application/repositories/users-repository'
+import type { User } from '@/domain/identity/enterprise/entities/user'
 import type { InstitutionMember } from '../../../enterprise/entities/institution-member'
 import { InstitutionNotFoundError } from '../../_errors/institution-not-found-error'
 import { NotAllowedToManageInstitutionError } from '../../_errors/not-allowed-to-manage-institution-error'
@@ -11,15 +13,21 @@ interface FetchInstitutionMembersUseCaseRequest {
   actorId: string
 }
 
+export interface InstitutionMemberItem {
+  member: InstitutionMember
+  user: User
+}
+
 type FetchInstitutionMembersUseCaseResponse = Either<
   InstitutionNotFoundError | NotAllowedToManageInstitutionError,
-  { members: InstitutionMember[] }
+  { members: InstitutionMemberItem[] }
 >
 
 export class FetchInstitutionMembersUseCase {
   constructor(
     private readonly institutionsRepository: InstitutionsRepository,
     private readonly institutionMembersRepository: InstitutionMembersRepository,
+    private readonly usersRepository: UsersRepository,
   ) {}
 
   async execute({
@@ -38,7 +46,19 @@ export class FetchInstitutionMembersUseCase {
       return left(new NotAllowedToManageInstitutionError())
     }
 
-    const members = await this.institutionMembersRepository.findManyByInstitutionId(institutionId)
+    const institutionMembers = await this.institutionMembersRepository.findManyByInstitutionId(institutionId)
+
+    const users = await Promise.all(institutionMembers.map((member) => this.usersRepository.findById(member.userId)))
+
+    const members = institutionMembers.flatMap((member, index) => {
+      const user = users[index]
+
+      if (!user) {
+        return []
+      }
+
+      return [{ member, user }]
+    })
 
     return right({ members })
   }

@@ -10,6 +10,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import { requireUser } from '@/server/auth/require-user'
+import { getCachedTags } from '@/server/http/routes/tags/fetch-tags'
 
 export const metadata: Metadata = {
   title: 'Novo projeto',
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
 
 export default async function NewProjectPage() {
   await requireUser()
+  const { tags } = await getCachedTags()
 
   return (
     <div className="flex flex-1 flex-col">
@@ -36,7 +38,7 @@ export default async function NewProjectPage() {
 
       <div className="flex flex-1 items-start justify-center px-4 py-8">
         <div className="w-full max-w-lg border border-border p-6">
-          <FormRegisterProject variant="page" />
+          <FormRegisterProject variant="page" tags={tags} />
         </div>
       </div>
     </div>

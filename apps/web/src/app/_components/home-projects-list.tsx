@@ -33,7 +33,7 @@ export function HomeProjectsList({
         return (
           <li key={project.id} className="px-4 py-4">
             <div className="space-y-4 lg:flex lg:gap-4">
-              <Link href={`/projetos/${project.id}`} className="block shrink-0">
+              <Link href={`/projetos/${project.slug}`} className="block shrink-0">
                 {project.coverUrl ? (
                   <div className="relative aspect-video w-full overflow-hidden lg:w-96">
                     <Image
@@ -52,7 +52,7 @@ export function HomeProjectsList({
               <div className="flex min-w-0 flex-1 items-start justify-between gap-3">
                 <div className="min-w-0 space-y-1">
                   <h2 className="font-heading text-lg font-medium">
-                    <Link href={`/projetos/${project.id}`} className="hover:underline">
+                    <Link href={`/projetos/${project.slug}`} className="hover:underline">
                       {project.title}
                     </Link>
                   </h2>
@@ -65,6 +65,7 @@ export function HomeProjectsList({
                 <div className="shrink-0">
                   <ProjectStarButton
                     projectId={project.id}
+                    projectSlug={project.slug}
                     starred={starred}
                     authenticated={authenticated}
                     disabled={isOwner}
@@ -77,19 +78,5 @@ export function HomeProjectsList({
         )
       })}
     </ul>
-  )
-}
-
-export function HomePreferencesBanner() {
-  return (
-    <div className="border border-border px-4 py-3 text-sm">
-      <p>
-        Você ainda não cadastrou tags preferidas.{' '}
-        <Link href="/conta" className="font-medium underline-offset-4 hover:underline">
-          Cadastre em Minha conta
-        </Link>{' '}
-        para personalizar a vitrine.
-      </p>
-    </div>
   )
 }

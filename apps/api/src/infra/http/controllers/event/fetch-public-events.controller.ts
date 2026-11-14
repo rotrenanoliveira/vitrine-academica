@@ -1,13 +1,14 @@
 import type { FastifyReply } from 'fastify'
 import type { FetchPublicEventsUseCase } from '@/domain/event/application/use-cases/event/fetch-public-events'
-import type { EventPhase } from '@/domain/event/enterprise/entities/event'
+import type { EventPhase, ParticipationScope } from '@/domain/event/enterprise/entities/event'
 import { EventPresenter } from '../../presenters/event-presenter'
 
 interface FetchPublicEventsQuery {
   page?: number
   perPage?: number
-  institutionId?: string
-  phase?: EventPhase
+  institutionIds?: string[]
+  phases?: EventPhase[]
+  participationScope?: ParticipationScope
 }
 
 export class FetchPublicEventsController {
@@ -21,7 +22,12 @@ export class FetchPublicEventsController {
     }
 
     return reply.status(200).send({
-      events: result.value.events.map(EventPresenter.toHTTP),
+      events: result.value.events.map(({ event, winner, institutionName }) =>
+        EventPresenter.toListHTTP(event, winner, institutionName),
+      ),
+      total: result.value.total,
+      page: result.value.page,
+      perPage: result.value.perPage,
     })
   }
 }

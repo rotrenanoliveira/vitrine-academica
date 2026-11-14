@@ -1,6 +1,7 @@
 import { type Either, right } from '@/core/either'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
 import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import type { PublicationNotifier } from '@/domain/project/application/notifier/publication-notifier'
 import { type Project, ProjectStatus } from '../../../enterprise/entities/project'
 import type { ProjectScheduledRepository } from '../../repositories/project-scheduled-repository'
 import type { ProjectsRepository } from '../../repositories/projects-repositories'
@@ -16,7 +17,16 @@ export class PublishScheduledProjectsUseCase {
     private readonly projectsRepository: ProjectsRepository,
     private readonly projectScheduledRepository: ProjectScheduledRepository,
     private readonly registerLog: RegisterLogUseCase,
+    private readonly publicationNotifier?: PublicationNotifier,
   ) {}
+
+  private async notifyFollowers(projectId: string) {
+    try {
+      await this.publicationNotifier?.execute({ projectId })
+    } catch {
+      return
+    }
+  }
 
   async execute({
     date = new Date(),
@@ -39,6 +49,7 @@ export class PublishScheduledProjectsUseCase {
       await this.projectsRepository.save(project)
 
       publishedProjects.push(project)
+      await this.notifyFollowers(project.id.toString())
     }
 
     for (const project of publishedProjects) {

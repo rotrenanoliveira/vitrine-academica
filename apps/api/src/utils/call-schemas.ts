@@ -16,12 +16,24 @@ export const callSchema = z.object({
   description: z.string(),
   applicationDeadline: z.iso.datetime(),
   status: callStatusSchema,
+  projectId: z.string().nullable(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime().nullable(),
 })
 
 export const callWithSkillsSchema = callSchema.extend({
   skills: z.array(callSkillSchema),
+})
+
+export const callListItemSchema = z.object({
+  id: z.string(),
+  authorId: z.string(),
+  title: z.string(),
+  description: z.string(),
+  applicationDeadline: z.iso.datetime(),
+  status: callStatusSchema,
+  projectSlug: z.string().nullable(),
+  skills: z.array(z.string()),
 })
 
 export const callSkillInputSchema = z.object({

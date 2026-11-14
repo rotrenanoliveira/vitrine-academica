@@ -1,7 +1,8 @@
 import { type Either, left, right } from '@/core/either'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
 import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
-import type { Project, ProjectStatus } from '../../../enterprise/entities/project'
+import type { PublicationNotifier } from '@/domain/project/application/notifier/publication-notifier'
+import { type Project, ProjectStatus } from '../../../enterprise/entities/project'
 import { ProjectMemberStatus } from '../../../enterprise/entities/project-member'
 import { NotProjectOwnerError } from '../../_errors/not-project-owner-error'
 import { ProjectNotFoundError } from '../../_errors/project-not-found-error'
@@ -14,6 +15,7 @@ interface UpdateProjectUseCaseRequest {
   title: string
   description: string
   status?: ProjectStatus
+  coverUrl?: string | null
   attachments?: string[]
 }
 
@@ -32,6 +34,7 @@ export class UpdateProjectUseCase {
     private readonly projectsRepository: ProjectsRepository,
     private readonly registerLog: RegisterLogUseCase,
     private readonly projectMembersRepository: ProjectMembersRepository,
+    private readonly publicationNotifier?: PublicationNotifier,
   ) {}
 
   private async log({ actorId, resourceId, text, status, diff }: LogParams) {
@@ -53,12 +56,21 @@ export class UpdateProjectUseCase {
     return projectMember?.status === ProjectMemberStatus.ACCEPTED
   }
 
+  private async notifyFollowers(projectId: string) {
+    try {
+      await this.publicationNotifier?.execute({ projectId })
+    } catch {
+      return
+    }
+  }
+
   async execute({
     projectId,
     authorId,
     title,
     description,
     status,
+    coverUrl,
     attachments,
   }: UpdateProjectUseCaseRequest): Promise<UpdateProjectUseCaseResponse> {
     const project = await this.projectsRepository.findById(projectId)
@@ -108,9 +120,16 @@ export class UpdateProjectUseCase {
     project.title = title
     project.description = description
 
+    const becamePublished = isOwner && status === ProjectStatus.PUBLISHED && project.status !== ProjectStatus.PUBLISHED
+
     if (isOwner && status !== undefined) {
       diff.status = { old: project.status, new: status }
       project.status = status
+    }
+
+    if (coverUrl !== undefined) {
+      diff.coverUrl = { old: project.coverUrl, new: coverUrl }
+      project.coverUrl = coverUrl
     }
 
     if (attachments !== undefined) {
@@ -127,6 +146,10 @@ export class UpdateProjectUseCase {
       status: AuditLogStatus.SUCCESS,
       diff,
     })
+
+    if (becamePublished) {
+      await this.notifyFollowers(project.id.toString())
+    }
 
     return right({ project })
   }

@@ -1,9 +1,14 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
-import type { EventPhase } from '@/domain/event/enterprise/entities/event'
+import type { EventPhase, ParticipationScope } from '@/domain/event/enterprise/entities/event'
 import { makeFetchInstitutionEventsController } from '../../factories/event/make-fetch-institution-events-controller'
-import { errorMessageSchema, eventHttpSchema, eventPhaseSchema } from '../../schemas/event-schemas'
+import {
+  errorMessageSchema,
+  eventListItemHttpSchema,
+  eventPhaseSchema,
+  participationScopeSchema,
+} from '../../schemas/event-schemas'
 
 export async function fetchInstitutionEventsRoute(app: FastifyInstance) {
   const controller = makeFetchInstitutionEventsController()
@@ -19,9 +24,10 @@ export async function fetchInstitutionEventsRoute(app: FastifyInstance) {
           page: z.coerce.number().int().min(1).optional(),
           perPage: z.coerce.number().int().min(1).max(100).optional(),
           phase: eventPhaseSchema.optional(),
+          participationScope: participationScopeSchema.optional(),
         }),
         response: {
-          200: z.object({ events: z.array(eventHttpSchema) }),
+          200: z.object({ events: z.array(eventListItemHttpSchema) }),
           404: errorMessageSchema,
         },
       },
@@ -32,6 +38,7 @@ export async function fetchInstitutionEventsRoute(app: FastifyInstance) {
           institutionId: request.params.institutionId,
           ...request.query,
           phase: request.query.phase as EventPhase | undefined,
+          participationScope: request.query.participationScope as ParticipationScope | undefined,
         },
         reply,
       ),

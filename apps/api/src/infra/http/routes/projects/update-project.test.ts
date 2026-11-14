@@ -108,6 +108,54 @@ describe('(E2E) - PUT /api/v1/projects/:projectId', () => {
     expect(response.status).toBe(403)
   })
 
+  it('deve permitir ao dono definir a capa do projeto', async () => {
+    const { accessToken, user } = await authenticateUser()
+    const { project } = await makeProjectOnDatabase({
+      author: user.id,
+      status: ProjectStatus.SKETCH,
+    })
+    const coverUrl = '11111111-1111-4111-8111-111111111111'
+
+    const response = await request(app.server)
+      .put(`/api/v1/projects/${project.id.toString()}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        title: project.title,
+        description: project.description,
+        coverUrl,
+      })
+
+    expect(response.status).toBe(200)
+    expect(response.body.project.coverUrl).toBe(coverUrl)
+
+    const saved = await new DrizzleProjectsRepository(db).findById(project.id.toString())
+    expect(saved?.coverUrl).toBe(coverUrl)
+  })
+
+  it('deve permitir ao dono limpar a capa do projeto', async () => {
+    const { accessToken, user } = await authenticateUser()
+    const { project } = await makeProjectOnDatabase({
+      author: user.id,
+      status: ProjectStatus.SKETCH,
+      coverUrl: '22222222-2222-4222-8222-222222222222',
+    })
+
+    const response = await request(app.server)
+      .put(`/api/v1/projects/${project.id.toString()}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        title: project.title,
+        description: project.description,
+        coverUrl: null,
+      })
+
+    expect(response.status).toBe(200)
+    expect(response.body.project.coverUrl).toBeNull()
+
+    const saved = await new DrizzleProjectsRepository(db).findById(project.id.toString())
+    expect(saved?.coverUrl).toBeNull()
+  })
+
   it('deve permitir ao coautor que aceitou o convite editar o projeto', async () => {
     const { accessToken, user } = await authenticateUser()
     const { user: owner } = await makeUserOnDatabase()

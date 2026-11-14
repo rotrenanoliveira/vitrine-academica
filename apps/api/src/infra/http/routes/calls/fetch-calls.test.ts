@@ -47,12 +47,13 @@ describe('(E2E) - GET /api/v1/calls', () => {
     expect(response.status).toBe(200)
     expect(response.body.calls).toHaveLength(1)
     expect(response.body.calls[0].id).toBe(openCall.id.toString())
-    expect(response.body.calls[0].skills).toEqual([
-      { id: expect.any(String), tagId: tag.id.toString(), description: 'Node.js' },
-    ])
+    expect(response.body.calls[0].skills).toEqual([tag.name])
+    expect(response.body.calls[0].projectSlug).toBeNull()
+    expect(response.body.calls[0]).not.toHaveProperty('projectId')
+    expect(response.body.calls[0]).not.toHaveProperty('createdAt')
   })
 
-  it('should be able to filter calls by tag', async () => {
+  it('should be able to filter calls by tags', async () => {
     const { accessToken } = await authenticateUser()
     const { user: author } = await makeUserOnDatabase()
     const { tag: backend } = await makeTagOnDatabase()
@@ -64,12 +65,13 @@ describe('(E2E) - GET /api/v1/calls', () => {
 
     const response = await request(app.server)
       .get('/api/v1/calls')
-      .query({ tagId: backend.id.toString() })
+      .query({ tags: backend.id.toString() })
       .set('Authorization', `Bearer ${accessToken}`)
 
     expect(response.status).toBe(200)
     expect(response.body.calls).toHaveLength(1)
     expect(response.body.calls[0].id).toBe(backendCall.id.toString())
+    expect(response.body.calls[0].skills).toEqual([backend.name])
   })
 
   it('should not be able to filter by a tag that does not exist', async () => {
@@ -77,7 +79,7 @@ describe('(E2E) - GET /api/v1/calls', () => {
 
     const response = await request(app.server)
       .get('/api/v1/calls')
-      .query({ tagId: new UniqueEntityId().toString() })
+      .query({ tags: new UniqueEntityId().toString() })
       .set('Authorization', `Bearer ${accessToken}`)
 
     expect(response.status).toBe(404)
@@ -86,9 +88,16 @@ describe('(E2E) - GET /api/v1/calls', () => {
     })
   })
 
-  it('should not be able to fetch calls without authentication', async () => {
+  it('should be able to fetch calls without authentication', async () => {
+    const { user: author } = await makeUserOnDatabase()
+    const { tag } = await makeTagOnDatabase()
+    const { call } = await makeCallOnDatabase({ authorId: author.id })
+    await makeCallSkillOnDatabase({ callId: call.id, tagId: tag.id })
+
     const response = await request(app.server).get('/api/v1/calls')
 
-    expect(response.status).toBe(401)
+    expect(response.status).toBe(200)
+    expect(response.body.calls).toHaveLength(1)
+    expect(response.body.calls[0].id).toBe(call.id.toString())
   })
 })

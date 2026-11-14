@@ -10,7 +10,7 @@ function makeUseCase(total = 0) {
   return { execute, useCase: { execute } as unknown as PublishScheduledProjectsUseCase }
 }
 
-describe('Agendador de publicação de projetos', () => {
+describe('(Job) - Publish Scheduled Projects', () => {
   beforeEach(() => {
     vi.useFakeTimers()
   })

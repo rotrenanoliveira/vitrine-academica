@@ -33,9 +33,11 @@ describe('(E2E) - GET /api/v1/projects/published', () => {
         {
           id: published.id.toString(),
           title: published.title,
+          slug: published.slug,
           description: published.description,
           authorId: user.id.toString(),
           status: 'PUBLISHED',
+          coverUrl: null,
           attachments: [],
           tags: [],
           createdAt: expect.any(String),

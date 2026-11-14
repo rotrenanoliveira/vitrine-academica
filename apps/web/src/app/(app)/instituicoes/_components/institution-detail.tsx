@@ -1,17 +1,11 @@
+import { UniversityIcon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import Link from 'next/link'
-import { EventCard } from '@/components/event/event-card'
-import { FormRequestInstitutionMembership } from '@/components/institution/form-request-institution-membership'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import type { Event, Institution } from '@/utils/type'
-import { InstitutionStatusActions } from './institution-status-actions'
 
-const statusLabels: Record<Institution['status'], string> = {
-  ACTIVE: 'Ativa',
-  INACTIVE: 'Inativa',
-  SUSPENDED: 'Suspensa',
-  ARCHIVED: 'Arquivada',
-}
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+
+import type { Institution } from '@/utils/type'
 
 const typeLabels: Record<Institution['type'], string> = {
   UNIVERSITY: 'Universidade',
@@ -29,114 +23,84 @@ const originLabels: Record<Institution['origin'], string> = {
 
 type InstitutionDetailProps = {
   institution: Institution
-  events: Event[]
-  isAuthenticated: boolean
-  alreadyMember: boolean
   canManage: boolean
 }
 
-export function InstitutionDetail({
-  institution,
-  events,
-  isAuthenticated,
-  alreadyMember,
-  canManage,
-}: InstitutionDetailProps) {
+export function InstitutionDetail({ institution, canManage }: InstitutionDetailProps) {
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <p className="text-xs tracking-wider text-muted-foreground uppercase">{statusLabels[institution.status]}</p>
-        <h1 className="font-heading text-3xl font-semibold">{institution.name}</h1>
-        <p className="text-sm text-muted-foreground">/{institution.slug}</p>
-        <p className="whitespace-pre-wrap text-muted-foreground">{institution.description}</p>
-      </div>
+      <Card className="w-full rounded-none bg-[#ebe6de] shadow-none">
+        <CardHeader>
+          <CardTitle className="text-3xl normal-case tracking-normal flex items-center">
+            <HugeiconsIcon icon={UniversityIcon} className="size-6 shrink-0 text-muted-foreground" />
+            <span className="ml-2">{institution.name}</span>
+          </CardTitle>
+          <CardDescription className="whitespace-pre-wrap">{institution.description}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <dl className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            <div>
+              <dt className="text-muted-foreground">Tipo</dt>
+              <dd>{typeLabels[institution.type]}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Domínio</dt>
+              <dd>{institution.domain ?? '—'}</dd>
+            </div>
 
-      <dl className="grid gap-3 text-sm sm:grid-cols-2">
-        <div>
-          <dt className="text-muted-foreground">Tipo</dt>
-          <dd>{typeLabels[institution.type]}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Origem</dt>
-          <dd>{originLabels[institution.origin]}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Domínio</dt>
-          <dd>{institution.domain ?? '—'}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Comprovante</dt>
-          <dd>{institution.shouldProof ? 'Exigido' : 'Não exigido'}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Verificação</dt>
-          <dd>{institution.shouldVerify ? 'Exigida' : 'Não exigida'}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Criada em</dt>
-          <dd>{new Date(institution.createdAt).toLocaleString('pt-BR')}</dd>
-        </div>
-      </dl>
-
-      {isAuthenticated && (
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-wrap gap-2">
             {canManage && (
               <>
-                <Button nativeButton={false} render={<Link href={`/instituicoes/${institution.slug}/editar`} />}>
-                  Editar
-                </Button>
-                <Button
-                  variant="outline"
-                  nativeButton={false}
-                  render={<Link href={`/instituicoes/${institution.slug}/membros`} />}
-                >
-                  Membros
-                </Button>
-                <Button
-                  variant="outline"
-                  nativeButton={false}
-                  render={<Link href={`/instituicoes/${institution.slug}/solicitacoes`} />}
-                >
-                  Solicitações
-                </Button>
-                <Button variant="outline" nativeButton={false} render={<Link href="/eventos/novo" />}>
-                  Novo ciclo
-                </Button>
+                <div>
+                  <dt className="text-muted-foreground">Registrada em</dt>
+                  <dd>{new Date(institution.createdAt).toLocaleString('pt-BR')}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Origem de cadastro</dt>
+                  <dd>{originLabels[institution.origin]}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Verificação</dt>
+                  <dd>{institution.shouldVerify ? 'Exigida' : 'Não exigida'}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Comprovante</dt>
+                  <dd>{institution.shouldProof ? 'Exigido' : 'Não exigido'}</dd>
+                </div>
               </>
             )}
-          </div>
+          </dl>
+        </CardContent>
+      </Card>
 
-          {canManage && <InstitutionStatusActions institution={institution} />}
+      {canManage && (
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" nativeButton={false} render={<Link href="/eventos/novo" />}>
+            Novo evento
+          </Button>
 
-          {!alreadyMember && (
-            <FormRequestInstitutionMembership
-              institutionId={institution.id}
-              institutionSlug={institution.slug}
-              shouldProof={institution.shouldProof}
-              alreadyMember={alreadyMember}
-            />
-          )}
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={<Link href={`/instituicoes/${institution.slug}/membros`} />}
+          >
+            Membros
+          </Button>
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={<Link href={`/instituicoes/${institution.slug}/solicitacoes`} />}
+          >
+            Solicitações
+          </Button>
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={<Link href={`/instituicoes/${institution.slug}/editar`} />}
+          >
+            Editar
+          </Button>
         </div>
       )}
-
-      <Separator />
-
-      <section className="space-y-3">
-        <div>
-          <h2 className="text-lg font-medium">Eventos</h2>
-          <p className="text-muted-foreground text-sm">Ciclos temáticos criados por esta instituição.</p>
-        </div>
-        {events.length === 0 ? (
-          <p className="text-muted-foreground text-sm">Nenhum evento criado ainda.</p>
-        ) : (
-          <div>
-            {events.map((event) => (
-              <EventCard key={event.id} event={event} canManage={canManage} />
-            ))}
-          </div>
-        )}
-      </section>
     </div>
   )
 }

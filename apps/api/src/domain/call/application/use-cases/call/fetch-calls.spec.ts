@@ -91,13 +91,13 @@ describe('(UC) - Fetch Calls', () => {
     }
   })
 
-  it('should be able to filter calls by tag', async () => {
+  it('should be able to filter calls by tags', async () => {
     const backend = addTag('Backend')
     const design = addTag('Design')
     const { call: backendCall } = addCall(backend)
     addCall(design)
 
-    const result = await sut.execute({ tagId: backend.id.toString() })
+    const result = await sut.execute({ tagIds: [backend.id.toString()] })
 
     expect(result.isRight()).toBeTruthy()
     if (result.isRight()) {
@@ -106,14 +106,32 @@ describe('(UC) - Fetch Calls', () => {
     }
   })
 
-  it('should not return closed or expired calls when filtering by tag', async () => {
+  it('should be able to filter calls by any of the tags', async () => {
+    const backend = addTag('Backend')
+    const design = addTag('Design')
+    const frontend = addTag('Frontend')
+    const { call: backendCall } = addCall(backend)
+    const { call: designCall } = addCall(design)
+    addCall(frontend)
+
+    const result = await sut.execute({ tagIds: [backend.id.toString(), design.id.toString()] })
+
+    expect(result.isRight()).toBeTruthy()
+    if (result.isRight()) {
+      expect(result.value.calls.map(({ call }) => call.id.toString()).sort()).toEqual(
+        [backendCall.id.toString(), designCall.id.toString()].sort(),
+      )
+    }
+  })
+
+  it('should not return closed or expired calls when filtering by tags', async () => {
     const tag = addTag('Backend')
     const { call: openCall } = addCall(tag)
     const { call: closedCall } = addCall(tag)
     closedCall.close()
     addCall(tag, { applicationDeadline: daysFromNow(-1) })
 
-    const result = await sut.execute({ tagId: tag.id.toString() })
+    const result = await sut.execute({ tagIds: [tag.id.toString()] })
 
     expect(result.isRight()).toBeTruthy()
     if (result.isRight()) {
@@ -123,7 +141,7 @@ describe('(UC) - Fetch Calls', () => {
   })
 
   it('should not be able to filter by a tag that does not exist', async () => {
-    const result = await sut.execute({ tagId: new UniqueEntityId().toString() })
+    const result = await sut.execute({ tagIds: [new UniqueEntityId().toString()] })
 
     expect(result.isLeft()).toBeTruthy()
     if (result.isLeft()) {

@@ -3,7 +3,7 @@ import { makeInstitution } from '@tests/factories/make-institution'
 import { InMemoryEventsRepository } from '@tests/repositories/in-memory-events-repository'
 import { InMemoryInstitutionsRepository } from '@tests/repositories/in-memory-institutions-repository'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
-import { EventPhase } from '../../../enterprise/entities/event'
+import { EventPhase, ParticipationScope } from '../../../enterprise/entities/event'
 import { FetchInstitutionEventsUseCase } from './fetch-institution-events'
 
 let eventsRepository: InMemoryEventsRepository
@@ -25,6 +25,7 @@ describe('(UC) - Fetch Institution Events', () => {
     const { event: open } = makeEvent({ institutionId: institution.id, startsAt: new Date('2026-02-01T12:00:00.000Z') })
     open.closeThemeVoting()
     open.selectWinnerTheme(new UniqueEntityId('theme-1'))
+    eventsRepository.themeTitlesById.set('theme-1', 'Tema institucional')
 
     const { event: other } = makeEvent({
       institutionId: new UniqueEntityId(),
@@ -38,9 +39,43 @@ describe('(UC) - Fetch Institution Events', () => {
     expect(result.isRight()).toBeTruthy()
     if (result.isRight()) {
       expect(result.value.events).toHaveLength(2)
-      expect(result.value.events.map((event) => event.phase)).toEqual(
+      expect(result.value.events.map((item) => item.event.phase)).toEqual(
         expect.arrayContaining([EventPhase.THEME_SELECTION, EventPhase.OPEN]),
       )
+      expect(result.value.events.find((item) => item.event.id.toString() === open.id.toString())?.winner).toBe(
+        'Tema institucional',
+      )
+      expect(
+        result.value.events.find((item) => item.event.id.toString() === themeSelection.id.toString())?.winner,
+      ).toBeNull()
+    }
+  })
+
+  it('should filter institution events by participation scope', async () => {
+    const { institution } = makeInstitution()
+    institutionsRepository.items.push(institution)
+
+    const { event: globalCycle } = makeEvent({
+      institutionId: institution.id,
+      participationScope: ParticipationScope.GLOBAL,
+    })
+    const { event: institutionCycle } = makeEvent({
+      institutionId: institution.id,
+      participationScope: ParticipationScope.INSTITUTION,
+      startsAt: new Date('2026-02-01T12:00:00.000Z'),
+    })
+
+    eventsRepository.items.push(globalCycle, institutionCycle)
+
+    const result = await sut.execute({
+      institutionId: institution.id.toString(),
+      participationScope: ParticipationScope.INSTITUTION,
+    })
+
+    expect(result.isRight()).toBeTruthy()
+    if (result.isRight()) {
+      expect(result.value.events).toHaveLength(1)
+      expect(result.value.events[0].event.id.toString()).toBe(institutionCycle.id.toString())
     }
   })
 

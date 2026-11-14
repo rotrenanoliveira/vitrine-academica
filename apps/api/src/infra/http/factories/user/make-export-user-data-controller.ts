@@ -4,6 +4,7 @@ import { db } from '@/infra/database/drizzle/client'
 import { DrizzleAccountsRepository } from '@/infra/database/repositories/drizzle-accounts-repository'
 import { DrizzleAuditLogsRepository } from '@/infra/database/repositories/drizzle-audit-logs-repository'
 import { DrizzleInstitutionMembersRepository } from '@/infra/database/repositories/drizzle-institution-members-repository'
+import { DrizzlePointTransactionsRepository } from '@/infra/database/repositories/drizzle-point-transactions-repository'
 import { DrizzlePreferenceTagsRepository } from '@/infra/database/repositories/drizzle-preference-tags-repository'
 import { DrizzleProjectsRepository } from '@/infra/database/repositories/drizzle-projects-repository'
 import { DrizzleSessionsRepository } from '@/infra/database/repositories/drizzle-sessions-repository'
@@ -17,6 +18,7 @@ export function makeExportUserDataController(): ExportUserDataController {
   const preferenceTagsRepository = new DrizzlePreferenceTagsRepository(db)
   const projectsRepository = new DrizzleProjectsRepository(db)
   const accountsRepository = new DrizzleAccountsRepository(db)
+  const pointTransactionsRepository = new DrizzlePointTransactionsRepository(db)
   const auditLogsRepository = new DrizzleAuditLogsRepository(db)
 
   const registerLog = new RegisterLogUseCase(auditLogsRepository)
@@ -28,6 +30,7 @@ export function makeExportUserDataController(): ExportUserDataController {
     institutionMembersRepository,
     preferenceTagsRepository,
     projectsRepository,
+    pointTransactionsRepository,
     registerLog,
   )
 

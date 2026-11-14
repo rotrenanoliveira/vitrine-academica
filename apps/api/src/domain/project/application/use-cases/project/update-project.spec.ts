@@ -108,6 +108,42 @@ describe('(UC) - Update Project', () => {
     }
   })
 
+  it('deve permitir ao dono definir ou trocar a capa do projeto', async () => {
+    const { project } = makeProject({ status: ProjectStatus.SKETCH, coverUrl: 'capa-antiga' })
+    projectsRepository.items.push(project)
+
+    const result = await sut.execute({
+      projectId: project.id.toString(),
+      authorId: project.author.toString(),
+      title: project.title,
+      description: project.description,
+      coverUrl: 'capa-nova',
+    })
+
+    expect(result.isRight()).toBeTruthy()
+    if (result.isRight()) {
+      expect(result.value.project.coverUrl).toBe('capa-nova')
+    }
+  })
+
+  it('deve permitir ao dono limpar a capa do projeto', async () => {
+    const { project } = makeProject({ status: ProjectStatus.SKETCH, coverUrl: 'capa-atual' })
+    projectsRepository.items.push(project)
+
+    const result = await sut.execute({
+      projectId: project.id.toString(),
+      authorId: project.author.toString(),
+      title: project.title,
+      description: project.description,
+      coverUrl: null,
+    })
+
+    expect(result.isRight()).toBeTruthy()
+    if (result.isRight()) {
+      expect(result.value.project.coverUrl).toBeNull()
+    }
+  })
+
   it('não deve atualizar um projeto que não existe', async () => {
     const result = await sut.execute({
       projectId: 'projeto-inexistente',

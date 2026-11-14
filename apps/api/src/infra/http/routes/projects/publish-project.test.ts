@@ -87,7 +87,13 @@ describe('(E2E) - POST /api/v1/projects/:projectId/publish-now', () => {
     const listed = response.body.projects.find((item: { id: string }) => item.id === project.id.toString())
 
     expect(listed).toBeDefined()
-    expect(listed.status).toBe('PUBLISHED')
+    expect(listed).toMatchObject({
+      id: project.id.toString(),
+      title: project.title,
+      slug: project.slug,
+      coverUrl: null,
+    })
+    expect(listed).not.toHaveProperty('status')
   })
 
   it('publicar agora: com projeto inexistente, deve retornar 404 com mensagem', async () => {

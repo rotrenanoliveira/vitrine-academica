@@ -40,10 +40,6 @@ export default async function EditCallPage({ params }: PageProps) {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link href="/chamados" />}>Chamados</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
               <BreadcrumbLink render={<Link href={`/chamados/${call.id}`} />}>Chamado</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />

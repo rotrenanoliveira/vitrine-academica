@@ -10,7 +10,7 @@ describe('(E2E) - GET /api/v1/institutions/:institutionId/members', () => {
   afterAll(async () => await app.close())
 
   it('should be able to fetch institution members as manager', async () => {
-    const { accessToken, institution } = await setupManagerWithInstitution()
+    const { accessToken, user, institution } = await setupManagerWithInstitution()
     const { user: extraUser } = await makeUserOnDatabase()
     await makeInstitutionMemberOnDatabase({
       institutionId: institution.id.toString(),
@@ -23,6 +23,12 @@ describe('(E2E) - GET /api/v1/institutions/:institutionId/members', () => {
 
     expect(response.status).toBe(200)
     expect(response.body.members.length).toBeGreaterThanOrEqual(2)
+    expect(response.body.members).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ userId: user.id.toString(), name: user.name }),
+        expect.objectContaining({ userId: extraUser.id.toString(), name: extraUser.name }),
+      ]),
+    )
   })
 
   it('should not be able to fetch members when not allowed', async () => {

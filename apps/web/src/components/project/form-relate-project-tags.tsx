@@ -38,6 +38,7 @@ export function FormRelateProjectTags({ project, tags }: FormRelateProjectTagsPr
       <h2 className="font-heading text-xl font-semibold">Tags do projeto</h2>
       <p className="text-sm text-muted-foreground">Marque ou desmarque as tags relacionadas ao projeto.</p>
       <input type="hidden" name="project-id" value={project.id} />
+      <input type="hidden" name="project-slug" value={project.slug} />
 
       <ul className="space-y-2">
         {tags.map((tag) => (

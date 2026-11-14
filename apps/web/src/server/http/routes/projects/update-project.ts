@@ -9,6 +9,7 @@ type UpdateProjectParams = {
   title: string
   description: string
   status?: ProjectStatus
+  coverUrl?: string | null
 }
 
 export async function updateProject({ id, ...data }: UpdateProjectParams) {

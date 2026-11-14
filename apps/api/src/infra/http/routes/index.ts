@@ -39,6 +39,7 @@ import { selectInstitutionalThemeRoute } from './events/select-institutional-the
 import { suggestThemeRoute } from './events/suggest-theme'
 import { voteThemeRoute } from './events/vote-theme'
 import { updateInstitutionRoute } from './institutions/edit-institution'
+import { fetchInstitutionProjectsBySlugRoute } from './institutions/fetch-institution-projects-by-slug'
 import { fetchInstitutionsRoute } from './institutions/fetch-institutions'
 import { getInstitutionByIdRoute } from './institutions/get-institution-by-id'
 import { getInstitutionBySlugRoute } from './institutions/get-institution-by-slug'
@@ -54,10 +55,20 @@ import { rejectInstitutionMembershipRequestRoute } from './institutions-membersh
 import { requestInstitutionMembershipRoute } from './institutions-membership/request-institution-membership'
 import { updateInstitutionMemberRoleRoute } from './institutions-membership/update-institution-member-role'
 import { updateInstitutionMemberStatusRoute } from './institutions-membership/update-institution-member-status'
+import { listMySubscriptionsRoute } from './newsletter/list-my-subscriptions'
+import { subscribeToAuthorRoute } from './newsletter/subscribe-to-author'
+import { unsubscribeByTokenRoute } from './newsletter/unsubscribe-by-token'
+import { unsubscribeFromAuthorRoute } from './newsletter/unsubscribe-from-author'
+import { getMyPointsBalanceRoute } from './points/get-my-points-balance'
+import { listActivePromotionsRoute } from './points/list-active-promotions'
+import { listMyPointTransactionsRoute } from './points/list-my-point-transactions'
+import { promoteProjectRoute } from './points/promote-project'
 import { deactivatePreferenceTagRoute } from './preference-tags/deactivate-preference-tag'
 import { fetchUserPreferenceTagsRoute } from './preference-tags/fetch-user-preference-tags'
 import { registerPreferenceTagRoute } from './preference-tags/register-preference-tag'
+import { fetchAuthorPublishedProjectsRoute } from './projects/fetch-author-published-projects'
 import { fetchMyProjectsRoute } from './projects/fetch-my-projects'
+import { fetchProjectsRoute } from './projects/fetch-projects'
 import { fetchProjectsOfInterestRoute } from './projects/fetch-projects-of-interest'
 import { fetchPublishedProjectsRoute } from './projects/fetch-published-projects'
 import { fetchPublishedProjectsTodayRoute } from './projects/fetch-published-projects-today'
@@ -65,6 +76,7 @@ import { fetchScheduledProjectsRoute } from './projects/fetch-scheduled-projects
 import { getMyStarOnProjectRoute } from './projects/get-my-star-on-project'
 import { getMyTeacherRatingOnProjectRoute } from './projects/get-my-teacher-rating-on-project'
 import { getProjectByIdRoute } from './projects/get-project-by-id'
+import { getProjectBySlugRoute } from './projects/get-project-by-slug'
 import { getProjectRatingsRoute } from './projects/get-project-ratings'
 import { inviteProjectMemberRoute } from './projects/invite-project-member'
 import { listActiveRatingCriteriaRoute } from './projects/list-active-rating-criteria'
@@ -189,6 +201,8 @@ export async function routes(app: FastifyInstance) {
   /** Projects routes */
   /** POST /projects */
   await app.register(registerProjectRoute)
+  /** GET /projects */
+  await app.register(fetchProjectsRoute)
   /** GET /projects/me */
   await app.register(fetchMyProjectsRoute)
   /** POST /projects/publish-scheduled */
@@ -203,6 +217,8 @@ export async function routes(app: FastifyInstance) {
   await app.register(publishProjectRoute)
   /** PUT /projects/:projectId */
   await app.register(updateProjectRoute)
+  /** GET /projects/slug/:slug */
+  await app.register(getProjectBySlugRoute)
   /** GET /projects/:projectId */
   await app.register(getProjectByIdRoute)
   /** POST /projects/:projectId/stars */
@@ -252,6 +268,27 @@ export async function routes(app: FastifyInstance) {
   /** GET /curation */
   await app.register(getCurationRoute)
 
+  /** Points routes */
+  /** GET /points/me */
+  await app.register(getMyPointsBalanceRoute)
+  /** GET /points/me/transactions */
+  await app.register(listMyPointTransactionsRoute)
+  /** POST /projects/:projectId/promotions */
+  await app.register(promoteProjectRoute)
+  /** GET /promotions/active */
+  await app.register(listActivePromotionsRoute)
+  /** Newsletter / authors routes */
+  /** GET /authors/:authorId/projects */
+  await app.register(fetchAuthorPublishedProjectsRoute)
+  /** POST /authors/:authorId/subscriptions */
+  await app.register(subscribeToAuthorRoute)
+  /** GET /subscriptions/me */
+  await app.register(listMySubscriptionsRoute)
+  /** POST /subscriptions/:subscriptionId/unsubscribe */
+  await app.register(unsubscribeFromAuthorRoute)
+  /** POST /subscriptions/unsubscribe */
+  await app.register(unsubscribeByTokenRoute)
+
   /** Institutions routes */
   /** POST /institutions */
   await app.register(registerInstitutionRoute)
@@ -261,6 +298,8 @@ export async function routes(app: FastifyInstance) {
   await app.register(fetchMyInstitutionMembershipsRoute)
   /** GET /institutions/slug/:slug */
   await app.register(getInstitutionBySlugRoute)
+  /** GET /institutions/slug/:slug/projects */
+  await app.register(fetchInstitutionProjectsBySlugRoute)
   /** POST /institutions/:institutionId/status */
   await app.register(updateInstitutionStatusRoute)
   /** PUT /institutions/:institutionId */

@@ -3,17 +3,7 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 import { makeAuthenticateMiddleware } from '../../factories/auth/make-authenticate-middleware'
 import { makeGetProjectByIdController } from '../../factories/project/make-get-project-by-id-controller'
-
-const projectSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  authorId: z.string(),
-  status: z.enum(['SKETCH', 'SCHEDULED', 'PUBLISHED', 'ARCHIVED']),
-  attachments: z.array(z.string()),
-  tags: z.array(z.string()),
-  createdAt: z.iso.datetime(),
-})
+import { projectHttpSchema } from '../../schemas/project-schemas'
 
 export async function getProjectByIdRoute(app: FastifyInstance) {
   const getProjectByIdController = makeGetProjectByIdController()
@@ -32,7 +22,7 @@ export async function getProjectByIdRoute(app: FastifyInstance) {
         }),
         response: {
           200: z.object({
-            project: projectSchema,
+            project: projectHttpSchema,
           }),
           401: z.object({
             message: z.string(),

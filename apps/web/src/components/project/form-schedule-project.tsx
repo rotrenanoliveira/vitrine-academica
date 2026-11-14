@@ -12,9 +12,10 @@ import { actionScheduleProject } from '@/server/actions/schedule-project'
 
 type FormScheduleProjectProps = {
   projectId: string
+  projectSlug: string
 }
 
-export function FormScheduleProject({ projectId }: FormScheduleProjectProps) {
+export function FormScheduleProject({ projectId, projectSlug }: FormScheduleProjectProps) {
   const router = useRouter()
 
   const [_, handleSubmit, isPending] = useFormState(actionScheduleProject, {
@@ -31,6 +32,7 @@ export function FormScheduleProject({ projectId }: FormScheduleProjectProps) {
     <form className="space-y-4" onSubmit={handleSubmit}>
       <h3 className="font-heading text-lg font-semibold">Agendar publicação</h3>
       <input type="hidden" name="project-id" value={projectId} />
+      <input type="hidden" name="project-slug" value={projectSlug} />
 
       <div className="space-y-2">
         <Label htmlFor="published-in">Data de publicação</Label>

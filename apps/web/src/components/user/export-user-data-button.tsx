@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { exportUserDataAction } from '@/server/actions/export-user-data'
 
@@ -27,7 +28,7 @@ export function ExportUserDataButton() {
       downloadAnchor.remove()
     } catch (error) {
       console.error('Erro ao exportar dados do usuário:', error)
-      alert('Não foi possível exportar seus dados no momento.')
+      toast.error('Não foi possível exportar seus dados no momento.')
     } finally {
       setIsExporting(false)
     }

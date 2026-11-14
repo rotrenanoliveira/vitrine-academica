@@ -77,7 +77,7 @@ export async function actionRegisterProjectTags(data: FormData) {
     }
   }
 
-  revalidateProjects(projectId)
+  revalidateProjects(project.slug)
 
   return { success: true, message: 'Tags do projeto atualizadas.' }
 }

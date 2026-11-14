@@ -85,14 +85,24 @@ describe('(E2E) - GET /api/v1/projects/:projectId/members', () => {
     expect(response.body.message).toBe('Projeto não encontrado')
   })
 
-  it('listar membros: sem token, deve retornar 401', async () => {
+  it('listar membros: sem token em projeto publicado, deve retornar 200 só com quem aceitou', async () => {
     const { user: owner } = await makeUserOnDatabase()
     const { project } = await makeProjectOnDatabase({ author: owner.id, status: ProjectStatus.PUBLISHED })
+    await addMember(project.id, ProjectMemberStatus.PENDING, 'Pessoa Pendente')
+    const accepted = await addMember(project.id, ProjectMemberStatus.ACCEPTED, 'Pessoa Aceita')
 
     const response = await listMembers(project.id.toString())
 
-    expect(response.status).toBe(401)
-    expect(response.body.message).toBe('Não autenticado.')
+    expect(response.status).toBe(200)
+    expect(response.body.members).toEqual([
+      {
+        id: accepted.projectMember.id.toString(),
+        userId: accepted.user.id.toString(),
+        name: 'Pessoa Aceita',
+        status: 'ACCEPTED',
+        createdAt: expect.any(String),
+      },
+    ])
   })
 
   it('listar membros: deve mostrar o nome de cada membro e nunca o e-mail', async () => {

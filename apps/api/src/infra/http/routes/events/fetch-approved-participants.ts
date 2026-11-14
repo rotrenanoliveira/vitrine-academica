@@ -3,7 +3,7 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 import { makeFetchApprovedParticipantsController } from '../../factories/event/make-fetch-approved-participants-controller'
 import { errorMessageSchema } from '../../schemas/event-schemas'
-import { projectHttpSchema } from '../../schemas/project-schemas'
+import { projectListHttpSchema } from '../../schemas/project-schemas'
 
 export async function fetchApprovedParticipantsRoute(app: FastifyInstance) {
   const controller = makeFetchApprovedParticipantsController()
@@ -16,7 +16,7 @@ export async function fetchApprovedParticipantsRoute(app: FastifyInstance) {
         summary: 'Listar participantes aprovados',
         params: z.object({ eventId: z.uuid() }),
         response: {
-          200: z.object({ projects: z.array(projectHttpSchema) }),
+          200: z.object({ projects: z.array(projectListHttpSchema) }),
           404: errorMessageSchema,
         },
       },

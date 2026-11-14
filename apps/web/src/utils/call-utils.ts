@@ -1,5 +1,4 @@
 import type { CallApplicationStatus, CallWithSkills } from './call-type'
-import type { InstitutionMemberRole } from './type'
 
 const DATE_TIME_LOCAL_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/
 const BRASILIA_OFFSET = '-03:00'
@@ -49,12 +48,4 @@ export const applicationStatusLabels: Record<CallApplicationStatus, string> = {
   PENDING: 'Pendente',
   APPROVED: 'Aprovada',
   REJECTED: 'Rejeitada',
-}
-
-export const memberRoleLabels: Record<InstitutionMemberRole, string> = {
-  STUDENT: 'Aluno',
-  PROFESSOR: 'Professor',
-  TEACHER: 'Docente',
-  MANAGER: 'Gestor',
-  ADMINISTRATIVE_OFFICE: 'Secretaria',
 }

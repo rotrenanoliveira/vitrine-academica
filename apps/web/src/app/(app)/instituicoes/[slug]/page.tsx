@@ -1,19 +1,12 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
+import { FormRequestInstitutionMembership } from '@/components/institution/form-request-institution-membership'
 import { getCurrentUser } from '@/server/auth/require-user'
-import { getCachedInstitutionEvents } from '@/server/http/routes/events/fetch-institution-events'
 import { getCachedInstitutionBySlug } from '@/server/http/routes/institutions/get-institution'
 import { getCachedMyInstitutionMemberships } from '@/server/http/routes/institutions/get-my-institution-memberships'
 import { canManageInstitution, isActiveInstitutionMember } from '@/utils/can-manage-institution'
 import { InstitutionDetail } from '../_components/institution-detail'
+import { InstitutionEventsPreview } from './_components/institution-events-preview'
+import { InstitutionProjectsPreview } from './_components/institution-projects-preview'
 
 export const metadata: Metadata = {
   title: 'Detalhe da instituição',
@@ -26,7 +19,6 @@ type PageProps = {
 export default async function InstitutionDetailPage({ params }: PageProps) {
   const { slug } = await params
   const [{ institution }, user] = await Promise.all([getCachedInstitutionBySlug(slug), getCurrentUser()])
-  const { events } = await getCachedInstitutionEvents(institution.id)
 
   let alreadyMember = false
   let canManage = false
@@ -37,30 +29,25 @@ export default async function InstitutionDetailPage({ params }: PageProps) {
     canManage = canManageInstitution(members, institution.id, user.id)
   }
 
+  const isAuthenticated = Boolean(user)
+
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border px-4">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink render={<Link href="/instituicoes" />}>Instituições</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Detalhe</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </header>
+      <div className="mx-auto flex w-full flex-1 flex-col gap-12 p-4 py-8">
+        <InstitutionDetail institution={institution} canManage={canManage} />
 
-      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-4 py-8">
-        <InstitutionDetail
-          institution={institution}
-          events={events}
-          isAuthenticated={Boolean(user)}
-          alreadyMember={alreadyMember}
-          canManage={canManage}
-        />
+        <InstitutionProjectsPreview slug={institution.slug} />
+
+        <InstitutionEventsPreview institutionId={institution.id} institutionSlug={institution.slug} />
+
+        {isAuthenticated && !alreadyMember && (
+          <FormRequestInstitutionMembership
+            institutionId={institution.id}
+            institutionSlug={institution.slug}
+            shouldProof={institution.shouldProof}
+            alreadyMember={alreadyMember}
+          />
+        )}
       </div>
     </div>
   )

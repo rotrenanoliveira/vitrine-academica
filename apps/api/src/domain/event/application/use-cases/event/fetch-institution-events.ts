@@ -1,17 +1,18 @@
 import { type Either, left, right } from '@/core/either'
 import { InstitutionNotFoundError } from '@/domain/institution/application/_errors/institution-not-found-error'
 import type { InstitutionsRepository } from '@/domain/institution/application/repositories/institutions-repository'
-import type { Event, EventPhase } from '../../../enterprise/entities/event'
-import type { EventsRepository } from '../../repositories/events-repository'
+import type { EventPhase, ParticipationScope } from '../../../enterprise/entities/event'
+import type { EventListItem, EventsRepository } from '../../repositories/events-repository'
 
 interface FetchInstitutionEventsUseCaseRequest {
   institutionId: string
   page?: number
   perPage?: number
   phase?: EventPhase
+  participationScope?: ParticipationScope
 }
 
-type FetchInstitutionEventsUseCaseResponse = Either<InstitutionNotFoundError, { events: Event[] }>
+type FetchInstitutionEventsUseCaseResponse = Either<InstitutionNotFoundError, { events: EventListItem[] }>
 
 export class FetchInstitutionEventsUseCase {
   constructor(
@@ -24,6 +25,7 @@ export class FetchInstitutionEventsUseCase {
     page = 1,
     perPage = 20,
     phase,
+    participationScope,
   }: FetchInstitutionEventsUseCaseRequest): Promise<FetchInstitutionEventsUseCaseResponse> {
     const institution = await this.institutionsRepository.findById(institutionId)
 
@@ -36,6 +38,7 @@ export class FetchInstitutionEventsUseCase {
       page,
       perPage,
       phase,
+      participationScope,
     })
 
     return right({ events })
