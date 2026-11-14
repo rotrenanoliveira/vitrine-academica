@@ -1,4 +1,6 @@
 import { type Either, left, right } from '@/core/either'
+import type { UsersRepository } from '@/domain/identity/application/repositories/users-repository'
+import type { User } from '@/domain/identity/enterprise/entities/user'
 import type { InstitutionMembershipRequest } from '../../../enterprise/entities/institution-membership-request'
 import { InstitutionNotFoundError } from '../../_errors/institution-not-found-error'
 import { NotAllowedToManageInstitutionError } from '../../_errors/not-allowed-to-manage-institution-error'
@@ -12,9 +14,14 @@ interface FetchInstitutionMembershipRequestsUseCaseRequest {
   actorId: string
 }
 
+export interface InstitutionMembershipRequestItem {
+  request: InstitutionMembershipRequest
+  user: User
+}
+
 type FetchInstitutionMembershipRequestsUseCaseResponse = Either<
   InstitutionNotFoundError | NotAllowedToManageInstitutionError,
-  { requests: InstitutionMembershipRequest[] }
+  { requests: InstitutionMembershipRequestItem[] }
 >
 
 export class FetchInstitutionMembershipRequestsUseCase {
@@ -22,6 +29,7 @@ export class FetchInstitutionMembershipRequestsUseCase {
     private readonly institutionsRepository: InstitutionsRepository,
     private readonly institutionMembersRepository: InstitutionMembersRepository,
     private readonly institutionMembershipRequestsRepository: InstitutionMembershipRequestsRepository,
+    private readonly usersRepository: UsersRepository,
   ) {}
 
   async execute({
@@ -40,7 +48,19 @@ export class FetchInstitutionMembershipRequestsUseCase {
       return left(new NotAllowedToManageInstitutionError())
     }
 
-    const requests = await this.institutionMembershipRequestsRepository.findManyByInstitutionId(institutionId)
+    const membershipRequests = await this.institutionMembershipRequestsRepository.findManyByInstitutionId(institutionId)
+
+    const users = await Promise.all(membershipRequests.map((request) => this.usersRepository.findById(request.userId)))
+
+    const requests = membershipRequests.flatMap((request, index) => {
+      const user = users[index]
+
+      if (!user) {
+        return []
+      }
+
+      return [{ request, user }]
+    })
 
     return right({ requests })
   }

@@ -22,7 +22,7 @@ export async function fetchInstitutionMembershipRequestsRoute(app: FastifyInstan
         }),
         response: {
           200: z.object({
-            requests: z.array(institutionMembershipRequestSchema),
+            requests: z.array(institutionMembershipRequestSchema.extend({ name: z.string() })),
           }),
           401: messageSchema,
           403: messageSchema,
