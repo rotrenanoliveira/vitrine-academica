@@ -16,7 +16,7 @@
     "env:load": "dotenv -e ../../.env --",
     "start": "pnpm env:load node dist/server.mjs",
     "build": "tsup",
-    "postbuild": "pnpm db:generate && pnpm db:migrate && pnpm db:seed"
+    "postbuild": "pnpm db:generate && pnpm db:migrate"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.6.0",
