@@ -55,18 +55,18 @@ export function ProjectsFilters() {
   }, [tagIdsKey, tags])
 
   function handleTitleChange(value: string) {
-    void setFilters({ title: value === '' ? null : value })
+    void setFilters({ title: value === '' ? null : value, page: 1 })
   }
 
   function handleTagsChange(value: Tag[]) {
     const next = sameIds(selectedTags, value) ? selectedTags : value
     setSelectedTags(next)
-    void setFilters({ tags: next.length > 0 ? next.map((tag) => tag.id) : null })
+    void setFilters({ tags: next.length > 0 ? next.map((tag) => tag.id) : null, page: 1 })
   }
 
   function handleClear() {
     setSelectedTags(EMPTY_TAGS)
-    void setFilters({ title: null, tags: null })
+    void setFilters({ title: null, tags: null, page: 1 })
   }
 
   const hasActiveFilters = Boolean(filters.title || (filters.tags && filters.tags.length > 0))

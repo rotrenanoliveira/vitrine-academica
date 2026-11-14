@@ -8,6 +8,8 @@ import { api } from '../../api-client'
 
 type FetchProjectsResponse = {
   total: number
+  page: number
+  limit: number
   projects: ProjectListItem[]
 }
 
@@ -19,6 +21,8 @@ export async function fetchPublishedProjects() {
       .get<FetchProjectsResponse>('api/v1/projects', {
         searchParams: {
           status: 'PUBLISHED',
+          page: '1',
+          limit: '100',
           ...(token ? { scope: 'user' } : {}),
         },
         cache: 'no-store',
