@@ -27,4 +27,7 @@ export class InMemoryProjectTagsRepository implements ProjectTagsRepository {
   async create(projectTag: ProjectTag): Promise<void> {
     this.items.push(projectTag)
   }
+  async delete(projectTag: ProjectTag): Promise<void> {
+    this.items = this.items.filter((item) => item.id.toString() !== projectTag.id.toString())
+  }
 }

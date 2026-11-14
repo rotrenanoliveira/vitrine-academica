@@ -2,6 +2,7 @@
 
 import { Loading03Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -14,6 +15,8 @@ import type { Project } from '@/utils/type'
 
 type FormUpdateProjectProps = {
   project: Project
+  canChangeStatus?: boolean
+  currentCoverUrl?: string | null
 }
 
 const statusOptions = [
@@ -23,13 +26,13 @@ const statusOptions = [
   { value: 'ARCHIVED', label: 'Arquivado' },
 ] as const
 
-export function FormUpdateProject({ project }: FormUpdateProjectProps) {
+export function FormUpdateProject({ project, canChangeStatus = true, currentCoverUrl = null }: FormUpdateProjectProps) {
   const router = useRouter()
 
   const [_, handleSubmit, isPending] = useFormState(actionUpdateProject, {
     onSuccess: (message) => {
       toast.success(message)
-      router.push(`/projetos/${project.id}`)
+      router.push(`/projetos/${project.slug}`)
       router.refresh()
     },
     onError: (message) => {
@@ -41,6 +44,7 @@ export function FormUpdateProject({ project }: FormUpdateProjectProps) {
     <form className="space-y-4" onSubmit={handleSubmit}>
       <h2 className="font-heading text-2xl font-semibold">Editar projeto</h2>
       <input type="hidden" name="project-id" value={project.id} />
+      <input type="hidden" name="project-slug" value={project.slug} />
 
       <div className="space-y-2">
         <Label htmlFor="title">Título</Label>
@@ -53,24 +57,49 @@ export function FormUpdateProject({ project }: FormUpdateProjectProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="status">Status</Label>
-        <select
-          id="status"
-          name="status"
-          required
-          defaultValue={project.status}
-          className="border-input bg-background h-9 w-full border-b px-0 text-sm outline-none"
-        >
-          {statusOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <Label htmlFor="cover-attachment">Capa</Label>
+        {currentCoverUrl ? (
+          <div className="relative mb-2 aspect-video w-full overflow-hidden border border-border bg-muted">
+            <Image
+              src={currentCoverUrl}
+              alt={`Capa atual de ${project.title}`}
+              fill
+              unoptimized
+              className="object-cover"
+            />
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground">Nenhuma capa definida ainda.</p>
+        )}
+        <Input id="cover-attachment" name="cover-attachment" type="file" accept="image/png,image/jpeg,image/jpg" />
         <p className="text-xs text-muted-foreground">
-          Altere para Publicado para disponibilizar o projeto imediatamente.
+          Opcional. PNG ou JPG de até 5 MB. Envie um arquivo novo para substituir a capa atual.
         </p>
       </div>
+
+      {canChangeStatus ? (
+        <div className="space-y-2">
+          <Label htmlFor="status">Status</Label>
+          <select
+            id="status"
+            name="status"
+            required
+            defaultValue={project.status}
+            className="border-input bg-background h-9 w-full border-b px-0 text-sm outline-none"
+          >
+            {statusOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-muted-foreground">
+            Altere para Publicado para disponibilizar o projeto imediatamente.
+          </p>
+        </div>
+      ) : (
+        <input type="hidden" name="status" value={project.status} />
+      )}
 
       <div className="flex w-full items-end justify-end">
         <Button type="submit" disabled={isPending}>

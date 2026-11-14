@@ -7,6 +7,13 @@ import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
 describe('(E2E) - GET /api/v1/projects/published', () => {
   afterAll(async () => await app.close())
 
+  it('deve retornar lista vazia quando nao ha projetos publicados', async () => {
+    const response = await request(app.server).get('/api/v1/projects/published')
+
+    expect(response.status).toBe(200)
+    expect(response.body.projects).toEqual([])
+  })
+
   it('deve ser possivel buscar todos os projetos publicados', async () => {
     const { user } = await makeUserOnDatabase()
     const { project: published } = await makeProjectOnDatabase({
@@ -26,9 +33,11 @@ describe('(E2E) - GET /api/v1/projects/published', () => {
         {
           id: published.id.toString(),
           title: published.title,
+          slug: published.slug,
           description: published.description,
           authorId: user.id.toString(),
           status: 'PUBLISHED',
+          coverUrl: null,
           attachments: [],
           tags: [],
           createdAt: expect.any(String),

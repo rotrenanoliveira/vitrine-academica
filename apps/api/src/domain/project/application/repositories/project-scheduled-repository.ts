@@ -3,6 +3,9 @@ import type { ProjectScheduled } from '../../enterprise/entities/project-schedul
 export interface ProjectScheduledRepository {
   findById(projectId: string): Promise<ProjectScheduled | null>
   findManyReadyToPublish(date: Date): Promise<ProjectScheduled[]>
+  findManyScheduledBetween(from: Date, to: Date): Promise<ProjectScheduled[]>
+  findManyDueToPublish(now: Date): Promise<ProjectScheduled[]>
+  findManyInRange(start: Date, end: Date): Promise<ProjectScheduled[]>
 
   create(projectScheduled: ProjectScheduled): Promise<void>
   save(projectScheduled: ProjectScheduled): Promise<void>

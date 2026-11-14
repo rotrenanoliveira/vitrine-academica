@@ -27,7 +27,7 @@ async function authenticateUser() {
 describe('(E2E) - POST /api/v1/projects/:projectId/schedule', () => {
   afterAll(async () => await app.close())
 
-  it('deve ser possivel agendar um projeto', async () => {
+  it('agendar: com projeto em rascunho, deve retornar 201 com o agendamento', async () => {
     const { accessToken, user } = await authenticateUser()
     const { project } = await makeProjectOnDatabase({ author: user.id })
     const publishedIn = new Date('2030-01-15T12:00:00.000Z')
@@ -50,7 +50,7 @@ describe('(E2E) - POST /api/v1/projects/:projectId/schedule', () => {
     })
   })
 
-  it('should not be able to schedule a project when it does not exist', async () => {
+  it('agendar: com projeto inexistente, deve retornar 404 com mensagem', async () => {
     const { accessToken } = await authenticateUser()
 
     const response = await request(app.server)
@@ -66,7 +66,7 @@ describe('(E2E) - POST /api/v1/projects/:projectId/schedule', () => {
     })
   })
 
-  it('should not be able to schedule a project of another user', async () => {
+  it('agendar: com projeto de outro usuário, deve retornar 403', async () => {
     const { accessToken } = await authenticateUser()
     const { user: owner } = await makeUserOnDatabase()
     const { project } = await makeProjectOnDatabase({ author: owner.id })
@@ -81,7 +81,7 @@ describe('(E2E) - POST /api/v1/projects/:projectId/schedule', () => {
     expect(response.status).toBe(403)
   })
 
-  it('should not be able to schedule a project when it is already scheduled', async () => {
+  it('agendar: com projeto já agendado, deve retornar 409 com mensagem', async () => {
     const { accessToken, user } = await authenticateUser()
     const { project } = await makeProjectOnDatabase({ author: user.id })
 
@@ -103,7 +103,7 @@ describe('(E2E) - POST /api/v1/projects/:projectId/schedule', () => {
     })
   })
 
-  it('should not be able to schedule a project when status is not sketch', async () => {
+  it('agendar: com projeto fora de rascunho, deve retornar 400 com mensagem', async () => {
     const { accessToken, user } = await authenticateUser()
     const { project } = await makeProjectOnDatabase({
       author: user.id,
@@ -121,5 +121,32 @@ describe('(E2E) - POST /api/v1/projects/:projectId/schedule', () => {
     expect(response.body).toEqual({
       message: expect.any(String),
     })
+  })
+
+  it('agendar: com data no passado, deve retornar 400 com mensagem', async () => {
+    const { accessToken, user } = await authenticateUser()
+    const { project } = await makeProjectOnDatabase({ author: user.id, status: ProjectStatus.SKETCH })
+
+    const response = await request(app.server)
+      .post(`/api/v1/projects/${project.id.toString()}/schedule`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        publishedIn: new Date('2020-01-15T12:00:00.000Z').toISOString(),
+      })
+
+    expect(response.status).toBe(400)
+    expect(response.body.message).toBe('A data de publicação deve estar no futuro')
+  })
+
+  it('agendar: com ano de seis dígitos, deve retornar 400', async () => {
+    const { accessToken, user } = await authenticateUser()
+    const { project } = await makeProjectOnDatabase({ author: user.id, status: ProjectStatus.SKETCH })
+
+    const response = await request(app.server)
+      .post(`/api/v1/projects/${project.id.toString()}/schedule`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ publishedIn: '+202600-01-01T00:00:00.000Z' })
+
+    expect(response.status).toBe(400)
   })
 })

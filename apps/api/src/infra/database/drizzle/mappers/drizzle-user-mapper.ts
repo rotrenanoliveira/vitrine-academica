@@ -1,5 +1,5 @@
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
-import { User, type UserStatus } from '@/domain/identity/enterprise/entities/user'
+import { User, type UserRole, type UserStatus } from '@/domain/identity/enterprise/entities/user'
 import type { users } from '../schemas/users'
 
 type DrizzleUser = typeof users.$inferSelect
@@ -12,6 +12,7 @@ export class DrizzleUserMapper {
         name: row.name,
         email: row.email,
         status: row.status as UserStatus,
+        role: row.role as UserRole,
         updatedAt: row.updatedAt,
       },
       new UniqueEntityId(row.id),
@@ -24,6 +25,7 @@ export class DrizzleUserMapper {
       name: user.name,
       email: user.email,
       status: user.status,
+      role: user.role,
       updatedAt: user.updatedAt ?? undefined,
     }
   }

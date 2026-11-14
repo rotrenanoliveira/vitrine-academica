@@ -31,4 +31,19 @@ describe('(UC) - Fetch Published Projects', () => {
       )
     }
   })
+
+  it('should able to fetch an empty list when there are no published projects', async () => {
+    const { project: scheduled } = makeProject({ status: ProjectStatus.SCHEDULED })
+    const { project: sketch } = makeProject({ status: ProjectStatus.SKETCH })
+
+    projectsRepository.items.push(scheduled, sketch)
+
+    const result = await sut.execute()
+
+    expect(result.isRight()).toBeTruthy()
+
+    if (result.isRight()) {
+      expect(result.value.projects).toHaveLength(0)
+    }
+  })
 })

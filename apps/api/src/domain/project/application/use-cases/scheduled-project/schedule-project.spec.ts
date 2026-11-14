@@ -8,6 +8,7 @@ import { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/r
 import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import { ProjectStatus } from '../../../enterprise/entities/project'
 import { InvalidProjectStatusError } from '../../_errors/invalid-project-status-error'
+import { InvalidScheduleDateError } from '../../_errors/invalid-schedule-date-error'
 import { NotProjectOwnerError } from '../../_errors/not-project-owner-error'
 import { ProjectAlreadyScheduledError } from '../../_errors/project-already-scheduled-error'
 import { ProjectNotFoundError } from '../../_errors/project-not-found-error'
@@ -33,7 +34,7 @@ describe('(UC) - Schedule Project', () => {
     const { project } = makeProject()
     projectsRepository.items.push(project)
 
-    const publishedIn = new Date('2026-09-10T12:00:00.000Z')
+    const publishedIn = new Date('2099-01-01T12:00:00.000Z')
 
     const result = await sut.execute({
       projectId: project.id.toString(),
@@ -58,7 +59,7 @@ describe('(UC) - Schedule Project', () => {
     await sut.execute({
       projectId: project.id.toString(),
       authorId: project.author.toString(),
-      publishedIn: new Date(),
+      publishedIn: new Date('2099-01-01T12:00:00.000Z'),
     })
 
     expect(auditLogsRepository.items).toHaveLength(1)
@@ -99,6 +100,7 @@ describe('(UC) - Schedule Project', () => {
 
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(NotProjectOwnerError)
+      expect(result.value.message).toContain('Você não é o autor deste projeto.')
     }
   })
 
@@ -141,5 +143,60 @@ describe('(UC) - Schedule Project', () => {
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(ProjectAlreadyScheduledError)
     }
+  })
+
+  it('should not be able to schedule a project with a publication date in the past', async () => {
+    const now = new Date('2026-09-09T10:00:00.000Z')
+    const { project } = makeProject({ status: ProjectStatus.SKETCH })
+    projectsRepository.items.push(project)
+
+    const result = await sut.execute({
+      projectId: project.id.toString(),
+      authorId: project.author.toString(),
+      publishedIn: new Date('2026-09-09T09:59:00.000Z'),
+      now,
+    })
+
+    expect(result.isLeft()).toBeTruthy()
+    expect(project.status).toBe(ProjectStatus.SKETCH)
+    expect(projectScheduledRepository.items).toHaveLength(0)
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.FAILURE)
+
+    if (result.isLeft()) {
+      expect(result.value).toBeInstanceOf(InvalidScheduleDateError)
+    }
+  })
+
+  it('should not be able to schedule a project for the current instant', async () => {
+    const now = new Date('2026-09-09T10:00:00.000Z')
+    const { project } = makeProject({ status: ProjectStatus.SKETCH })
+    projectsRepository.items.push(project)
+
+    const result = await sut.execute({
+      projectId: project.id.toString(),
+      authorId: project.author.toString(),
+      publishedIn: now,
+      now,
+    })
+
+    expect(result.isLeft()).toBeTruthy()
+    expect(projectScheduledRepository.items).toHaveLength(0)
+  })
+
+  it('should be able to schedule a project for one minute after the current instant', async () => {
+    const now = new Date('2026-09-09T10:00:00.000Z')
+    const { project } = makeProject({ status: ProjectStatus.SKETCH })
+    projectsRepository.items.push(project)
+
+    const result = await sut.execute({
+      projectId: project.id.toString(),
+      authorId: project.author.toString(),
+      publishedIn: new Date('2026-09-09T10:01:00.000Z'),
+      now,
+    })
+
+    expect(result.isRight()).toBeTruthy()
+    expect(project.status).toBe(ProjectStatus.SCHEDULED)
   })
 })

@@ -4,7 +4,7 @@ import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/au
 import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import { UserNotFoundError } from '@/domain/identity/application/_errors/user-not-found-error'
 import type { UsersRepository } from '@/domain/identity/application/repositories/users-repository'
-import { PreferenceTag } from '../../../enterprise/entities/preference-tag'
+import { PreferenceTag, PreferenceTagStatus } from '../../../enterprise/entities/preference-tag'
 import { PreferenceTagAlreadyExistsError } from '../../_errors/preference-tag-already-exists-error'
 import { TagNotFoundError } from '../../_errors/tag-not-found-error'
 import type { PreferenceTagsRepository } from '../../repositories/preference-tags-repository'
@@ -16,6 +16,7 @@ interface RegisterPreferenceTagUseCaseRequest {
 }
 
 type LogParams = {
+  action?: AuditLogAction
   actorId: string
   resourceId: string
   text: string
@@ -35,11 +36,11 @@ export class RegisterPreferenceTagUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
-  private async log({ actorId, resourceId, text, status, diff }: LogParams) {
+  private async log({ action, actorId, resourceId, text, status, diff }: LogParams) {
     await this.registerLog.execute({
       actorId,
       sessionId: null,
-      action: AuditLogAction.CREATE,
+      action: action ?? AuditLogAction.CREATE,
       resource: 'preference-tag',
       resourceId,
       diff: diff ?? null,
@@ -75,17 +76,33 @@ export class RegisterPreferenceTagUseCase {
       return left(new TagNotFoundError())
     }
 
-    const preferenceTagAlreadyExists = await this.preferenceTagsRepository.findByUserIdAndTagId(userId, tagId)
+    const existingPreferenceTag = await this.preferenceTagsRepository.findByUserIdAndTagId(userId, tagId)
 
-    if (preferenceTagAlreadyExists) {
+    if (existingPreferenceTag) {
+      if (existingPreferenceTag.status === PreferenceTagStatus.ACTIVE) {
+        await this.log({
+          actorId: userId,
+          resourceId: existingPreferenceTag.id.toString(),
+          text: `Preferência de tag ${existingPreferenceTag.id.toString()} já existe.`,
+          status: AuditLogStatus.FAILURE,
+        })
+
+        return left(new PreferenceTagAlreadyExistsError())
+      }
+
+      existingPreferenceTag.status = PreferenceTagStatus.ACTIVE
+      await this.preferenceTagsRepository.save(existingPreferenceTag)
+
       await this.log({
+        action: AuditLogAction.UPDATE,
         actorId: userId,
-        resourceId: preferenceTagAlreadyExists.id.toString(),
-        text: `Preferência de tag ${preferenceTagAlreadyExists.id.toString()} já existe.`,
-        status: AuditLogStatus.FAILURE,
+        resourceId: existingPreferenceTag.id.toString(),
+        text: `Usuário ${userId} reativou a tag ${tagId} em suas preferências.`,
+        status: AuditLogStatus.SUCCESS,
+        diff: { status: { old: PreferenceTagStatus.INACTIVE, new: PreferenceTagStatus.ACTIVE } },
       })
 
-      return left(new PreferenceTagAlreadyExistsError())
+      return right({ preferenceTag: existingPreferenceTag })
     }
 
     const preferenceTag = PreferenceTag.create({

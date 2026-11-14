@@ -4,49 +4,64 @@ import { makeProjectScheduledOnDatabase } from '@tests/factories/make-project-sc
 import { makeUserOnDatabase } from '@tests/factories/make-user'
 import request from 'supertest'
 import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
+import { db } from '@/infra/database/drizzle/client'
+import { DrizzleProjectsRepository } from '@/infra/database/repositories/drizzle-projects-repository'
+
+const HOUR_IN_MS = 60 * 60 * 1000
 
 describe('(E2E) - GET /api/v1/projects/published/today', () => {
   afterAll(async () => await app.close())
 
-  it('deve ser possivel buscar os projetos publicados com agendamento no dia atual', async () => {
+  it('listar hoje: com projetos lançados hoje, deve retornar 200 com os projetos', async () => {
     const { user } = await makeUserOnDatabase()
-    const today = new Date()
-    const yesterday = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 1, 12))
+    const now = new Date()
 
-    await makeProjectOnDatabase({
+    const { project: launchedToday } = await makeProjectOnDatabase({
       author: user.id,
       status: ProjectStatus.PUBLISHED,
-      createdAt: today,
     })
+    await makeProjectScheduledOnDatabase({ projectId: launchedToday.id, publishedIn: now })
 
-    const { project: scheduledPublished } = await makeProjectOnDatabase({
+    const { project: launchedBefore } = await makeProjectOnDatabase({
       author: user.id,
       status: ProjectStatus.PUBLISHED,
-      createdAt: yesterday,
     })
     await makeProjectScheduledOnDatabase({
-      projectId: scheduledPublished.id,
-      publishedIn: today,
+      projectId: launchedBefore.id,
+      publishedIn: new Date(now.getTime() - 36 * HOUR_IN_MS),
     })
 
-    const { project: scheduledAnotherDay } = await makeProjectOnDatabase({
-      author: user.id,
-      status: ProjectStatus.PUBLISHED,
-      createdAt: yesterday,
-    })
-    await makeProjectScheduledOnDatabase({
-      projectId: scheduledAnotherDay.id,
-      publishedIn: yesterday,
-    })
+    await makeProjectOnDatabase({ author: user.id, status: ProjectStatus.PUBLISHED })
 
     const response = await request(app.server).get('/api/v1/projects/published/today')
 
     expect(response.status).toBe(200)
+    expect(response.body.total).toBe(1)
     expect(response.body.projects).toEqual([
       expect.objectContaining({
-        id: scheduledPublished.id.toString(),
-        status: 'PUBLISHED',
+        id: launchedToday.id.toString(),
+        title: launchedToday.title,
+        description: launchedToday.description,
+        coverUrl: null,
+        tags: expect.any(Array),
+        createdAt: expect.any(String),
       }),
     ])
+    expect(response.body.projects[0]).not.toHaveProperty('status')
+  })
+
+  it('listar hoje: com projeto agendado para hoje, deve retornar 200 sem publicar o projeto', async () => {
+    const { user } = await makeUserOnDatabase()
+    const { project } = await makeProjectOnDatabase({ author: user.id, status: ProjectStatus.SCHEDULED })
+    await makeProjectScheduledOnDatabase({ projectId: project.id, publishedIn: new Date() })
+
+    const response = await request(app.server).get('/api/v1/projects/published/today')
+
+    expect(response.status).toBe(200)
+    expect(response.body.projects).toEqual([])
+
+    const saved = await new DrizzleProjectsRepository(db).findById(project.id.toString())
+
+    expect(saved?.status).toBe(ProjectStatus.SCHEDULED)
   })
 })

@@ -15,6 +15,7 @@ export async function searchExternalProjectsRoute(app: FastifyInstance) {
         description: 'Busca trabalhos científicos na OpenAlex.',
         querystring: z.object({
           q: z.string().trim().min(3).max(200).describe('Termo de busca'),
+          page: z.coerce.number().int().min(1).default(1).describe('Página da busca'),
         }),
         response: {
           200: z.object({
@@ -27,12 +28,18 @@ export async function searchExternalProjectsRoute(app: FastifyInstance) {
                 abstract: z.string().optional(),
               }),
             ),
+            page: z.number().int().min(1),
+            perPage: z.number().int().min(1),
+            hasNextPage: z.boolean(),
+          }),
+          502: z.object({
+            message: z.string(),
           }),
         },
       },
     },
     async (request, reply) => {
-      return searchExternalProjectsController.handle({ query: request.query.q }, reply)
+      return searchExternalProjectsController.handle({ query: request.query.q, page: request.query.page }, reply)
     },
   )
 }

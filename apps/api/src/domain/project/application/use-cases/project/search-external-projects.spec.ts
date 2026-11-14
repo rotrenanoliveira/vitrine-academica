@@ -1,17 +1,17 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { OpenAlexService } from '@/infra/external/openalex.service'
+import { InMemoryExternalProjectsSearch } from '@tests/repositories/in-memory-external-projects-search'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { ExternalServiceError } from '../../_errors/external-service-error'
 import { SearchExternalProjectsUseCase } from './search-external-projects'
 
-let openAlexService: OpenAlexService
+let externalProjectsSearch: InMemoryExternalProjectsSearch
 let sut: SearchExternalProjectsUseCase
 
-describe('(UC) - Nenhum projeto encontrado', () => {
+describe('(UC) - Search External Projects', () => {
   beforeEach(() => {
-    openAlexService = new OpenAlexService()
-    sut = new SearchExternalProjectsUseCase(openAlexService)
+    externalProjectsSearch = new InMemoryExternalProjectsSearch()
+    sut = new SearchExternalProjectsUseCase(externalProjectsSearch)
 
-    vi.spyOn(openAlexService, 'search').mockResolvedValue([
+    externalProjectsSearch.items = [
       {
         title: 'PFC Teste',
         authors: ['Thainá Soares'],
@@ -19,45 +19,45 @@ describe('(UC) - Nenhum projeto encontrado', () => {
         publishedIn: 'Revista UMC',
         abstract: 'Resumo reconstruído para o teste.',
       },
-    ])
+    ]
   })
 
-  it('Pesquisa por projetos externos', async () => {
-    const query = 'Engenhria de Software'
+  it('pesquisa por projetos externos', async () => {
+    const result = await sut.execute({ query: 'Engenharia de Software' })
 
-    const result = await sut.execute({ query })
-
-    expect(openAlexService.search).toHaveBeenCalledWith(query)
+    expect(externalProjectsSearch.lastQuery).toBe('Engenharia de Software')
+    expect(externalProjectsSearch.lastPage).toBe(1)
     expect(result.isRight()).toBe(true)
 
     if (result.isRight()) {
       expect(result.value.projects).toHaveLength(1)
       expect(result.value.projects[0].title).toBe('PFC Teste')
+      expect(result.value.page).toBe(1)
+      expect(result.value.perPage).toBe(30)
+      expect(result.value.hasNextPage).toBe(false)
     }
   })
 
-  it('Nenhum projeto encontrado', async () => {
-    vi.spyOn(openAlexService, 'search').mockResolvedValueOnce([])
+  it('repassa a página solicitada ao serviço externo', async () => {
+    externalProjectsSearch.hasNextPage = true
 
-    const result = await sut.execute({ query: 'query-sem-resultados' })
+    const result = await sut.execute({ query: 'Engenharia de Software', page: 2 })
 
+    expect(externalProjectsSearch.lastPage).toBe(2)
     expect(result.isRight()).toBe(true)
 
     if (result.isRight()) {
-      expect(result.value.projects).toHaveLength(0)
+      expect(result.value.page).toBe(2)
+      expect(result.value.hasNextPage).toBe(true)
     }
   })
 
-  it('Erro', async () => {
-    const failure = new Error('OpenAlex unavailable')
-    vi.spyOn(openAlexService, 'search').mockRejectedValueOnce(failure)
+  it('retorna erro quando o serviço externo está indisponível', async () => {
+    externalProjectsSearch.shouldFail = true
 
     const result = await sut.execute({ query: 'Engenharia de Software' })
 
     expect(result.isLeft()).toBe(true)
-
-    if (result.isLeft()) {
-      expect(result.value).toBeInstanceOf(ExternalServiceError)
-    }
+    expect(result.value).toBeInstanceOf(ExternalServiceError)
   })
 })

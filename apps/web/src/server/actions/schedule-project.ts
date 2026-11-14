@@ -6,6 +6,7 @@ import { revalidateProjects } from '../revalidate-projects'
 
 const scheduleProjectSchema = z.object({
   'project-id': z.uuid('Projeto inválido.'),
+  'project-slug': z.string().min(1, 'Slug inválido.'),
   'published-in': z.string().min(1, 'Informe a data de publicação.'),
 })
 
@@ -20,7 +21,14 @@ export async function actionScheduleProject(data: FormData) {
   }
 
   const projectId = formResult.data['project-id']
-  const publishedIn = new Date(formResult.data['published-in']).toISOString()
+  const projectSlug = formResult.data['project-slug']
+  const publishedInDate = new Date(formResult.data['published-in'])
+
+  if (Number.isNaN(publishedInDate.getTime())) {
+    return { success: false, message: 'Informe uma data de publicação válida.' }
+  }
+
+  const publishedIn = publishedInDate.toISOString()
 
   const [_, responseError] = await scheduleProject({
     projectId,
@@ -31,7 +39,7 @@ export async function actionScheduleProject(data: FormData) {
     return { success: false, message: responseError.message ?? 'Não foi possível agendar o projeto.' }
   }
 
-  revalidateProjects(projectId)
+  revalidateProjects(projectSlug)
 
   return { success: true, message: 'Projeto agendado para publicação.' }
 }

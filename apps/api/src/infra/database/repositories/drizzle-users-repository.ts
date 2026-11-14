@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 import type { UsersRepository } from '@/domain/identity/application/repositories/users-repository'
 import type { User } from '@/domain/identity/enterprise/entities/user'
 import type { DrizzleClient } from '../drizzle/client'
@@ -26,6 +26,16 @@ export class DrizzleUsersRepository implements UsersRepository {
     }
 
     return DrizzleUserMapper.toDomain(row)
+  }
+
+  async findManyByIds(ids: string[]): Promise<User[]> {
+    if (ids.length === 0) {
+      return []
+    }
+
+    const rows = await this.db.select().from(users).where(inArray(users.id, ids))
+
+    return rows.map(DrizzleUserMapper.toDomain)
   }
 
   async create(user: User): Promise<void> {

@@ -69,15 +69,20 @@ describe('(E2E) - GET /api/v1/projects/external-search', () => {
   it('deve retornar 200 com os projetos encontrados', async () => {
     const { accessToken } = await authenticateUser()
 
-    searchSpy.mockResolvedValue([
-      {
-        title: 'PFC Teste',
-        authors: ['Thainá Soares'],
-        externalUrl: 'https://pfc.1234/test',
-        publishedIn: 'PFC UMC',
-        abstract: 'Resumo de teste.',
-      },
-    ])
+    searchSpy.mockResolvedValue({
+      projects: [
+        {
+          title: 'PFC Teste',
+          authors: ['Thainá Soares'],
+          externalUrl: 'https://pfc.1234/test',
+          publishedIn: 'PFC UMC',
+          abstract: 'Resumo de teste.',
+        },
+      ],
+      page: 1,
+      perPage: 30,
+      hasNextPage: false,
+    })
 
     const response = await request(app.server)
       .get('/api/v1/projects/external-search')
@@ -87,13 +92,42 @@ describe('(E2E) - GET /api/v1/projects/external-search', () => {
     expect(response.status).toBe(200)
     expect(response.body.projects).toHaveLength(1)
     expect(response.body.projects[0].title).toBe('PFC Teste')
-    expect(searchSpy).toHaveBeenCalledWith('Engenharia de Software')
+    expect(response.body.page).toBe(1)
+    expect(response.body.perPage).toBe(30)
+    expect(response.body.hasNextPage).toBe(false)
+    expect(searchSpy).toHaveBeenCalledWith('Engenharia de Software', 1)
+  })
+
+  it('deve repassar a página solicitada', async () => {
+    const { accessToken } = await authenticateUser()
+
+    searchSpy.mockResolvedValue({
+      projects: [],
+      page: 2,
+      perPage: 30,
+      hasNextPage: true,
+    })
+
+    const response = await request(app.server)
+      .get('/api/v1/projects/external-search')
+      .query({ q: 'Engenharia de Software', page: 2 })
+      .set('Authorization', `Bearer ${accessToken}`)
+
+    expect(response.status).toBe(200)
+    expect(response.body.page).toBe(2)
+    expect(response.body.hasNextPage).toBe(true)
+    expect(searchSpy).toHaveBeenCalledWith('Engenharia de Software', 2)
   })
 
   it('deve retornar 200 com lista vazia quando nada é encontrado', async () => {
     const { accessToken } = await authenticateUser()
 
-    searchSpy.mockResolvedValue([])
+    searchSpy.mockResolvedValue({
+      projects: [],
+      page: 1,
+      perPage: 30,
+      hasNextPage: false,
+    })
 
     const response = await request(app.server)
       .get('/api/v1/projects/external-search')
@@ -102,5 +136,19 @@ describe('(E2E) - GET /api/v1/projects/external-search', () => {
 
     expect(response.status).toBe(200)
     expect(response.body.projects).toEqual([])
+  })
+
+  it('deve retornar 502 quando o serviço externo falha', async () => {
+    const { accessToken } = await authenticateUser()
+
+    searchSpy.mockResolvedValue(null)
+
+    const response = await request(app.server)
+      .get('/api/v1/projects/external-search')
+      .query({ q: 'Engenharia de Software' })
+      .set('Authorization', `Bearer ${accessToken}`)
+
+    expect(response.status).toBe(502)
+    expect(response.body.message).toBe('Serviço externo indisponível')
   })
 })

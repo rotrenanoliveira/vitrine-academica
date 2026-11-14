@@ -2,10 +2,12 @@ import { appForTest as app } from '@tests/app'
 import { makeAccessCodeOnDatabase } from '@tests/factories/make-access-code'
 import { makeAccountOnDatabase } from '@tests/factories/make-account'
 import { makeProjectOnDatabase } from '@tests/factories/make-project'
+import { makeProjectMemberOnDatabase } from '@tests/factories/make-project-member'
 import { makeUserOnDatabase } from '@tests/factories/make-user'
 import request from 'supertest'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
+import { ProjectMemberStatus } from '@/domain/project/enterprise/entities/project-member'
 
 async function authenticateUser() {
   const { user } = await makeUserOnDatabase()
@@ -80,4 +82,49 @@ describe('(E2E) - GET /api/v1/projects/:projectId', () => {
 
     expect(response.status).toBe(404)
   })
+
+  it('deve permitir ao coautor que aceitou o convite ver um rascunho', async () => {
+    const { accessToken, user } = await authenticateUser()
+    const { user: owner } = await makeUserOnDatabase()
+    const { project } = await makeProjectOnDatabase({
+      author: owner.id,
+      status: ProjectStatus.SKETCH,
+    })
+    await makeProjectMemberOnDatabase({
+      projectId: project.id,
+      userId: user.id,
+      status: ProjectMemberStatus.ACCEPTED,
+    })
+
+    const response = await request(app.server)
+      .get(`/api/v1/projects/${project.id.toString()}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+
+    expect(response.status).toBe(200)
+    expect(response.body.project.id).toBe(project.id.toString())
+    expect(response.body.project.status).toBe('SKETCH')
+  })
+
+  it.each([ProjectMemberStatus.PENDING, ProjectMemberStatus.REJECTED])(
+    'não deve permitir a quem tem convite %s ver um rascunho',
+    async (memberStatus) => {
+      const { accessToken, user } = await authenticateUser()
+      const { user: owner } = await makeUserOnDatabase()
+      const { project } = await makeProjectOnDatabase({
+        author: owner.id,
+        status: ProjectStatus.SKETCH,
+      })
+      await makeProjectMemberOnDatabase({
+        projectId: project.id,
+        userId: user.id,
+        status: memberStatus,
+      })
+
+      const response = await request(app.server)
+        .get(`/api/v1/projects/${project.id.toString()}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+
+      expect(response.status).toBe(404)
+    },
+  )
 })

@@ -1,0 +1,4 @@
+{
+  "extends": "@vitrine-academica/tsconfig/library.json",
+  "include": ["src/**/*"]
+}

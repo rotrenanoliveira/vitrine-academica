@@ -1,13 +1,16 @@
 import { revalidatePath, updateTag } from 'next/cache'
 
-export function revalidateProjects(id?: string) {
+export function revalidateProjects(slug?: string) {
   updateTag('projects')
   revalidatePath('/')
   revalidatePath('/projetos')
+  revalidatePath('/projetos/promovidos')
   revalidatePath('/projetos/novo')
+  revalidatePath('/me')
+  revalidatePath('/me/projetos')
 
-  if (id) {
-    revalidatePath(`/projetos/${id}`)
-    revalidatePath(`/projetos/${id}/editar`)
+  if (slug) {
+    revalidatePath(`/projetos/${slug}`)
+    revalidatePath(`/projetos/${slug}/editar`)
   }
 }

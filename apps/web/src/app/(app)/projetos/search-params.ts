@@ -1,17 +1,11 @@
-import { createLoader, parseAsStringEnum, type SearchParams, type UrlKeys } from 'nuqs/server'
-import type { ProjectStatus } from '@/utils/type'
-
-const statusValues = ['SKETCH', 'SCHEDULED', 'PUBLISHED', 'ARCHIVED'] as const satisfies readonly ProjectStatus[]
+import { parseAsArrayOf, parseAsString, type UrlKeys } from 'nuqs/server'
 
 export const projectsSearchParams = {
-  status: parseAsStringEnum([...statusValues]),
+  title: parseAsString,
+  tags: parseAsArrayOf(parseAsString),
 }
 
 export const projectsUrlKeys: UrlKeys<typeof projectsSearchParams> = {
-  status: 'status',
+  title: 'title',
+  tags: 'tags',
 }
-
-export const loadProjectsFilters = createLoader(projectsSearchParams, { urlKeys: projectsUrlKeys })
-
-export type ProjectsFilters = Awaited<ReturnType<typeof loadProjectsFilters>>
-export type { SearchParams }

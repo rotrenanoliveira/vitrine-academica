@@ -2,15 +2,11 @@ import type { FastifyReply } from 'fastify'
 import type { PublishScheduledProjectsUseCase } from '@/domain/project/application/use-cases/scheduled-project/publish-scheduled-projects'
 import { ProjectPresenter } from '../../presenters/project-presenter'
 
-interface PublishScheduledProjectsBody {
-  date?: Date
-}
-
 export class PublishScheduledProjectsController {
   constructor(private readonly publishScheduledProjects: PublishScheduledProjectsUseCase) {}
 
-  async handle({ date }: PublishScheduledProjectsBody, reply: FastifyReply) {
-    const result = await this.publishScheduledProjects.execute({ date })
+  async handle(reply: FastifyReply) {
+    const result = await this.publishScheduledProjects.execute()
 
     if (!result.isRight()) {
       return reply.status(400).send({

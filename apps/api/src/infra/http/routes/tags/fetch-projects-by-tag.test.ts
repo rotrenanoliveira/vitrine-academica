@@ -9,7 +9,7 @@ import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 describe('(E2E) - GET /api/v1/tags/:tagId/projects', () => {
   afterAll(async () => await app.close())
 
-  it('should be able to fetch projects related to a tag', async () => {
+  it('listar projetos por tag: com tag existente, deve retornar 200 com os projetos da tag', async () => {
     const { user } = await makeUserOnDatabase()
     const { tag } = await makeTagOnDatabase()
     const { project: firstProject } = await makeProjectOnDatabase({ author: user.id })
@@ -28,7 +28,7 @@ describe('(E2E) - GET /api/v1/tags/:tagId/projects', () => {
     )
   })
 
-  it('should not be able to fetch projects when tag does not exist', async () => {
+  it('listar projetos por tag: com tag inexistente, deve retornar 404 com mensagem', async () => {
     const response = await request(app.server).get(`/api/v1/tags/${new UniqueEntityId().toString()}/projects`)
 
     expect(response.status).toBe(404)

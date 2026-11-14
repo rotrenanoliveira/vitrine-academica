@@ -26,7 +26,7 @@ async function authenticateUser() {
 describe('(E2E) - POST /api/v1/projects/:projectId/tags', () => {
   afterAll(async () => await app.close())
 
-  it('should be able to register a tag on a project', async () => {
+  it('associar tag: com projeto e tag válidos, deve retornar 201 com a associação', async () => {
     const { accessToken, user } = await authenticateUser()
     const { project } = await makeProjectOnDatabase({ author: user.id })
     const { tag } = await makeTagOnDatabase()
@@ -48,7 +48,7 @@ describe('(E2E) - POST /api/v1/projects/:projectId/tags', () => {
     })
   })
 
-  it('should not be able to register a tag when project does not exist', async () => {
+  it('associar tag: com projeto inexistente, deve retornar 404 com mensagem', async () => {
     const { accessToken } = await authenticateUser()
     const { tag } = await makeTagOnDatabase()
 
@@ -65,7 +65,7 @@ describe('(E2E) - POST /api/v1/projects/:projectId/tags', () => {
     })
   })
 
-  it('should not be able to register a tag when tag does not exist', async () => {
+  it('associar tag: com tag inexistente, deve retornar 404 com mensagem', async () => {
     const { accessToken, user } = await authenticateUser()
     const { project } = await makeProjectOnDatabase({ author: user.id })
 
@@ -82,7 +82,7 @@ describe('(E2E) - POST /api/v1/projects/:projectId/tags', () => {
     })
   })
 
-  it('should not be able to register a tag already registered on the project', async () => {
+  it('associar tag: com tag já associada, deve retornar 409 com mensagem', async () => {
     const { accessToken, user } = await authenticateUser()
     const { project } = await makeProjectOnDatabase({ author: user.id })
     const { tag } = await makeTagOnDatabase()
@@ -102,6 +102,25 @@ describe('(E2E) - POST /api/v1/projects/:projectId/tags', () => {
       })
 
     expect(response.status).toBe(409)
+    expect(response.body).toEqual({
+      message: expect.any(String),
+    })
+  })
+
+  it('should not be able to register a tag on a project of another author', async () => {
+    const { accessToken } = await authenticateUser()
+    const { user: otherUser } = await makeUserOnDatabase()
+    const { project } = await makeProjectOnDatabase({ author: otherUser.id })
+    const { tag } = await makeTagOnDatabase()
+
+    const response = await request(app.server)
+      .post(`/api/v1/projects/${project.id.toString()}/tags`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        tagId: tag.id.toString(),
+      })
+
+    expect(response.status).toBe(403)
     expect(response.body).toEqual({
       message: expect.any(String),
     })

@@ -47,4 +47,7 @@ export class DrizzleProjectTagsRepository implements ProjectTagsRepository {
   async create(projectTag: ProjectTag): Promise<void> {
     await this.db.insert(projectTags).values(DrizzleProjectTagMapper.toPersistence(projectTag))
   }
+  async delete(projectTag: ProjectTag): Promise<void> {
+    await this.db.delete(projectTags).where(eq(projectTags.id, projectTag.id.toString()))
+  }
 }

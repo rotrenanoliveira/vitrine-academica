@@ -1,5 +1,5 @@
 import { Resend } from 'resend'
-import type { Mail } from '@/domain/mail/application/mail/mail'
+import type { Mail, MailResult } from '@/domain/mail/application/mail/mail'
 import type { EmailMessage } from '@/domain/mail/enterprise/value-objects/email-message'
 
 interface ResendMailConfig {
@@ -16,7 +16,7 @@ export class ResendMail implements Mail {
     this.from = config.from
   }
 
-  async send(message: EmailMessage): Promise<void> {
+  async send(message: EmailMessage): Promise<MailResult> {
     const mail = await this.client.emails.send({
       from: this.from,
       to: message.to,
@@ -27,5 +27,7 @@ export class ResendMail implements Mail {
     if (mail.error) {
       throw new Error(`Falha ao enviar e-mail: ${mail.error.message}`)
     }
+
+    return { id: mail.data?.id ?? null }
   }
 }

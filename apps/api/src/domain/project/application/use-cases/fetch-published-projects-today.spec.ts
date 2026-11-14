@@ -9,6 +9,16 @@ let projectsRepository: InMemoryProjectsRepository
 let projectScheduledRepository: InMemoryProjectScheduledRepository
 let sut: FetchPublishedProjectsTodayUseCase
 
+function launch(status: ProjectStatus, publishedIn: Date) {
+  const { project } = makeProject({ status })
+  const { projectScheduled } = makeProjectScheduled({ projectId: project.id, publishedIn })
+
+  projectsRepository.items.push(project)
+  projectScheduledRepository.items.push(projectScheduled)
+
+  return project
+}
+
 describe('(UC) - Fetch Published Projects Today', () => {
   beforeEach(() => {
     projectsRepository = new InMemoryProjectsRepository()
@@ -16,53 +26,72 @@ describe('(UC) - Fetch Published Projects Today', () => {
     sut = new FetchPublishedProjectsTodayUseCase(projectsRepository, projectScheduledRepository)
   })
 
-  it('deve ser possível buscar os projetos publicados com agendamento no dia atual', async () => {
-    const today = new Date('2026-09-11T10:00:00.000Z')
-    const yesterday = new Date('2026-09-10T10:00:00.000Z')
+  it('deve listar os projetos publicados com lançamento hoje', async () => {
+    const now = new Date('2026-09-09T15:00:00.000Z')
+    const today = launch(ProjectStatus.PUBLISHED, new Date('2026-09-09T12:00:00.000Z'))
+    launch(ProjectStatus.PUBLISHED, new Date('2026-09-08T12:00:00.000Z'))
 
-    const { project: scheduledToday } = makeProject({
-      status: ProjectStatus.PUBLISHED,
-      createdAt: yesterday,
-    })
-    const { project: scheduledAnotherDay } = makeProject({
-      status: ProjectStatus.PUBLISHED,
-      createdAt: yesterday,
-    })
-    const { project: stillScheduled } = makeProject({
-      status: ProjectStatus.SCHEDULED,
-      createdAt: yesterday,
-    })
-    const { project: publishedWithoutSchedule } = makeProject({
-      status: ProjectStatus.PUBLISHED,
-      createdAt: today,
-    })
-
-    projectsRepository.items.push(scheduledToday, scheduledAnotherDay, stillScheduled, publishedWithoutSchedule)
-
-    const { projectScheduled: todaySchedule } = makeProjectScheduled({
-      projectId: scheduledToday.id,
-      publishedIn: new Date('2026-09-11T18:00:00.000Z'),
-    })
-    const { projectScheduled: anotherDaySchedule } = makeProjectScheduled({
-      projectId: scheduledAnotherDay.id,
-      publishedIn: yesterday,
-    })
-    const futureDay = new Date('2026-09-12T10:00:00.000Z')
-
-    const { projectScheduled: pendingSchedule } = makeProjectScheduled({
-      projectId: stillScheduled.id,
-      publishedIn: futureDay,
-    })
-
-    projectScheduledRepository.items.push(todaySchedule, anotherDaySchedule, pendingSchedule)
-
-    const result = await sut.execute({ date: today })
+    const result = await sut.execute({ date: now })
 
     expect(result.isRight()).toBeTruthy()
 
     if (result.isRight()) {
-      expect(result.value.projects).toHaveLength(1)
-      expect(result.value.projects[0].id.toString()).toBe(scheduledToday.id.toString())
+      expect(result.value.projects.map((project) => project.id.toString())).toEqual([today.id.toString()])
+    }
+  })
+
+  it('não deve publicar nem listar um projeto agendado para mais tarde', async () => {
+    const now = new Date('2026-09-09T13:00:00.000Z')
+    const scheduled = launch(ProjectStatus.SCHEDULED, new Date('2026-09-09T21:00:00.000Z'))
+
+    const result = await sut.execute({ date: now })
+
+    if (result.isRight()) {
+      expect(result.value.projects).toHaveLength(0)
+    }
+
+    expect(scheduled.status).toBe(ProjectStatus.SCHEDULED)
+  })
+
+  it('não deve listar projetos arquivados ou em rascunho com lançamento hoje', async () => {
+    const now = new Date('2026-09-09T15:00:00.000Z')
+    const archived = launch(ProjectStatus.ARCHIVED, new Date('2026-09-09T12:00:00.000Z'))
+    const sketch = launch(ProjectStatus.SKETCH, new Date('2026-09-09T12:00:00.000Z'))
+
+    const result = await sut.execute({ date: now })
+
+    if (result.isRight()) {
+      expect(result.value.projects).toHaveLength(0)
+    }
+
+    expect(archived.status).toBe(ProjectStatus.ARCHIVED)
+    expect(sketch.status).toBe(ProjectStatus.SKETCH)
+  })
+
+  it('deve usar o dia de Brasília e não o dia de UTC', async () => {
+    const now = new Date('2026-09-10T01:00:00.000Z')
+    const startOfDay = launch(ProjectStatus.PUBLISHED, new Date('2026-09-09T03:00:00.000Z'))
+    const lateNight = launch(ProjectStatus.PUBLISHED, new Date('2026-09-10T00:30:00.000Z'))
+    launch(ProjectStatus.PUBLISHED, new Date('2026-09-09T02:59:00.000Z'))
+    launch(ProjectStatus.PUBLISHED, new Date('2026-09-10T03:00:00.000Z'))
+
+    const result = await sut.execute({ date: now })
+
+    if (result.isRight()) {
+      expect(result.value.projects.map((project) => project.id.toString())).toEqual([
+        startOfDay.id.toString(),
+        lateNight.id.toString(),
+      ])
+    }
+  })
+
+  it('deve devolver uma lista vazia quando não há lançamentos hoje', async () => {
+    const result = await sut.execute({ date: new Date('2026-09-09T15:00:00.000Z') })
+
+    expect(result.isRight()).toBeTruthy()
+
+    if (result.isRight()) {
+      expect(result.value.projects).toEqual([])
     }
   })
 })

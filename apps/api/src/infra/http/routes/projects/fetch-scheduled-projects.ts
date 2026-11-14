@@ -1,0 +1,34 @@
+import type { FastifyInstance } from 'fastify'
+import type { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { z } from 'zod'
+import { makeFetchScheduledProjectsController } from '../../factories/project/make-fetch-scheduled-projects-controller'
+import { projectListHttpSchema } from '../../schemas/project-schemas'
+
+export async function fetchScheduledProjectsRoute(app: FastifyInstance) {
+  const fetchScheduledProjectsController = makeFetchScheduledProjectsController()
+
+  app.withTypeProvider<ZodTypeProvider>().get(
+    '/projects/scheduled/soon',
+    {
+      schema: {
+        tags: ['projects'],
+        summary: 'Listar projetos que serão lançados em breve',
+        description:
+          'Lista projetos com status SCHEDULED agendados para os próximos 7 dias, do mais próximo ao mais distante',
+        response: {
+          200: z.object({
+            scheduledProjects: z.array(
+              z.object({
+                project: projectListHttpSchema,
+                publishedIn: z.iso.datetime(),
+              }),
+            ),
+          }),
+        },
+      },
+    },
+    async (_request, reply) => {
+      return fetchScheduledProjectsController.handle(reply)
+    },
+  )
+}

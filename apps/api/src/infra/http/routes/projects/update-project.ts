@@ -4,19 +4,9 @@ import { z } from 'zod'
 import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
 import { makeAuthenticateMiddleware } from '../../factories/auth/make-authenticate-middleware'
 import { makeUpdateProjectController } from '../../factories/project/make-update-project-controller'
+import { projectHttpSchema } from '../../schemas/project-schemas'
 
 const projectStatusSchema = z.nativeEnum(ProjectStatus)
-
-const projectSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  authorId: z.string(),
-  status: projectStatusSchema,
-  attachments: z.array(z.string()),
-  tags: z.array(z.string()),
-  createdAt: z.iso.datetime(),
-})
 
 export async function updateProjectRoute(app: FastifyInstance) {
   const updateProjectController = makeUpdateProjectController()
@@ -37,11 +27,12 @@ export async function updateProjectRoute(app: FastifyInstance) {
           title: z.string().min(1).describe('O título do projeto'),
           description: z.string().min(1).describe('A descrição do projeto'),
           status: projectStatusSchema.optional().describe('O status do projeto'),
+          coverUrl: z.uuid().optional().nullable().describe('ID do attachment de capa do projeto'),
           attachments: z.array(z.string()).optional().describe('IDs dos anexos do projeto'),
         }),
         response: {
           200: z.object({
-            project: projectSchema,
+            project: projectHttpSchema,
           }),
           400: z.object({
             message: z.string(),

@@ -5,7 +5,7 @@ import request from 'supertest'
 describe('(E2E) - GET /api/v1/tags', () => {
   afterAll(async () => await app.close())
 
-  it('should be able to fetch all tags', async () => {
+  it('listar tags: com tags cadastradas, deve retornar 200 com todas as tags', async () => {
     const { tag: firstTag } = await makeTagOnDatabase({ name: 'Biologia' })
     const { tag: secondTag } = await makeTagOnDatabase({ name: 'Química' })
 

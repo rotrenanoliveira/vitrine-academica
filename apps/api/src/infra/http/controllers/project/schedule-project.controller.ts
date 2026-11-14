@@ -1,5 +1,6 @@
 import type { FastifyReply } from 'fastify'
 import { InvalidProjectStatusError } from '@/domain/project/application/_errors/invalid-project-status-error'
+import { InvalidScheduleDateError } from '@/domain/project/application/_errors/invalid-schedule-date-error'
 import { NotProjectOwnerError } from '@/domain/project/application/_errors/not-project-owner-error'
 import { ProjectAlreadyScheduledError } from '@/domain/project/application/_errors/project-already-scheduled-error'
 import { ProjectNotFoundError } from '@/domain/project/application/_errors/project-not-found-error'
@@ -46,7 +47,7 @@ export class ScheduleProjectController {
         })
       }
 
-      if (error instanceof InvalidProjectStatusError) {
+      if (error instanceof InvalidProjectStatusError || error instanceof InvalidScheduleDateError) {
         return reply.status(400).send({
           message: error.message,
         })
