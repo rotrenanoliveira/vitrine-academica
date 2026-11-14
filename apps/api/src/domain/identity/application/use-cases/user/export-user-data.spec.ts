@@ -7,6 +7,7 @@ import { InMemoryPointTransactionsRepository } from '@tests/repositories/in-memo
 import { InMemoryPreferenceTagsRepository } from '@tests/repositories/in-memory-preference-tags-repository'
 import { InMemoryProjectsRepository } from '@tests/repositories/in-memory-projects-repository'
 import { InMemorySessionsRepository } from '@tests/repositories/in-memory-sessions-repository'
+import { InMemoryUserDataExportRepository } from '@tests/repositories/in-memory-user-data-export-repository'
 import { InMemoryUsersRepository } from '@tests/repositories/in-memory-users-repository'
 import { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
 import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
@@ -21,6 +22,7 @@ let inMemoryInstitutionMembersRepository: InMemoryInstitutionMembersRepository
 let inMemoryPreferenceTagsRepository: InMemoryPreferenceTagsRepository
 let inMemoryProjectsRepository: InMemoryProjectsRepository
 let inMemoryPointTransactionsRepository: InMemoryPointTransactionsRepository
+let inMemoryUserDataExportRepository: InMemoryUserDataExportRepository
 let auditLogsRepository: InMemoryAuditLogsRepository
 let sut: ExportUserDataUseCase
 
@@ -33,6 +35,7 @@ describe('Export User Data Use Case', () => {
     inMemoryPreferenceTagsRepository = new InMemoryPreferenceTagsRepository()
     inMemoryProjectsRepository = new InMemoryProjectsRepository()
     inMemoryPointTransactionsRepository = new InMemoryPointTransactionsRepository()
+    inMemoryUserDataExportRepository = new InMemoryUserDataExportRepository()
     auditLogsRepository = new InMemoryAuditLogsRepository()
 
     const registerLog = new RegisterLogUseCase(auditLogsRepository)
@@ -45,6 +48,7 @@ describe('Export User Data Use Case', () => {
       inMemoryPreferenceTagsRepository,
       inMemoryProjectsRepository,
       inMemoryPointTransactionsRepository,
+      inMemoryUserDataExportRepository,
       registerLog,
     )
   })
@@ -75,6 +79,8 @@ describe('Export User Data Use Case', () => {
       expect(result.value.userData.preferences).toBeDefined()
       expect(result.value.userData.projects).toBeDefined()
       expect(result.value.userData.points).toEqual({ balance: 0, transactions: [] })
+      expect(result.value.userData.projectStars).toEqual([])
+      expect(result.value.userData.promotions).toEqual([])
     }
   })
 
@@ -116,6 +122,41 @@ describe('Export User Data Use Case', () => {
     if (result.isRight()) {
       expect(result.value.userData.points.balance).toBe(3)
       expect(result.value.userData.points.transactions).toHaveLength(2)
+    }
+  })
+
+  it('should export the stars and the promotions given by the user', async () => {
+    const { user } = makeUser()
+    await inMemoryUsersRepository.create(user)
+
+    const star = {
+      id: 'star-1',
+      projectId: 'project-1',
+      weight: 5,
+      active: false,
+      ratedAt: new Date('2026-11-10T10:00:00.000Z'),
+      createdAt: new Date('2026-11-10T10:00:00.000Z'),
+    }
+
+    const promotion = {
+      id: 'promotion-1',
+      projectId: 'project-2',
+      cost: 1000,
+      status: 'ACTIVE',
+      expiresAt: new Date('2026-11-20T10:00:00.000Z'),
+      createdAt: new Date('2026-11-13T10:00:00.000Z'),
+    }
+
+    inMemoryUserDataExportRepository.projectStarsByUser.set(user.id.toString(), [star])
+    inMemoryUserDataExportRepository.promotionsByUser.set(user.id.toString(), [promotion])
+
+    const result = await sut.execute({ userId: user.id.toString() })
+
+    expect(result.isRight()).toBe(true)
+
+    if (result.isRight()) {
+      expect(result.value.userData.projectStars).toEqual([star])
+      expect(result.value.userData.promotions).toEqual([promotion])
     }
   })
 

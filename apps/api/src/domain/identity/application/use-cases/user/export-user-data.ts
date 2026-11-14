@@ -8,6 +8,11 @@ import type { PreferenceTagsRepository } from '@/domain/tag/application/reposito
 import { UserNotFoundError } from '../../_errors/user-not-found-error'
 import type { AccountsRepository } from '../../repositories/accounts-repository'
 import type { SessionsRepository } from '../../repositories/sessions-repository'
+import type {
+  ExportedProjectStar,
+  ExportedPromotion,
+  UserDataExportRepository,
+} from '../../repositories/user-data-export-repository'
 import type { UsersRepository } from '../../repositories/users-repository'
 
 interface ExportUserDataUseCaseRequest {
@@ -58,6 +63,8 @@ export interface UserDataReport {
       createdAt: Date
     }>
   }
+  projectStars: ExportedProjectStar[]
+  promotions: ExportedPromotion[]
 }
 
 type ExportUserDataUseCaseResponse = Either<UserNotFoundError, { userData: UserDataReport }>
@@ -71,6 +78,7 @@ export class ExportUserDataUseCase {
     private readonly preferenceTagsRepository: PreferenceTagsRepository,
     private readonly projectsRepository: ProjectsRepository,
     private readonly pointTransactionsRepository: PointTransactionsRepository,
+    private readonly userDataExportRepository: UserDataExportRepository,
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
@@ -81,17 +89,27 @@ export class ExportUserDataUseCase {
       return left(new UserNotFoundError())
     }
 
-    const [account, sessions, memberships, preferences, projects, pointsBalance, pointTransactions] = await Promise.all(
-      [
-        this.accountsRepository.findByUserId(userId),
-        this.sessionsRepository.findManyByUserId(userId),
-        this.institutionMembersRepository.findManyByUserId(userId),
-        this.preferenceTagsRepository.findByUserId(userId),
-        this.projectsRepository.findManyByAuthorId(userId),
-        this.pointTransactionsRepository.getBalanceByUserId(userId),
-        this.pointTransactionsRepository.findAllByUserId(userId),
-      ],
-    )
+    const [
+      account,
+      sessions,
+      memberships,
+      preferences,
+      projects,
+      pointsBalance,
+      pointTransactions,
+      projectStars,
+      promotions,
+    ] = await Promise.all([
+      this.accountsRepository.findByUserId(userId),
+      this.sessionsRepository.findManyByUserId(userId),
+      this.institutionMembersRepository.findManyByUserId(userId),
+      this.preferenceTagsRepository.findByUserId(userId),
+      this.projectsRepository.findManyByAuthorId(userId),
+      this.pointTransactionsRepository.getBalanceByUserId(userId),
+      this.pointTransactionsRepository.findAllByUserId(userId),
+      this.userDataExportRepository.findProjectStarsByUserId(userId),
+      this.userDataExportRepository.findPromotionsByUserId(userId),
+    ])
 
     const userData: UserDataReport = {
       user: {
@@ -139,6 +157,8 @@ export class ExportUserDataUseCase {
           createdAt: transaction.createdAt,
         })),
       },
+      projectStars,
+      promotions,
     }
 
     await this.registerLog.execute({

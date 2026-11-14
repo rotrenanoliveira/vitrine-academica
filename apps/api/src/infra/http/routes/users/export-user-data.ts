@@ -69,10 +69,28 @@ export async function exportUserDataRoute(app: FastifyInstance) {
                 }),
               ),
             }),
+            projectStars: z.array(
+              z.object({
+                id: z.string(),
+                projectId: z.string(),
+                weight: z.number().int(),
+                active: z.boolean(),
+                ratedAt: z.coerce.date(),
+                createdAt: z.coerce.date(),
+              }),
+            ),
+            promotions: z.array(
+              z.object({
+                id: z.string(),
+                projectId: z.string(),
+                cost: z.number().int(),
+                status: z.string(),
+                expiresAt: z.coerce.date(),
+                createdAt: z.coerce.date(),
+              }),
+            ),
           }),
-          400: z.object({
-            message: z.string(),
-          }),
+          400: z.object({}),
           401: z.object({
             message: z.string(),
           }),
