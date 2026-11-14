@@ -1,25 +1,60 @@
-# GitHub Actions
+# Vitrine Acadêmica
 
-O CI da Vitrine Acadêmica está em [`.github/workflows/`](.github/workflows/). São três workflows independentes. Todos disparam em qualquer `push` e em pull requests para `main` e `production`. O nome exibido no GitHub é a mensagem do commit ou o título do pull request.
+Galeria virtual de projetos acadêmicos. A plataforma está em [vitrineacademica.com](https://vitrineacademica.com).
 
-Cada job roda em `ubuntu-latest`, com Node.js 24, pnpm `11.25.0` e `pnpm install --frozen-lockfile`.
+![Vitrine Acadêmica](.github/images/vitrine-academica.png)
 
-| Workflow | Arquivo | O que executa |
-|----------|---------|----------------|
-| Biome Lint | [`run-biome-lint.yml`](.github/workflows/run-biome-lint.yml) | `pnpm exec biome check .` — lint e formatação do monorepo, com as regras de [`biome.json`](biome.json) |
-| Unit Tests | [`run-unit-tests.yml`](.github/workflows/run-unit-tests.yml) | `pnpm --filter @vitrine-academica/api test:unit:run` — Vitest no projeto `unit` (`**/*.spec.ts` da API) |
-| Integration Tests | [`run-e2e-tests.yml`](.github/workflows/run-e2e-tests.yml) | `pnpm --filter @vitrine-academica/api test:e2e:run` — Vitest no projeto `e2e` (`**/*.test.ts` e `**/*.e2e.spec.ts`) |
+## O que é
 
-Os testes unitários cobrem casos de uso e domínio, sem banco. Os de integração sobem a API com [supertest](https://github.com/ladjs/supertest) e o [MSW](https://mswjs.io/) (`apps/api/tests/mocks/setup-msw.ts`), em série e com timeout de 30s.
+A Vitrine Acadêmica é uma plataforma digital para divulgação e descoberta de projetos acadêmicos. Ela aproxima pessoas interessadas em colaborar, organiza chamadas e candidaturas, reúne avaliações de trabalhos, permite acompanhar autores, consultar pesquisas científicas e realizar eventos e atividades institucionais.
 
-O workflow de integração sobe um Postgres 18 como service container (`vitrine` / banco `vitrine_academica_test`, porta `5432`) e espera o healthcheck `pg_isready` antes dos testes. As variáveis da API (`DATABASE_URL`, `JWT_SECRET`, `COOKIE_SECRET`, Cloudflare R2, Resend e OpenAlex) são definidas no job com valores fictícios de teste. O frontend não entra nesses jobs.
+É um ambiente de divulgação e interação. A plataforma não certifica a validade acadêmica dos trabalhos e não substitui os regulamentos de cada instituição.
 
-Os mesmos comandos rodam localmente:
+## Recursos
 
-```bash
-pnpm exec biome check .
-pnpm --filter @vitrine-academica/api test:unit:run
-pnpm --filter @vitrine-academica/api test:e2e:run
-```
+- **Projetos.** Cadastro com anexos e tags, nos estados de rascunho, agendado, publicado e arquivado. A publicação pode ser imediata ou marcada para uma data.
+- **Exposição.** Galeria dos projetos publicados no dia e dos agendados para os próximos sete dias.
+- **Destaques.** Curadoria da banca, a partir de avaliações docentes por critérios, e da comunidade, a partir de estrelas.
+- **Chamados.** Publicação de demandas, candidaturas e decisão. Um chamado encerrado pode originar um projeto.
+- **Instituições.** Páginas institucionais, membros e solicitações de vínculo, com análise de aprovação ou rejeição.
+- **Eventos.** Ciclo com sugestão e moderação de temas, votação, seleção institucional, inscrições de projetos e encerramento.
+- **Pontos e promoções.** Saldo usado para destacar projetos na vitrine.
+- **Newsletter.** Acompanhamento de autores, com aviso por e-mail quando um novo projeto é publicado.
+- **Pesquisas científicas.** Busca de trabalhos na OpenAlex.
+- **Administração.** Painel com métricas de projetos, usuários, instituições e tags.
+- **Conta.** Acesso por código temporário enviado ao e-mail cadastrado, sem senha. O usuário pode exportar os próprios dados e excluir a conta.
 
-Os scripts de teste da API carregam `../../.env.test`. Para a integração local, o Postgres precisa estar acessível pela `DATABASE_URL` desse arquivo. No CI, as variáveis do workflow cobrem esse ambiente.
+## Papéis
+
+A conta tem um papel global: `USER`, `STUDENT`, `PROFESSOR` ou `ADMIN`, definidos em [`packages/permissions/src/roles.ts`](packages/permissions/src/roles.ts). Usuário lê projetos e instituições. Estudante e professor também criam projetos e alteram os próprios. Administrador gerencia a plataforma.
+
+O vínculo com uma instituição é independente desse papel. Dentro da instituição, o membro pode ser estudante, professor, docente, gestor ou secretaria. Gestor e secretaria administram a instituição; docente e professor participam da avaliação de trabalhos.
+
+As regras de autorização ficam no pacote compartilhado `@vitrine-academica/permissions`, com [CASL](https://casl.js.org/).
+
+## Arquitetura
+
+O repositório é um monorepo com pnpm e Turborepo.
+
+A API segue camadas de domínio, aplicação e infraestrutura. Casos de uso e entidades ficam em `apps/api/src/domain`; HTTP, persistência e jobs ficam em `apps/api/src/infra`. O servidor é Fastify, com validação Zod, e persiste em PostgreSQL via Drizzle ORM. A documentação da API é exposta com Swagger.
+
+O frontend é uma aplicação Next.js com App Router. As páginas autenticadas consultam a API no servidor e guardam a sessão em cookie.
+
+Jobs periódicos publicam projetos agendados, avançam as fases dos eventos, encerram chamados com prazo vencido, expiram promoções e enviam os avisos pendentes da newsletter.
+
+## Tecnologias
+
+**Web** (`@vitrine-academica/web`): Next.js 16, React 19, Tailwind CSS 4, shadcn e Base UI, TanStack Query, nuqs, Recharts e ky.
+
+**API** (`@vitrine-academica/api`): Fastify 5, Drizzle ORM, PostgreSQL, JWT e cookies, Vitest para testes de domínio e de integração HTTP.
+
+**Compartilhado:** TypeScript, Zod, Biome e o pacote de permissões.
+
+**Integrações:** Cloudflare R2 para anexos, Resend para e-mail e OpenAlex para a busca de trabalhos científicos.
+
+## Repositório
+
+- `apps/web` — interface da galeria, das instituições, dos eventos e da conta.
+- `apps/api` — API, domínio, banco e jobs.
+- `packages/permissions` — papéis e habilidades usados pela API e pelo frontend.
+- `config/typescript-config` — configuração de TypeScript do monorepo.
