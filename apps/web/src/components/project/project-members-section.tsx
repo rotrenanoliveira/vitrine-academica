@@ -1,30 +1,24 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { listProjectMembers } from '@/server/http/routes/projects/list-project-members'
-import type { ProjectStatus } from '@/utils/type'
-import { FormInviteProjectMember } from './form-invite-project-member'
 import { ProjectMembersList } from './project-members-list'
 
 type ProjectMembersSectionProps = {
   projectId: string
   projectSlug: string
-  projectStatus: ProjectStatus
   isOwner: boolean
-  currentUserId: string
+  currentUserId: string | null
 }
 
 export async function ProjectMembersSection({
   projectId,
   projectSlug,
-  projectStatus,
   isOwner,
   currentUserId,
 }: ProjectMembersSectionProps) {
   const { members } = await listProjectMembers({ projectId })
 
-  const canInvite = isOwner && projectStatus !== 'ARCHIVED'
-
-  const isCoauthor = !isOwner && members.some((member) => member.userId === currentUserId)
+  const isCoauthor = Boolean(currentUserId) && !isOwner && members.some((member) => member.userId === currentUserId)
 
   return (
     <>
@@ -33,12 +27,6 @@ export async function ProjectMembersSection({
           <Button nativeButton={false} variant="outline" render={<Link href={`/projetos/${projectSlug}/editar`} />}>
             Gerenciar / Editar
           </Button>
-        </div>
-      )}
-
-      {canInvite && (
-        <div className="border border-border p-4">
-          <FormInviteProjectMember projectId={projectId} projectSlug={projectSlug} />
         </div>
       )}
 

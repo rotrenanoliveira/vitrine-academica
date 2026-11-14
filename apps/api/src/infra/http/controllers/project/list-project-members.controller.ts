@@ -4,7 +4,7 @@ import { ProjectMemberListItemPresenter } from '../../presenters/project-member-
 
 interface ListProjectMembersParams {
   projectId: string
-  requesterId: string
+  requesterId?: string
 }
 
 export class ListProjectMembersController {

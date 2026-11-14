@@ -84,7 +84,16 @@ Pessoas diferentes podem promover o mesmo projeto. Depois de promover, o saldo e
 
 ## GET /promotions/active
 
-Promoções ativas (status `ACTIVE`, dentro da validade e de projetos publicados), da mais recente à mais antiga. Exige login.
+Promoções ativas (status `ACTIVE`, dentro da validade e de projetos publicados), da mais recente à mais antiga. Rota pública (não exige login).
+
+Quando o mesmo projeto tem mais de uma promoção ativa, a lista devolve **apenas uma entrada por projeto**, sempre a promoção mais recente.
+
+Parâmetros de query:
+
+| Parâmetro | Tipo | Padrão | Limite |
+| --- | --- | --- | --- |
+| `page` | inteiro ≥ 1 | `1` | — |
+| `limit` | inteiro | `20` | 1 a 100 |
 
 Resposta 200:
 
@@ -93,10 +102,24 @@ Resposta 200:
   "items": [
     {
       "promotion": { "id": "uuid", "projectId": "uuid", "promoterId": "uuid", "cost": 1000, "status": "ACTIVE", "expiresAt": "...", "createdAt": "..." },
-      "project": { "id": "uuid", "title": "...", "description": "...", "authorId": "uuid", "status": "PUBLISHED", "attachments": [], "tags": [], "createdAt": "..." },
+      "project": {
+        "id": "uuid",
+        "title": "...",
+        "slug": "...",
+        "description": "...",
+        "authorId": "uuid",
+        "status": "PUBLISHED",
+        "coverUrl": null,
+        "attachments": [],
+        "tags": [],
+        "createdAt": "..."
+      },
       "promoter": { "id": "uuid", "name": "Nome de quem promoveu" }
     }
-  ]
+  ],
+  "total": 17,
+  "page": 1,
+  "limit": 20
 }
 ```
 

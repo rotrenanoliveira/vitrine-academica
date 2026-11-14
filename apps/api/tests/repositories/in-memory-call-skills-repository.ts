@@ -16,6 +16,10 @@ export class InMemoryCallSkillsRepository implements CallSkillsRepository {
     return this.items.filter((skill) => skill.tagId.toString() === tagId)
   }
 
+  async findManyByTagIds(tagIds: string[]): Promise<CallSkill[]> {
+    return this.items.filter((skill) => tagIds.includes(skill.tagId.toString()))
+  }
+
   async createMany(skills: CallSkill[]): Promise<void> {
     this.items.push(...skills)
   }

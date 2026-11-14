@@ -1,10 +1,9 @@
-import { createLoader, parseAsString, type SearchParams } from 'nuqs/server'
+import { parseAsArrayOf, parseAsString, type UrlKeys } from 'nuqs/server'
 
 export const callsSearchParams = {
-  tag: parseAsString,
+  tags: parseAsArrayOf(parseAsString),
 }
 
-export const loadCallsFilters = createLoader(callsSearchParams)
-
-export type CallsFilters = Awaited<ReturnType<typeof loadCallsFilters>>
-export type { SearchParams }
+export const callsUrlKeys: UrlKeys<typeof callsSearchParams> = {
+  tags: 'tags',
+}

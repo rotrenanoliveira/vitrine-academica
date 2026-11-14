@@ -3,15 +3,10 @@ import { makeAccessCodeOnDatabase } from '@tests/factories/make-access-code'
 import { makeAccountOnDatabase } from '@tests/factories/make-account'
 import { makeCallOnDatabase } from '@tests/factories/make-call'
 import { makeCallApplicationOnDatabase } from '@tests/factories/make-call-application'
-import { makeInstitutionOnDatabase } from '@tests/factories/make-institution'
-import { makeInstitutionMember } from '@tests/factories/make-institution-member'
 import { makeUserOnDatabase } from '@tests/factories/make-user'
 import request from 'supertest'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { CallApplicationStatus } from '@/domain/call/enterprise/entities/call-application'
-import { InstitutionMemberRole } from '@/domain/institution/enterprise/entities/institution-member'
-import { db } from '@/infra/database/drizzle/client'
-import { DrizzleInstitutionMembersRepository } from '@/infra/database/repositories/drizzle-institution-members-repository'
 
 async function authenticateUser() {
   const { user } = await makeUserOnDatabase()
@@ -32,19 +27,9 @@ async function authenticateUser() {
 describe('(E2E) - GET /api/v1/calls/:callId/applications', () => {
   afterAll(async () => await app.close())
 
-  it('should return the applicants with name, institution and role but without email', async () => {
+  it('should return the applications with applicant name and without excess fields', async () => {
     const { accessToken, user } = await authenticateUser()
     const { user: applicant } = await makeUserOnDatabase({ name: 'Maria Silva', email: 'maria@email.com' })
-    const { institution } = await makeInstitutionOnDatabase({
-      name: 'UMC',
-      registerBy: user.id,
-    })
-    const { member } = makeInstitutionMember({
-      institutionId: institution.id.toString(),
-      userId: applicant.id.toString(),
-      role: InstitutionMemberRole.STUDENT,
-    })
-    await new DrizzleInstitutionMembersRepository(db).create(member)
     const { call } = await makeCallOnDatabase({ authorId: user.id })
     const { application } = await makeCallApplicationOnDatabase({
       callId: call.id,
@@ -58,13 +43,18 @@ describe('(E2E) - GET /api/v1/calls/:callId/applications', () => {
 
     expect(response.status).toBe(200)
     expect(response.body.applications).toHaveLength(1)
-    expect(response.body.applications[0].id).toBe(application.id.toString())
-    expect(response.body.applications[0].message).toBe('Quero participar')
-    expect(response.body.applications[0].applicant).toEqual({
-      id: applicant.id.toString(),
-      name: 'Maria Silva',
-      memberships: [{ institutionId: institution.id.toString(), institutionName: 'UMC', role: 'STUDENT' }],
+    expect(response.body.applications[0]).toEqual({
+      id: application.id.toString(),
+      callId: call.id.toString(),
+      applicantId: applicant.id.toString(),
+      message: 'Quero participar',
+      status: CallApplicationStatus.PENDING,
+      decidedAt: null,
+      createdAt: expect.any(String),
+      applicantName: 'Maria Silva',
     })
+    expect(response.body.applications[0]).not.toHaveProperty('updatedAt')
+    expect(response.body.applications[0]).not.toHaveProperty('applicant')
     expect(JSON.stringify(response.body)).not.toContain('maria@email.com')
   })
 

@@ -47,6 +47,9 @@ describe('(UC) - List Active Promotions', () => {
 
     expect(result.isRight()).toBeTruthy()
     expect(result.value.items).toEqual([])
+    expect(result.value.total).toBe(0)
+    expect(result.value.page).toBe(1)
+    expect(result.value.limit).toBe(20)
   })
 
   it('should list an active promotion with its project and promoter', async () => {
@@ -114,5 +117,52 @@ describe('(UC) - List Active Promotions', () => {
     const result = await sut.execute({ now: new Date(Date.now() + 5 * DAY_IN_MS) })
 
     expect(result.value.items).toEqual([])
+  })
+
+  it('should keep only the newest promotion when the same project is promoted twice', async () => {
+    const { user: olderPromoter } = makeUser()
+    const { user: newerPromoter } = makeUser()
+    const { project } = makeProject({ status: ProjectStatus.PUBLISHED })
+
+    usersRepository.items.push(olderPromoter, newerPromoter)
+    projectsRepository.items.push(project)
+
+    const { promotion: older } = makePromotion({
+      projectId: project.id,
+      promoterId: olderPromoter.id,
+      createdAt: new Date(Date.now() - 2 * DAY_IN_MS),
+    })
+    const { promotion: newer } = makePromotion({
+      projectId: project.id,
+      promoterId: newerPromoter.id,
+      createdAt: new Date(Date.now() - DAY_IN_MS),
+    })
+
+    promotionsRepository.items.push(older, newer)
+
+    const result = await sut.execute()
+
+    expect(result.value.items).toHaveLength(1)
+    expect(result.value.total).toBe(1)
+    expect(result.value.items[0].promotion.id.toString()).toBe(newer.id.toString())
+    expect(result.value.items[0].promoter.id.toString()).toBe(newerPromoter.id.toString())
+  })
+
+  it('should paginate unique promoted projects', async () => {
+    const first = setupPromotion({ createdAt: new Date(Date.now() - 3 * DAY_IN_MS) })
+    const second = setupPromotion({ createdAt: new Date(Date.now() - 2 * DAY_IN_MS) })
+    const third = setupPromotion({ createdAt: new Date(Date.now() - DAY_IN_MS) })
+
+    const page1 = await sut.execute({ page: 1, limit: 2 })
+    const page2 = await sut.execute({ page: 2, limit: 2 })
+
+    expect(page1.value.total).toBe(3)
+    expect(page1.value.page).toBe(1)
+    expect(page1.value.limit).toBe(2)
+    expect(page1.value.items.map((item) => item.promotion.id.toString())).toEqual([
+      third.promotion.id.toString(),
+      second.promotion.id.toString(),
+    ])
+    expect(page2.value.items.map((item) => item.promotion.id.toString())).toEqual([first.promotion.id.toString()])
   })
 })

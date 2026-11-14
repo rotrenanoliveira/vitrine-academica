@@ -69,6 +69,36 @@ describe('(UC) - List Project Members', () => {
     }
   })
 
+  it('deve listar só coautores aceitos para visitante sem autenticação em projeto publicado', async () => {
+    const { project } = setup()
+    addMember(project.id, ProjectMemberStatus.PENDING)
+    const accepted = addMember(project.id, ProjectMemberStatus.ACCEPTED)
+
+    const result = await sut.execute({
+      projectId: project.id.toString(),
+    })
+
+    expect(result.isRight()).toBeTruthy()
+    if (result.isRight()) {
+      expect(result.value.members).toHaveLength(1)
+      expect(result.value.members[0].projectMember.id.toString()).toBe(accepted.projectMember.id.toString())
+    }
+  })
+
+  it('não deve listar membros de rascunho para visitante sem autenticação', async () => {
+    const { project } = setup(ProjectStatus.SKETCH)
+    addMember(project.id, ProjectMemberStatus.ACCEPTED)
+
+    const result = await sut.execute({
+      projectId: project.id.toString(),
+    })
+
+    expect(result.isLeft()).toBeTruthy()
+    if (result.isLeft()) {
+      expect(result.value).toBeInstanceOf(ProjectNotFoundError)
+    }
+  })
+
   it('não deve mostrar a lista de um projeto não publicado para quem não é o dono', async () => {
     const { project } = setup(ProjectStatus.SKETCH)
     addMember(project.id, ProjectMemberStatus.ACCEPTED)

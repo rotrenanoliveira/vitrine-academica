@@ -10,6 +10,7 @@ import { InMemoryUsersRepository } from '@tests/repositories/in-memory-users-rep
 import { SubscriptionStatus } from '@/domain/newsletter/enterprise/entities/author-subscription'
 import { NotificationStatus } from '@/domain/newsletter/enterprise/entities/publication-notification'
 import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
+import { env } from '@/environment-variables'
 import { SendPendingNotificationsUseCase } from './send-pending-notifications'
 
 let notificationsRepository: InMemoryPublicationNotificationsRepository
@@ -18,8 +19,6 @@ let projectsRepository: InMemoryProjectsRepository
 let usersRepository: InMemoryUsersRepository
 let mail: InMemoryMail
 let sut: SendPendingNotificationsUseCase
-
-const webUrl = 'https://vitrine.exemplo.com'
 
 function setup(projectStatus: ProjectStatus = ProjectStatus.PUBLISHED) {
   const { user: author } = makeUser()
@@ -55,7 +54,7 @@ describe('(UC) - Send Pending Notifications', () => {
   it('deve enviar o e-mail e marcar o aviso como enviado, guardando o id do provedor', async () => {
     const { notification } = setup()
 
-    const result = await sut.execute({ webUrl })
+    const result = await sut.execute({ webUrl: env.WEB_URL })
 
     expect(result.isRight()).toBeTruthy()
 
@@ -73,22 +72,22 @@ describe('(UC) - Send Pending Notifications', () => {
   it('deve enviar o e-mail para o endereço da assinatura, com o autor, o projeto e os dois links', async () => {
     const { author, project, subscription } = setup()
 
-    await sut.execute({ webUrl })
+    await sut.execute({ webUrl: env.WEB_URL })
 
     const message = mail.items[0]
 
     expect(message.to).toBe(subscription.email.toLowerCase())
     expect(message.subject).toContain(author.name)
     expect(message.text).toContain(project.title)
-    expect(message.text).toContain(`${webUrl}/projetos/${project.id.toString()}`)
-    expect(message.text).toContain(`${webUrl}/newsletter/cancelar?token=${subscription.unsubscribeToken}`)
+    expect(message.text).toContain(`${env.WEB_URL}/projetos/${project.slug}`)
+    expect(message.text).toContain(`${env.WEB_URL}/newsletter/cancelar?token=${subscription.unsubscribeToken}`)
   })
 
   it('deve marcar como falhou e não travar quando o provedor de e-mail dá erro', async () => {
     setup()
     mail.shouldFail = true
 
-    const result = await sut.execute({ webUrl })
+    const result = await sut.execute({ webUrl: env.WEB_URL })
 
     expect(result.isRight()).toBeTruthy()
 
@@ -106,7 +105,7 @@ describe('(UC) - Send Pending Notifications', () => {
       subscription.unsubscribe()
       Object.defineProperty(subscription, 'status', { value: status })
 
-      await sut.execute({ webUrl })
+      await sut.execute({ webUrl: env.WEB_URL })
 
       expect(mail.items).toHaveLength(0)
       expect(notificationsRepository.items[0].status).toBe(NotificationStatus.FAILED)
@@ -118,7 +117,7 @@ describe('(UC) - Send Pending Notifications', () => {
     async (status) => {
       setup(status)
 
-      await sut.execute({ webUrl })
+      await sut.execute({ webUrl: env.WEB_URL })
 
       expect(mail.items).toHaveLength(0)
       expect(notificationsRepository.items[0].status).toBe(NotificationStatus.FAILED)
@@ -129,7 +128,7 @@ describe('(UC) - Send Pending Notifications', () => {
     setup()
     usersRepository.items = []
 
-    await sut.execute({ webUrl })
+    await sut.execute({ webUrl: env.WEB_URL })
 
     expect(mail.items).toHaveLength(0)
     expect(notificationsRepository.items[0].status).toBe(NotificationStatus.FAILED)
@@ -138,8 +137,8 @@ describe('(UC) - Send Pending Notifications', () => {
   it('não deve reenviar os avisos que já foram enviados', async () => {
     setup()
 
-    await sut.execute({ webUrl })
-    const second = await sut.execute({ webUrl })
+    await sut.execute({ webUrl: env.WEB_URL })
+    const second = await sut.execute({ webUrl: env.WEB_URL })
 
     expect(mail.items).toHaveLength(1)
 
@@ -152,7 +151,7 @@ describe('(UC) - Send Pending Notifications', () => {
     setup(ProjectStatus.ARCHIVED)
     setup()
 
-    const result = await sut.execute({ webUrl })
+    const result = await sut.execute({ webUrl: env.WEB_URL })
 
     if (result.isRight()) {
       expect(result.value).toEqual({ sent: 1, failed: 1 })
@@ -166,7 +165,7 @@ describe('(UC) - Send Pending Notifications', () => {
     setup()
     setup()
 
-    const result = await sut.execute({ webUrl, limit: 2 })
+    const result = await sut.execute({ webUrl: env.WEB_URL, limit: 2 })
 
     if (result.isRight()) {
       expect(result.value.sent).toBe(2)

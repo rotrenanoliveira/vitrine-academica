@@ -1,22 +1,22 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
-import { makeAuthenticateMiddleware } from '../../factories/auth/make-authenticate-middleware'
+import { makeOptionalAuthenticateMiddleware } from '../../factories/auth/make-optional-authenticate-middleware'
 import { makeListProjectMembersController } from '../../factories/project/make-list-project-members-controller'
 
 export async function listProjectMembersRoute(app: FastifyInstance) {
   const listProjectMembersController = makeListProjectMembersController()
-  const authenticate = makeAuthenticateMiddleware()
+  const optionalAuthenticate = makeOptionalAuthenticateMiddleware()
 
   app.withTypeProvider<ZodTypeProvider>().get(
     '/projects/:projectId/members',
     {
-      onRequest: [authenticate],
+      onRequest: [optionalAuthenticate],
       schema: {
         tags: ['projects'],
         summary: 'Listar os membros de um projeto',
         description:
-          'O dono vê todos os convites. As outras pessoas veem só os coautores que aceitaram, e só em projetos publicados',
+          'O dono vê todos os convites. Visitantes e outras pessoas veem só os coautores que aceitaram, e só em projetos publicados',
         params: z.object({
           projectId: z.uuid().describe('O ID do projeto'),
         }),
@@ -45,7 +45,7 @@ export async function listProjectMembersRoute(app: FastifyInstance) {
       return listProjectMembersController.handle(
         {
           projectId: request.params.projectId,
-          requesterId: request.user.sub,
+          requesterId: request.headers.authorization ? request.user.sub : undefined,
         },
         reply,
       )

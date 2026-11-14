@@ -68,7 +68,7 @@ export class SendPendingNotificationsUseCase {
           to: subscription.email,
           authorName: author.name,
           projectTitle: project.title,
-          projectUrl: `${webUrl}/projetos/${project.id.toString()}`,
+          projectUrl: `${webUrl}/projetos/${project.slug}`,
           unsubscribeUrl: `${webUrl}/newsletter/cancelar?token=${subscription.unsubscribeToken}`,
         }),
       )

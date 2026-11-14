@@ -29,7 +29,8 @@ export async function actionUnstarProject(data: FormData) {
   }
 
   revalidateProjects(projectSlug)
-  revalidatePath('/projetos/apoiados')
+  revalidatePath('/me')
+  revalidatePath('/me/pontos')
 
   return { success: true, message: 'Apoio removido.' }
 }

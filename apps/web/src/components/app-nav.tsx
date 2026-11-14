@@ -15,8 +15,8 @@ const links = [
   { href: '/chamados', label: 'Chamados' },
   { href: '/instituicoes', label: 'Instituições' },
   { href: '/pesquisas-cientificas', label: 'OpenAlex' },
-  // { href: '/conta', label: 'Minha Conta' },
-  // { href: '/projetos/convites', label: 'Convites' },
+  // { href: '/me', label: 'Meu perfil' },
+  // { href: '/me/convites', label: 'Convites' },
 ]
 
 export function AppNav() {
@@ -39,11 +39,11 @@ export function AppNav() {
       })}
 
       <Link
-        href="/conta"
+        href="/me"
         className={cn(
           buttonVariants({ variant: 'outline' }),
           'size-10',
-          pathname === 'conta' || (pathname.startsWith('/conta') && 'bg-primary text-primary-foreground'),
+          (pathname === '/me' || pathname.startsWith('/me/')) && 'bg-primary text-primary-foreground',
         )}
       >
         <HugeiconsIcon icon={User03Icon} className="size-5" />

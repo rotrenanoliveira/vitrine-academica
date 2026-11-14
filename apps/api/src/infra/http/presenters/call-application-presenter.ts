@@ -16,18 +16,16 @@ export class CallApplicationPresenter {
     }
   }
 
-  static toHTTPWithApplicant({ application, applicant }: CallApplicationWithApplicant) {
+  static toHTTPWithApplicant({ application, applicantName }: CallApplicationWithApplicant) {
     return {
-      ...CallApplicationPresenter.toHTTP(application),
-      applicant: {
-        id: applicant.id,
-        name: applicant.name,
-        memberships: applicant.memberships.map((membership) => ({
-          institutionId: membership.institutionId,
-          institutionName: membership.institutionName,
-          role: membership.role,
-        })),
-      },
+      id: application.id.toString(),
+      callId: application.callId.toString(),
+      applicantId: application.applicantId.toString(),
+      message: application.message,
+      status: application.status,
+      decidedAt: application.decidedAt?.toISOString() ?? null,
+      createdAt: application.createdAt.toISOString(),
+      applicantName,
     }
   }
 

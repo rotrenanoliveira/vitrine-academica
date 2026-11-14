@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { ProjectListItem, Tag } from '@/utils/type'
+import { ProjectCoverFrame } from './project-cover-frame'
 import { resolveProjectTagNames } from './project-gallery-utils'
 
 const AUTO_ADVANCE_MS = 15_000
@@ -47,38 +48,30 @@ export function ProjectGallerySlide({ projects, tags = [] }: ProjectGallerySlide
   return (
     <div className="flex flex-col gap-10">
       <div className="relative">
-        <div className="border border-[#252422]/35 bg-[#e6e0d7] p-2 shadow-[10px_10px_0_rgba(37,36,34,0.10)] sm:p-3">
-          <div className="relative aspect-video overflow-hidden bg-[#c6c0b8]">
-            {projects.map((item, index) => (
-              <div
-                key={item.id}
-                className={`absolute inset-0 transition-all duration-700 ${
-                  index === activeIndex ? 'scale-100 opacity-100' : 'scale-105 opacity-0'
-                }`}
-                aria-hidden={index !== activeIndex}
-              >
-                {item.coverUrl ? (
-                  <Image
-                    src={item.coverUrl}
-                    alt={`Capa de ${item.title}`}
-                    fill
-                    unoptimized
-                    className="object-cover"
-                    priority={index === 0}
-                  />
-                ) : (
-                  <div className="size-full bg-[#c6c0b8]" aria-hidden />
-                )}
-              </div>
-            ))}
-            <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-white/10" />
-            {tagNames[0] ? (
-              <span className="absolute left-4 top-4 bg-[#f4f1eb]/90 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em]">
-                {tagNames[0]}
-              </span>
-            ) : null}
-          </div>
-        </div>
+        <ProjectCoverFrame coverUrl={project.coverUrl} alt={`Capa de ${project.title}`} tagLabel={tagNames[0]} priority>
+          {projects.map((item, index) => (
+            <div
+              key={item.id}
+              className={`absolute inset-0 transition-all duration-700 ${
+                index === activeIndex ? 'scale-100 opacity-100' : 'scale-105 opacity-0'
+              }`}
+              aria-hidden={index !== activeIndex}
+            >
+              {item.coverUrl ? (
+                <Image
+                  src={item.coverUrl}
+                  alt={`Capa de ${item.title}`}
+                  fill
+                  unoptimized
+                  className="object-cover"
+                  priority={index === 0}
+                />
+              ) : (
+                <div className="size-full bg-[#c6c0b8]" aria-hidden />
+              )}
+            </div>
+          ))}
+        </ProjectCoverFrame>
 
         <div className="mt-7 flex items-center justify-between gap-4 text-xs uppercase tracking-[0.2em] text-[#252422]/55">
           <span>

@@ -57,6 +57,31 @@ describe('(UC) - Get Project By Slug', () => {
     expect(result.isRight()).toBeTruthy()
   })
 
+  it('deve permitir a visitante sem autenticação ver um projeto publicado', async () => {
+    const { project } = makeProject({ status: ProjectStatus.PUBLISHED })
+    projectsRepository.items.push(project)
+
+    const result = await sut.execute({
+      slug: project.slug,
+    })
+
+    expect(result.isRight()).toBeTruthy()
+  })
+
+  it('não deve permitir a visitante sem autenticação ver um projeto em rascunho', async () => {
+    const { project } = makeProject({ status: ProjectStatus.SKETCH })
+    projectsRepository.items.push(project)
+
+    const result = await sut.execute({
+      slug: project.slug,
+    })
+
+    expect(result.isLeft()).toBeTruthy()
+    if (result.isLeft()) {
+      expect(result.value).toBeInstanceOf(ProjectNotFoundError)
+    }
+  })
+
   it('não deve permitir a quem não é dono nem coautor ver um projeto em rascunho', async () => {
     const { project } = makeProject({ status: ProjectStatus.SKETCH })
     projectsRepository.items.push(project)

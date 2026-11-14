@@ -18,7 +18,7 @@ const schema = z.object({
   RESEND_API_KEY: z.string(),
   MAIL_FROM: z.string(),
   // Site
-  WEB_URL: z.url().default('http://localhost:3000'),
+  WEB_URL: z.url().default('http://vitrineacademica.com'),
   // OpenAlex
   OPENALEX_API_KEY: z.string(),
 })

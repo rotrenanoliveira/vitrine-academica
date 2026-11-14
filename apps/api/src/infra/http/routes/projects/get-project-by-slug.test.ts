@@ -73,6 +73,31 @@ describe('(E2E) - GET /api/v1/projects/slug/:slug', () => {
     expect(response.status).toBe(200)
   })
 
+  it('deve permitir visitante sem autenticação ver projeto publicado', async () => {
+    const { user: owner } = await makeUserOnDatabase()
+    const { project } = await makeProjectOnDatabase({
+      author: owner.id,
+      status: ProjectStatus.PUBLISHED,
+    })
+
+    const response = await request(app.server).get(`/api/v1/projects/slug/${project.slug}`)
+
+    expect(response.status).toBe(200)
+    expect(response.body.project.id).toBe(project.id.toString())
+  })
+
+  it('não deve permitir visitante sem autenticação ver rascunho', async () => {
+    const { user: owner } = await makeUserOnDatabase()
+    const { project } = await makeProjectOnDatabase({
+      author: owner.id,
+      status: ProjectStatus.SKETCH,
+    })
+
+    const response = await request(app.server).get(`/api/v1/projects/slug/${project.slug}`)
+
+    expect(response.status).toBe(404)
+  })
+
   it('deve retornar 404 quando o projeto não existe', async () => {
     const { accessToken } = await authenticateUser()
 

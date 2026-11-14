@@ -5,16 +5,19 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { ProjectListItem, Tag } from '@/utils/type'
+import { ProjectGalleryTileLink } from './project-gallery-tile-link'
 import { resolveProjectTagNames } from './project-gallery-utils'
 
 type ProjectGalleryCardProps = {
   project: ProjectListItem
   tags?: Tag[]
+  ctaVariant?: 'text' | 'tile'
 }
 
-export function ProjectGalleryCard({ project, tags = [] }: ProjectGalleryCardProps) {
+export function ProjectGalleryCard({ project, tags = [], ctaVariant = 'text' }: ProjectGalleryCardProps) {
   const projectHref = `/projetos/${project.slug}`
   const tagNames = resolveProjectTagNames(project, tags)
+  const viewLabel = `Visualizar o projeto ${project.title}`
 
   return (
     <Card className="group gap-0 overflow-hidden rounded-none bg-transparent p-0 shadow-none transition-transform duration-300 hover:-translate-y-1">
@@ -53,16 +56,23 @@ export function ProjectGalleryCard({ project, tags = [] }: ProjectGalleryCardPro
           </Link>
         </h3>
         <p className="mt-3 line-clamp-2 text-sm leading-5 text-[#252422]/65">{project.description}</p>
-        <Button
-          variant="link"
-          nativeButton={false}
-          className="mt-auto h-auto justify-between p-0 pt-5 group text-[#252422] no-underline hover:no-underline"
-          render={<Link href={projectHref} />}
-          aria-label={`Visualizar o projeto ${project.title}`}
-        >
-          <span className="group-hover:underline">Visualizar projeto</span>
-          <HugeiconsIcon icon={ArrowUpRight01Icon} data-icon="inline-end" className="size-5" />
-        </Button>
+        {ctaVariant === 'tile' ? (
+          <div className="mt-auto flex items-center justify-between gap-3 pt-5">
+            <span className="text-xs font-semibold tracking-widest text-[#252422] uppercase">Visualizar projeto</span>
+            <ProjectGalleryTileLink href={projectHref} label={viewLabel} size="sm" />
+          </div>
+        ) : (
+          <Button
+            variant="link"
+            nativeButton={false}
+            className="mt-auto h-auto justify-between p-0 pt-5 group text-[#252422] no-underline hover:no-underline"
+            render={<Link href={projectHref} />}
+            aria-label={viewLabel}
+          >
+            <span className="group-hover:underline">Visualizar projeto</span>
+            <HugeiconsIcon icon={ArrowUpRight01Icon} data-icon="inline-end" className="size-5" />
+          </Button>
+        )}
       </CardContent>
     </Card>
   )

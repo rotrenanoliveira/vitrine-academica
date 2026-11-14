@@ -2,6 +2,7 @@
 
 import { Loading03Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -15,6 +16,7 @@ import type { Project } from '@/utils/type'
 type FormUpdateProjectProps = {
   project: Project
   canChangeStatus?: boolean
+  currentCoverUrl?: string | null
 }
 
 const statusOptions = [
@@ -24,7 +26,7 @@ const statusOptions = [
   { value: 'ARCHIVED', label: 'Arquivado' },
 ] as const
 
-export function FormUpdateProject({ project, canChangeStatus = true }: FormUpdateProjectProps) {
+export function FormUpdateProject({ project, canChangeStatus = true, currentCoverUrl = null }: FormUpdateProjectProps) {
   const router = useRouter()
 
   const [_, handleSubmit, isPending] = useFormState(actionUpdateProject, {
@@ -52,6 +54,27 @@ export function FormUpdateProject({ project, canChangeStatus = true }: FormUpdat
       <div className="space-y-2">
         <Label htmlFor="description">Descrição</Label>
         <Textarea id="description" name="description" required rows={5} defaultValue={project.description} />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="cover-attachment">Capa</Label>
+        {currentCoverUrl ? (
+          <div className="relative mb-2 aspect-video w-full overflow-hidden border border-border bg-muted">
+            <Image
+              src={currentCoverUrl}
+              alt={`Capa atual de ${project.title}`}
+              fill
+              unoptimized
+              className="object-cover"
+            />
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground">Nenhuma capa definida ainda.</p>
+        )}
+        <Input id="cover-attachment" name="cover-attachment" type="file" accept="image/png,image/jpeg,image/jpg" />
+        <p className="text-xs text-muted-foreground">
+          Opcional. PNG ou JPG de até 5 MB. Envie um arquivo novo para substituir a capa atual.
+        </p>
       </div>
 
       {canChangeStatus ? (

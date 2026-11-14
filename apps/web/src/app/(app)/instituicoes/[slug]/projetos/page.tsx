@@ -2,6 +2,7 @@ import { ArrowLeft02Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { Button } from '@/components/ui/button'
 import { getCachedInstitutionBySlug } from '@/server/http/routes/institutions/get-institution'
 import { InstitutionProjectsFilters } from './_components/institution-projects-filters'
@@ -34,11 +35,15 @@ export default async function InstitutionProjectsPage({ params }: PageProps) {
           </Button>
 
           <div className="flex-1">
-            <InstitutionProjectsFilters />
+            <Suspense fallback={null}>
+              <InstitutionProjectsFilters />
+            </Suspense>
           </div>
         </div>
 
-        <InstitutionProjectsList slug={institution.slug} />
+        <Suspense fallback={<p className="text-sm text-muted-foreground">Carregando projetos…</p>}>
+          <InstitutionProjectsList slug={institution.slug} />
+        </Suspense>
       </div>
     </div>
   )

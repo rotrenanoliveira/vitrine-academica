@@ -5,7 +5,7 @@ import { ProjectPresenter } from '../../presenters/project-presenter'
 
 interface GetProjectBySlugParams {
   slug: string
-  requesterId: string
+  requesterId?: string
 }
 
 export class GetProjectBySlugController {
