@@ -1,18 +1,30 @@
 import type {
-  ExportedProjectStar,
-  ExportedPromotion,
   UserDataExportRepository,
+  UserExportedRecords,
 } from '@/domain/identity/application/repositories/user-data-export-repository'
 
-export class InMemoryUserDataExportRepository implements UserDataExportRepository {
-  public projectStarsByUser = new Map<string, ExportedProjectStar[]>()
-  public promotionsByUser = new Map<string, ExportedPromotion[]>()
-
-  async findProjectStarsByUserId(userId: string): Promise<ExportedProjectStar[]> {
-    return this.projectStarsByUser.get(userId) ?? []
+function makeEmptyRecords(): UserExportedRecords {
+  return {
+    projects: [],
+    projectStars: [],
+    promotions: [],
+    projectMembers: [],
+    calls: [],
+    callApplications: [],
+    teacherRatings: [],
+    institutionMembershipRequests: [],
+    registeredInstitutions: [],
+    eventThemes: [],
+    eventVotes: [],
+    eventRegistrations: [],
+    authorSubscriptions: [],
   }
+}
 
-  async findPromotionsByUserId(userId: string): Promise<ExportedPromotion[]> {
-    return this.promotionsByUser.get(userId) ?? []
+export class InMemoryUserDataExportRepository implements UserDataExportRepository {
+  public recordsByUser = new Map<string, Partial<UserExportedRecords>>()
+
+  async findRecordsByUserId(userId: string): Promise<UserExportedRecords> {
+    return { ...makeEmptyRecords(), ...this.recordsByUser.get(userId) }
   }
 }

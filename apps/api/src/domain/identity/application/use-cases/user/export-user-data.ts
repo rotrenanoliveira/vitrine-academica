@@ -3,23 +3,18 @@ import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/au
 import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
 import type { InstitutionMembersRepository } from '@/domain/institution/application/repositories/institution-members-repository'
 import type { PointTransactionsRepository } from '@/domain/points/application/repositories/point-transactions-repository'
-import type { ProjectsRepository } from '@/domain/project/application/repositories/projects-repositories'
 import type { PreferenceTagsRepository } from '@/domain/tag/application/repositories/preference-tags-repository'
 import { UserNotFoundError } from '../../_errors/user-not-found-error'
 import type { AccountsRepository } from '../../repositories/accounts-repository'
 import type { SessionsRepository } from '../../repositories/sessions-repository'
-import type {
-  ExportedProjectStar,
-  ExportedPromotion,
-  UserDataExportRepository,
-} from '../../repositories/user-data-export-repository'
+import type { UserDataExportRepository, UserExportedRecords } from '../../repositories/user-data-export-repository'
 import type { UsersRepository } from '../../repositories/users-repository'
 
 interface ExportUserDataUseCaseRequest {
   userId: string
 }
 
-export interface UserDataReport {
+export interface UserDataReport extends UserExportedRecords {
   user: {
     id: string
     name: string
@@ -47,11 +42,6 @@ export interface UserDataReport {
   preferences: Array<{
     tagId: string
   }>
-  projects: Array<{
-    id: string
-    title: string
-    status: string
-  }>
   points: {
     balance: number
     transactions: Array<{
@@ -63,8 +53,6 @@ export interface UserDataReport {
       createdAt: Date
     }>
   }
-  projectStars: ExportedProjectStar[]
-  promotions: ExportedPromotion[]
 }
 
 type ExportUserDataUseCaseResponse = Either<UserNotFoundError, { userData: UserDataReport }>
@@ -76,7 +64,6 @@ export class ExportUserDataUseCase {
     private readonly sessionsRepository: SessionsRepository,
     private readonly institutionMembersRepository: InstitutionMembersRepository,
     private readonly preferenceTagsRepository: PreferenceTagsRepository,
-    private readonly projectsRepository: ProjectsRepository,
     private readonly pointTransactionsRepository: PointTransactionsRepository,
     private readonly userDataExportRepository: UserDataExportRepository,
     private readonly registerLog: RegisterLogUseCase,
@@ -89,26 +76,14 @@ export class ExportUserDataUseCase {
       return left(new UserNotFoundError())
     }
 
-    const [
-      account,
-      sessions,
-      memberships,
-      preferences,
-      projects,
-      pointsBalance,
-      pointTransactions,
-      projectStars,
-      promotions,
-    ] = await Promise.all([
+    const [account, sessions, memberships, preferences, pointsBalance, pointTransactions, records] = await Promise.all([
       this.accountsRepository.findByUserId(userId),
       this.sessionsRepository.findManyByUserId(userId),
       this.institutionMembersRepository.findManyByUserId(userId),
       this.preferenceTagsRepository.findByUserId(userId),
-      this.projectsRepository.findManyByAuthorId(userId),
       this.pointTransactionsRepository.getBalanceByUserId(userId),
       this.pointTransactionsRepository.findAllByUserId(userId),
-      this.userDataExportRepository.findProjectStarsByUserId(userId),
-      this.userDataExportRepository.findPromotionsByUserId(userId),
+      this.userDataExportRepository.findRecordsByUserId(userId),
     ])
 
     const userData: UserDataReport = {
@@ -141,11 +116,6 @@ export class ExportUserDataUseCase {
       preferences: preferences.map((preference) => ({
         tagId: preference.tagId.toString(),
       })),
-      projects: projects.map((project) => ({
-        id: project.id.toString(),
-        title: project.title,
-        status: project.status,
-      })),
       points: {
         balance: pointsBalance,
         transactions: pointTransactions.map((transaction) => ({
@@ -157,8 +127,7 @@ export class ExportUserDataUseCase {
           createdAt: transaction.createdAt,
         })),
       },
-      projectStars,
-      promotions,
+      ...records,
     }
 
     await this.registerLog.execute({

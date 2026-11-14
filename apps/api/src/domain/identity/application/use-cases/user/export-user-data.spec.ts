@@ -5,7 +5,6 @@ import { InMemoryAuditLogsRepository } from '@tests/repositories/in-memory-audit
 import { InMemoryInstitutionMembersRepository } from '@tests/repositories/in-memory-institution-members-repository'
 import { InMemoryPointTransactionsRepository } from '@tests/repositories/in-memory-point-transactions-repository'
 import { InMemoryPreferenceTagsRepository } from '@tests/repositories/in-memory-preference-tags-repository'
-import { InMemoryProjectsRepository } from '@tests/repositories/in-memory-projects-repository'
 import { InMemorySessionsRepository } from '@tests/repositories/in-memory-sessions-repository'
 import { InMemoryUserDataExportRepository } from '@tests/repositories/in-memory-user-data-export-repository'
 import { InMemoryUsersRepository } from '@tests/repositories/in-memory-users-repository'
@@ -20,7 +19,6 @@ let inMemoryAccountsRepository: InMemoryAccountsRepository
 let inMemorySessionsRepository: InMemorySessionsRepository
 let inMemoryInstitutionMembersRepository: InMemoryInstitutionMembersRepository
 let inMemoryPreferenceTagsRepository: InMemoryPreferenceTagsRepository
-let inMemoryProjectsRepository: InMemoryProjectsRepository
 let inMemoryPointTransactionsRepository: InMemoryPointTransactionsRepository
 let inMemoryUserDataExportRepository: InMemoryUserDataExportRepository
 let auditLogsRepository: InMemoryAuditLogsRepository
@@ -33,7 +31,6 @@ describe('Export User Data Use Case', () => {
     inMemorySessionsRepository = new InMemorySessionsRepository()
     inMemoryInstitutionMembersRepository = new InMemoryInstitutionMembersRepository()
     inMemoryPreferenceTagsRepository = new InMemoryPreferenceTagsRepository()
-    inMemoryProjectsRepository = new InMemoryProjectsRepository()
     inMemoryPointTransactionsRepository = new InMemoryPointTransactionsRepository()
     inMemoryUserDataExportRepository = new InMemoryUserDataExportRepository()
     auditLogsRepository = new InMemoryAuditLogsRepository()
@@ -46,7 +43,6 @@ describe('Export User Data Use Case', () => {
       inMemorySessionsRepository,
       inMemoryInstitutionMembersRepository,
       inMemoryPreferenceTagsRepository,
-      inMemoryProjectsRepository,
       inMemoryPointTransactionsRepository,
       inMemoryUserDataExportRepository,
       registerLog,
@@ -77,10 +73,24 @@ describe('Export User Data Use Case', () => {
       )
       expect(result.value.userData.institutions).toBeDefined()
       expect(result.value.userData.preferences).toBeDefined()
-      expect(result.value.userData.projects).toBeDefined()
       expect(result.value.userData.points).toEqual({ balance: 0, transactions: [] })
-      expect(result.value.userData.projectStars).toEqual([])
-      expect(result.value.userData.promotions).toEqual([])
+      expect(result.value.userData).toEqual(
+        expect.objectContaining({
+          projects: [],
+          projectStars: [],
+          promotions: [],
+          projectMembers: [],
+          calls: [],
+          callApplications: [],
+          teacherRatings: [],
+          institutionMembershipRequests: [],
+          registeredInstitutions: [],
+          eventThemes: [],
+          eventVotes: [],
+          eventRegistrations: [],
+          authorSubscriptions: [],
+        }),
+      )
     }
   })
 
@@ -125,7 +135,7 @@ describe('Export User Data Use Case', () => {
     }
   })
 
-  it('should export the stars and the promotions given by the user', async () => {
+  it('should export the records the user has created, given or received', async () => {
     const { user } = makeUser()
     await inMemoryUsersRepository.create(user)
 
@@ -147,8 +157,21 @@ describe('Export User Data Use Case', () => {
       createdAt: new Date('2026-11-13T10:00:00.000Z'),
     }
 
-    inMemoryUserDataExportRepository.projectStarsByUser.set(user.id.toString(), [star])
-    inMemoryUserDataExportRepository.promotionsByUser.set(user.id.toString(), [promotion])
+    const call = {
+      id: 'call-1',
+      title: 'Procuro designer',
+      description: 'Preciso de ajuda com a interface',
+      applicationDeadline: new Date('2026-12-01T10:00:00.000Z'),
+      status: 'OPEN',
+      projectId: null,
+      createdAt: new Date('2026-11-12T10:00:00.000Z'),
+    }
+
+    inMemoryUserDataExportRepository.recordsByUser.set(user.id.toString(), {
+      projectStars: [star],
+      promotions: [promotion],
+      calls: [call],
+    })
 
     const result = await sut.execute({ userId: user.id.toString() })
 
@@ -157,6 +180,33 @@ describe('Export User Data Use Case', () => {
     if (result.isRight()) {
       expect(result.value.userData.projectStars).toEqual([star])
       expect(result.value.userData.promotions).toEqual([promotion])
+      expect(result.value.userData.calls).toEqual([call])
+      expect(result.value.userData.callApplications).toEqual([])
+    }
+  })
+
+  it('should not export the records of another user', async () => {
+    const { user } = makeUser()
+    const { user: otherUser } = makeUser()
+    await inMemoryUsersRepository.create(user)
+
+    inMemoryUserDataExportRepository.recordsByUser.set(otherUser.id.toString(), {
+      eventVotes: [
+        {
+          id: 'vote-1',
+          eventId: 'event-1',
+          themeId: 'theme-1',
+          createdAt: new Date('2026-11-10T10:00:00.000Z'),
+        },
+      ],
+    })
+
+    const result = await sut.execute({ userId: user.id.toString() })
+
+    expect(result.isRight()).toBe(true)
+
+    if (result.isRight()) {
+      expect(result.value.userData.eventVotes).toEqual([])
     }
   })
 
