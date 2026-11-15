@@ -203,6 +203,38 @@ describe('(UC) - List Project Members', () => {
   })
 
   it.each([ProjectStatus.SKETCH, ProjectStatus.SCHEDULED])(
+    'deve mostrar ao convite pendente só os coautores aceitos de um projeto com status %s',
+    async (projectStatus) => {
+      const { project } = setup(projectStatus)
+      const pending = addMember(project.id, ProjectMemberStatus.PENDING)
+      const accepted = addMember(project.id, ProjectMemberStatus.ACCEPTED)
+      addMember(project.id, ProjectMemberStatus.REJECTED)
+
+      const result = await sut.execute({ projectId: project.id.toString(), requesterId: pending.user.id.toString() })
+
+      expect(result.isRight()).toBeTruthy()
+      if (result.isRight()) {
+        expect(result.value.members).toHaveLength(1)
+        expect(result.value.members[0].projectMember.id.toString()).toBe(accepted.projectMember.id.toString())
+        expect(result.value.members[0].projectMember.status).toBe(ProjectMemberStatus.ACCEPTED)
+      }
+    },
+  )
+
+  it('não deve mostrar a lista de um rascunho para quem recusou o convite', async () => {
+    const { project } = setup(ProjectStatus.SKETCH)
+    const rejected = addMember(project.id, ProjectMemberStatus.REJECTED)
+    addMember(project.id, ProjectMemberStatus.ACCEPTED)
+
+    const result = await sut.execute({ projectId: project.id.toString(), requesterId: rejected.user.id.toString() })
+
+    expect(result.isLeft()).toBeTruthy()
+    if (result.isLeft()) {
+      expect(result.value).toBeInstanceOf(ProjectNotFoundError)
+    }
+  })
+
+  it.each([ProjectStatus.SKETCH, ProjectStatus.SCHEDULED])(
     'deve mostrar ao coautor que aceitou a lista de um projeto com status %s',
     async (projectStatus) => {
       const { project } = setup(projectStatus)

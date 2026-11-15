@@ -130,26 +130,45 @@ describe('(E2E) - GET /api/v1/projects/slug/:slug', () => {
     expect(response.body.project.status).toBe('SKETCH')
   })
 
-  it.each([ProjectMemberStatus.PENDING, ProjectMemberStatus.REJECTED])(
-    'não deve permitir a quem tem convite %s ver um rascunho',
-    async (memberStatus) => {
-      const { accessToken, user } = await authenticateUser()
-      const { user: owner } = await makeUserOnDatabase()
-      const { project } = await makeProjectOnDatabase({
-        author: owner.id,
-        status: ProjectStatus.SKETCH,
-      })
-      await makeProjectMemberOnDatabase({
-        projectId: project.id,
-        userId: user.id,
-        status: memberStatus,
-      })
+  it('deve permitir a quem tem convite pendente ver um rascunho', async () => {
+    const { accessToken, user } = await authenticateUser()
+    const { user: owner } = await makeUserOnDatabase()
+    const { project } = await makeProjectOnDatabase({
+      author: owner.id,
+      status: ProjectStatus.SKETCH,
+    })
+    await makeProjectMemberOnDatabase({
+      projectId: project.id,
+      userId: user.id,
+      status: ProjectMemberStatus.PENDING,
+    })
 
-      const response = await request(app.server)
-        .get(`/api/v1/projects/slug/${project.slug}`)
-        .set('Authorization', `Bearer ${accessToken}`)
+    const response = await request(app.server)
+      .get(`/api/v1/projects/slug/${project.slug}`)
+      .set('Authorization', `Bearer ${accessToken}`)
 
-      expect(response.status).toBe(404)
-    },
-  )
+    expect(response.status).toBe(200)
+    expect(response.body.project.id).toBe(project.id.toString())
+    expect(response.body.project.status).toBe('SKETCH')
+  })
+
+  it('não deve permitir a quem recusou o convite ver um rascunho', async () => {
+    const { accessToken, user } = await authenticateUser()
+    const { user: owner } = await makeUserOnDatabase()
+    const { project } = await makeProjectOnDatabase({
+      author: owner.id,
+      status: ProjectStatus.SKETCH,
+    })
+    await makeProjectMemberOnDatabase({
+      projectId: project.id,
+      userId: user.id,
+      status: ProjectMemberStatus.REJECTED,
+    })
+
+    const response = await request(app.server)
+      .get(`/api/v1/projects/slug/${project.slug}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+
+    expect(response.status).toBe(404)
+  })
 })
