@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { listActiveRatingCriteria } from '@/server/http/routes/projects/list-active-rating-criteria'
 import { listMyTeacherRatings } from '@/server/http/routes/projects/list-my-teacher-ratings'
+import { formatBrasiliaDateTime } from '@/utils/date-time'
 
 export function MeRatingsList() {
   const ratingsQuery = useQuery({
@@ -40,7 +41,7 @@ export function MeRatingsList() {
               {project.title}
             </Link>
             <p className="text-xs text-muted-foreground">
-              Avaliado em {new Date(rating.ratedAt).toLocaleString('pt-BR')} · média {rating.overallScore.toFixed(1)}
+              Avaliado em {formatBrasiliaDateTime(rating.ratedAt)} · média {rating.overallScore.toFixed(1)}
             </p>
           </div>
           <ul className="grid gap-1 text-sm sm:grid-cols-2">
