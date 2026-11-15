@@ -16,9 +16,10 @@ const AUTO_ADVANCE_MS = 15_000
 type ProjectGallerySlideProps = {
   projects: ProjectListItem[]
   tags?: Tag[]
+  captionByProjectId?: Record<string, string>
 }
 
-export function ProjectGallerySlide({ projects, tags = [] }: ProjectGallerySlideProps) {
+export function ProjectGallerySlide({ projects, tags = [], captionByProjectId }: ProjectGallerySlideProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const total = projects.length
 
@@ -90,6 +91,9 @@ export function ProjectGallerySlide({ projects, tags = [] }: ProjectGallerySlide
                 {project.title}
               </h2>
               <p className="line-clamp-2 text-sm leading-6 text-[#252422]/70">{project.description}</p>
+              {captionByProjectId?.[project.id] ? (
+                <p className="text-sm leading-6 text-[#252422]/70">{captionByProjectId[project.id]}</p>
+              ) : null}
             </CardContent>
           </Card>
 

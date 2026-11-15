@@ -5,10 +5,11 @@ import { useQuery } from '@tanstack/react-query'
 import { ProjectGallerySlide } from '@/components/project/project-gallery-slide'
 import { ProjectGallerySlideSkeleton } from '@/components/project/project-gallery-slide-skeleton'
 import { fetchScheduledProjectsWithCover } from '@/server/http/routes/projects/fetch-scheduled-projects'
+import { formatBrasiliaDateTime } from '@/utils/date-time'
 
 export function ScheduledProjectsList() {
   const {
-    data: projects = [],
+    data: scheduledProjects = [],
     isPending: isProjectsPending,
     isError: isProjectsError,
   } = useQuery({
@@ -24,9 +25,21 @@ export function ScheduledProjectsList() {
     return <p className="text-sm text-muted-foreground">Não foi possível carregar os lançamentos.</p>
   }
 
-  if (projects.length === 0) {
+  if (scheduledProjects.length === 0) {
     return <p className="text-sm text-muted-foreground">Nenhum lançamento agendado para os próximos 7 dias.</p>
   }
 
-  return <ProjectGallerySlide projects={projects} />
+  const captionByProjectId = Object.fromEntries(
+    scheduledProjects.map(({ project, publishedIn }) => [
+      project.id,
+      `Lançamento em ${formatBrasiliaDateTime(publishedIn)}`,
+    ]),
+  )
+
+  return (
+    <ProjectGallerySlide
+      projects={scheduledProjects.map(({ project }) => project)}
+      captionByProjectId={captionByProjectId}
+    />
+  )
 }
