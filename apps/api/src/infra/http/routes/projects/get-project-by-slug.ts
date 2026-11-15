@@ -17,7 +17,7 @@ export async function getProjectBySlugRoute(app: FastifyInstance) {
         tags: ['projects'],
         summary: 'Obter projeto por slug',
         description:
-          'Retorna um projeto pelo slug. Visitante só vê publicados. Dono vê qualquer status; coautor aceito também.',
+          'Retorna um projeto pelo slug. Visitante só vê publicados. Dono vê qualquer status; coautor aceito e convite pendente também. Convite recusado não vê.',
         params: z.object({
           slug: z.string().min(1).describe('O slug do projeto'),
         }),

@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   transpilePackages: ['@vitrine-academica/permissions'],
   experimental: {
     serverActions: {
-      bodySizeLimit: '5mb',
+      bodySizeLimit: '20mb',
     },
   },
 }

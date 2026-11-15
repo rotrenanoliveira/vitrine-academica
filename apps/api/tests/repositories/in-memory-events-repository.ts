@@ -20,6 +20,11 @@ export class InMemoryEventsRepository implements EventsRepository {
     return this.items.find((event) => event.slug === slug) ?? null
   }
 
+  async findManyByIds(ids: string[]): Promise<Event[]> {
+    const idSet = new Set(ids)
+    return this.items.filter((event) => idSet.has(event.id.toString()))
+  }
+
   private toListItem(event: Event): EventListItem {
     const winnerThemeId = event.winnerThemeId?.toString()
     const institutionId = event.institutionId.toString()

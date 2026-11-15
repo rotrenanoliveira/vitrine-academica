@@ -90,6 +90,9 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   const canPublish = isOwner && (project.status === 'SKETCH' || project.status === 'SCHEDULED')
   const canInvite = isOwner && project.status !== 'ARCHIVED'
   const hasOwnerActions = canSchedule || canPublish || canInvite
+  const isCoauthor =
+    user !== null && members.some((member) => member.userId === user.id && member.status === 'ACCEPTED')
+  const canManage = isOwner || isCoauthor
 
   const authorName = authorData?.author.name ?? 'Autor'
   const coauthors = members
@@ -232,7 +235,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           </div>
         )}
 
-        {isOwner && (
+        {canManage && (
           <div>
             <Button nativeButton={false} variant="outline" render={<Link href={`/projetos/${project.slug}/editar`} />}>
               Gerenciar / Editar
