@@ -89,11 +89,11 @@ describe('(UC) - Get Curation', () => {
     expect(curationRepository.lastCommunityFilters?.since.toISOString()).toBe('2026-05-10T12:00:00.000Z')
   })
 
-  it('deve repassar o filtro de instituição', async () => {
-    await sut.execute({ now, institutionId: 'instituicao-1' })
+  it('deve repassar o filtro de instituições', async () => {
+    await sut.execute({ now, institutionIds: ['instituicao-1', 'instituicao-2'] })
 
-    expect(curationRepository.lastTeacherFilters?.institutionId).toBe('instituicao-1')
-    expect(curationRepository.lastCommunityFilters?.institutionId).toBe('instituicao-1')
+    expect(curationRepository.lastTeacherFilters?.institutionIds).toEqual(['instituicao-1', 'instituicao-2'])
+    expect(curationRepository.lastCommunityFilters?.institutionIds).toEqual(['instituicao-1', 'instituicao-2'])
   })
 
   it('deve repassar title e tagIds', async () => {
