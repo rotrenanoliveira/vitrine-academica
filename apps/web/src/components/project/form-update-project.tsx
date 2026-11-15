@@ -1,9 +1,10 @@
 'use client'
 
-import { Loading03Icon } from '@hugeicons/core-free-icons'
+import { Cancel01Icon, Loading03Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,12 +12,14 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { useFormState } from '@/hook/use-form-state'
 import { actionUpdateProject } from '@/server/actions/update-project'
+import type { ProjectAttachmentPreview } from '@/server/projects/resolve-project-cover-url'
 import type { Project } from '@/utils/type'
 
 type FormUpdateProjectProps = {
   project: Project
   canChangeStatus?: boolean
   currentCoverUrl?: string | null
+  currentAttachments?: ProjectAttachmentPreview[]
 }
 
 const statusOptions = [
@@ -26,8 +29,16 @@ const statusOptions = [
   { value: 'ARCHIVED', label: 'Arquivado' },
 ] as const
 
-export function FormUpdateProject({ project, canChangeStatus = true, currentCoverUrl = null }: FormUpdateProjectProps) {
+const IMAGE_HINT = 'Opcional. PNG ou JPG de até 5 MB. Recomendado: 1920×1080 px (proporção 16:9).'
+
+export function FormUpdateProject({
+  project,
+  canChangeStatus = true,
+  currentCoverUrl = null,
+  currentAttachments = [],
+}: FormUpdateProjectProps) {
   const router = useRouter()
+  const [keptAttachments, setKeptAttachments] = useState(currentAttachments)
 
   const [_, handleSubmit, isPending] = useFormState(actionUpdateProject, {
     onSuccess: (message) => {
@@ -40,11 +51,19 @@ export function FormUpdateProject({ project, canChangeStatus = true, currentCove
     },
   })
 
+  function handleRemoveAttachment(attachmentId: string) {
+    setKeptAttachments((current) => current.filter((attachment) => attachment.id !== attachmentId))
+  }
+
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
       <h2 className="font-heading text-2xl font-semibold">Editar projeto</h2>
       <input type="hidden" name="project-id" value={project.id} />
       <input type="hidden" name="project-slug" value={project.slug} />
+      <input type="hidden" name="attachments-managed" value="1" />
+      {keptAttachments.map((attachment) => (
+        <input key={attachment.id} type="hidden" name="kept-attachment-id" value={attachment.id} />
+      ))}
 
       <div className="space-y-2">
         <Label htmlFor="title">Título</Label>
@@ -73,7 +92,49 @@ export function FormUpdateProject({ project, canChangeStatus = true, currentCove
         )}
         <Input id="cover-attachment" name="cover-attachment" type="file" accept="image/png,image/jpeg,image/jpg" />
         <p className="text-xs text-muted-foreground">
-          Opcional. PNG ou JPG de até 5 MB. Envie um arquivo novo para substituir a capa atual.
+          {IMAGE_HINT} Envie um arquivo novo para substituir a capa atual.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="project-attachments">Imagens do projeto</Label>
+        {keptAttachments.length > 0 ? (
+          <ul className="mb-2 grid gap-2 sm:grid-cols-2">
+            {keptAttachments.map((attachment, index) => (
+              <li key={attachment.id} className="relative aspect-video overflow-hidden border border-border bg-muted">
+                <Image
+                  src={attachment.url}
+                  alt={`Imagem ${index + 1} de ${project.title}`}
+                  fill
+                  unoptimized
+                  className="object-cover"
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="icon-xs"
+                  className="absolute top-2 right-2"
+                  aria-label={`Remover imagem ${index + 1}`}
+                  onClick={() => handleRemoveAttachment(attachment.id)}
+                >
+                  <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-xs text-muted-foreground">Nenhuma imagem adicional definida ainda.</p>
+        )}
+        <Input
+          id="project-attachments"
+          name="project-attachments"
+          type="file"
+          accept="image/png,image/jpeg,image/jpg"
+          multiple
+        />
+        <p className="text-xs text-muted-foreground">
+          Até 4 imagens no total. PNG ou JPG de até 5 MB cada. Recomendado: 1920×1080 px (proporção 16:9). Novos
+          arquivos são adicionados às imagens mantidas. Use o botão em cada preview para remover.
         </p>
       </div>
 

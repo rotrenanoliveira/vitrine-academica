@@ -29,3 +29,31 @@ export async function resolveProjectsWithCover<T extends Project>(
     })),
   )
 }
+
+export type ProjectAttachmentPreview = {
+  id: string
+  url: string
+}
+
+export async function resolveProjectAttachmentUrls(project: Project): Promise<ProjectAttachmentPreview[]> {
+  const results = await Promise.all(
+    project.attachments.map(async (attachmentId) => {
+      const [attachmentResult] = await getAttachment(attachmentId)
+
+      if (!attachmentResult) {
+        return null
+      }
+
+      if (!attachmentResult.attachment.mimeType.startsWith('image/')) {
+        return null
+      }
+
+      return {
+        id: attachmentId,
+        url: attachmentResult.attachmentUrl,
+      }
+    }),
+  )
+
+  return results.filter((item): item is ProjectAttachmentPreview => item !== null)
+}
