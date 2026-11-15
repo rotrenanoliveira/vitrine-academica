@@ -1,6 +1,8 @@
 import { makeProject } from '@tests/factories/make-project'
 import { makeProjectMember } from '@tests/factories/make-project-member'
+import { makeProjectScheduled } from '@tests/factories/make-project-scheduled'
 import { InMemoryProjectMembersRepository } from '@tests/repositories/in-memory-project-members-repository'
+import { InMemoryProjectScheduledRepository } from '@tests/repositories/in-memory-project-scheduled-repository'
 import { InMemoryProjectsRepository } from '@tests/repositories/in-memory-projects-repository'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { ProjectStatus } from '../../../enterprise/entities/project'
@@ -10,6 +12,7 @@ import { GetProjectBySlugUseCase } from './get-project-by-slug'
 
 let projectsRepository: InMemoryProjectsRepository
 let projectMembersRepository: InMemoryProjectMembersRepository
+let projectScheduledRepository: InMemoryProjectScheduledRepository
 let sut: GetProjectBySlugUseCase
 
 function setupMember(projectStatus: ProjectStatus, memberStatus: ProjectMemberStatus) {
@@ -27,7 +30,8 @@ describe('(UC) - Get Project By Slug', () => {
   beforeEach(() => {
     projectsRepository = new InMemoryProjectsRepository()
     projectMembersRepository = new InMemoryProjectMembersRepository()
-    sut = new GetProjectBySlugUseCase(projectsRepository, projectMembersRepository)
+    projectScheduledRepository = new InMemoryProjectScheduledRepository()
+    sut = new GetProjectBySlugUseCase(projectsRepository, projectMembersRepository, projectScheduledRepository)
   })
 
   it('deve permitir ao dono ver um projeto em rascunho', async () => {
@@ -42,6 +46,26 @@ describe('(UC) - Get Project By Slug', () => {
     expect(result.isRight()).toBeTruthy()
     if (result.isRight()) {
       expect(result.value.project.id.toString()).toBe(project.id.toString())
+      expect(result.value.publishedIn).toBeNull()
+    }
+  })
+
+  it('deve devolver a data de publicação quando o projeto tem agenda', async () => {
+    const { project } = makeProject({ status: ProjectStatus.SCHEDULED })
+    const publishedIn = new Date('2030-01-15T15:00:00.000Z')
+    const { projectScheduled } = makeProjectScheduled({ projectId: project.id, publishedIn })
+
+    projectsRepository.items.push(project)
+    projectScheduledRepository.items.push(projectScheduled)
+
+    const result = await sut.execute({
+      slug: project.slug,
+      requesterId: project.author.toString(),
+    })
+
+    expect(result.isRight()).toBeTruthy()
+    if (result.isRight()) {
+      expect(result.value.publishedIn).toEqual(publishedIn)
     }
   })
 
