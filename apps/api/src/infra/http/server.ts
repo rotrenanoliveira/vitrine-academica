@@ -23,6 +23,8 @@ import { startNewsletterScheduler } from '../jobs/start-newsletter-scheduler'
 import { app } from './app'
 import { makePublicationNotifier } from './factories/newsletter/make-publication-notifier'
 
+const schedulerIntervalInMs = 60_000
+
 //Ligando a função que publica sozinho os projetos de acordo com os horários do agendamento
 function startScheduler() {
   const registerLog = new RegisterLogUseCase(new DrizzleAuditLogsRepository(db))
@@ -36,6 +38,7 @@ function startScheduler() {
 
   startPublishScheduledProjectsJob({
     publishScheduledProjects,
+    intervalInMs: schedulerIntervalInMs,
     onPublished: (total) => app.log.info(`[Scheduled]: ${total} projeto(s) publicado(s)`),
     onError: (error) => app.log.error({ err: error }, '[Scheduled]: falha ao publicar os projetos agendados'),
   })
@@ -44,6 +47,7 @@ function startScheduler() {
 
   startAdvanceEventPhaseJob({
     advanceDueEventPhases,
+    intervalInMs: schedulerIntervalInMs,
     onAdvanced: ({ closedThemeSelection, closedEvents }) =>
       app.log.info(
         `[Event Scheduler]: ${closedThemeSelection} escolha(s) encerrada(s), ${closedEvents} evento(s) encerrado(s)`,
@@ -65,6 +69,7 @@ function startScheduler() {
 
   startCloseExpiredCallsJob({
     closeExpiredCalls,
+    intervalInMs: schedulerIntervalInMs,
     onClosed: (total) => app.log.info(`[Calls Scheduler]: ${total} chamado(s) encerrado(s) por prazo vencido`),
     onError: (error, callId) =>
       app.log.error({ err: error, callId }, '[Calls Scheduler]: falha ao encerrar chamados com prazo vencido'),
@@ -74,18 +79,19 @@ function startScheduler() {
 
   startExpirePromotionsJob({
     expireDuePromotions,
+    intervalInMs: schedulerIntervalInMs,
     onExpired: (total) => app.log.info(`[Promotion Scheduler]: ${total} promoção(ões) encerrada(s)`),
     onError: (error) => app.log.error({ err: error }, '[Promotion Scheduler]: falha ao encerrar promoções vencidas'),
   })
 
   app.log.info(
-    '[Agendador]: ligado, verifica projetos agendados, fases de eventos e promoções vencidas a cada 30 segundos',
+    '[Scheduler]: ligado, verifica projetos agendados, fases de eventos e promoções vencidas a cada 1 minuto',
   )
 
-  startNewsletterScheduler(app.log)
+  startNewsletterScheduler(app.log, schedulerIntervalInMs)
 
   app.log.info(
-    '[Scheduled]: ligado, verifica projetos agendados, fases de eventos, chamados com prazo vencido e avisos da newsletter a cada 30 segundos',
+    '[Scheduler]: ligado, verifica projetos agendados, fases de eventos, chamados com prazo vencido e avisos da newsletter a cada 1 minuto',
   )
 }
 
