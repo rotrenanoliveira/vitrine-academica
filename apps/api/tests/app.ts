@@ -1,25 +1,9 @@
 import type { FastifyInstance } from 'fastify'
-import { afterAll, beforeAll, beforeEach } from 'vitest'
-import { resetTestStorage } from '@/infra/storage/test-storage'
-import { cleanupDatabase, resetDatabase, setupDatabase } from './setup-e2e'
 
 let app: FastifyInstance
 
-beforeAll(async () => {
-  await setupDatabase()
-
-  const server = await import('@/infra/http/app.js')
-  await server.app.ready()
-  app = server.app
-})
-
-beforeEach(async () => {
-  await resetDatabase()
-  resetTestStorage()
-})
-
-afterAll(async () => {
-  await cleanupDatabase()
-})
+export function __setAppForTest(instance: FastifyInstance) {
+  app = instance
+}
 
 export { app as appForTest }

@@ -8,6 +8,7 @@ import { requireUser } from '@/server/auth/require-user'
 import { MeApplicationsSection } from './_components/me-applications-section'
 import { MeAuthorsSection } from './_components/me-authors-section'
 import { MeCallsSection } from './_components/me-calls-section'
+import { MeEventRegistrationsSection } from './_components/me-event-registrations-section'
 import { MeInstitutionsSection } from './_components/me-institutions-section'
 import { MeInvitationsSection } from './_components/me-invitations-section'
 import { MePointsSection } from './_components/me-points-section'
@@ -35,6 +36,7 @@ export default async function MePage() {
       <MeProjectsSection />
       <MeCallsSection />
       <MeApplicationsSection />
+      <MeEventRegistrationsSection />
       <MeInstitutionsSection />
       <MeInvitationsSection />
       <MeRatingsSection />

@@ -51,7 +51,9 @@ describe('(E2E) - GET /api/v1/attachments/:attachmentId', () => {
 
     const attachmentResponse = await fetch(response.body.attachmentUrl)
     expect(attachmentResponse.status).toBe(200)
-    expect(Buffer.from(await attachmentResponse.arrayBuffer())).toEqual(fileBuffer)
+
+    const downloaded = Buffer.from(await attachmentResponse.arrayBuffer())
+    expect(downloaded.equals(fileBuffer)).toBe(true)
 
     await makeDeleteAttachmentOnStorage(attachment.storageKey)
   })

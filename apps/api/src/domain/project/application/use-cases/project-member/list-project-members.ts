@@ -39,7 +39,7 @@ export class ListProjectMembersUseCase {
     const isOwner = Boolean(requesterId) && project.author.toString() === requesterId
     const isPublished = project.status === ProjectStatus.PUBLISHED
 
-    if (!isOwner && !isPublished && !(requesterId && (await this.isAcceptedMember(projectId, requesterId)))) {
+    if (!isOwner && !isPublished && !(requesterId && (await this.canReadUnpublished(projectId, requesterId)))) {
       return left(new ProjectNotFoundError())
     }
 
@@ -68,9 +68,12 @@ export class ListProjectMembersUseCase {
     return right({ members })
   }
 
-  private async isAcceptedMember(projectId: string, userId: string): Promise<boolean> {
+  // Convite recusado não conta: só aceito ou pendente leem a lista de um projeto ainda não publicado
+  private async canReadUnpublished(projectId: string, userId: string): Promise<boolean> {
     const projectMember = await this.projectMembersRepository.findByProjectAndUser(projectId, userId)
 
-    return projectMember?.status === ProjectMemberStatus.ACCEPTED
+    return (
+      projectMember?.status === ProjectMemberStatus.ACCEPTED || projectMember?.status === ProjectMemberStatus.PENDING
+    )
   }
 }

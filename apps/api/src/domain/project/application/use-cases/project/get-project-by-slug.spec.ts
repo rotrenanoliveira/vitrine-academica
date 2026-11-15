@@ -123,19 +123,30 @@ describe('(UC) - Get Project By Slug', () => {
     },
   )
 
-  it.each([ProjectMemberStatus.PENDING, ProjectMemberStatus.REJECTED])(
-    'não deve permitir a quem tem convite %s ver um projeto em rascunho',
-    async (memberStatus) => {
-      const { project, userId } = setupMember(ProjectStatus.SKETCH, memberStatus)
+  it.each([ProjectStatus.SKETCH, ProjectStatus.SCHEDULED, ProjectStatus.ARCHIVED])(
+    'deve permitir a quem tem convite pendente ver um projeto com status %s',
+    async (projectStatus) => {
+      const { project, userId } = setupMember(projectStatus, ProjectMemberStatus.PENDING)
 
       const result = await sut.execute({ slug: project.slug, requesterId: userId.toString() })
 
-      expect(result.isLeft()).toBeTruthy()
-      if (result.isLeft()) {
-        expect(result.value).toBeInstanceOf(ProjectNotFoundError)
+      expect(result.isRight()).toBeTruthy()
+      if (result.isRight()) {
+        expect(result.value.project.id.toString()).toBe(project.id.toString())
       }
     },
   )
+
+  it('não deve permitir a quem recusou o convite ver um projeto em rascunho', async () => {
+    const { project, userId } = setupMember(ProjectStatus.SKETCH, ProjectMemberStatus.REJECTED)
+
+    const result = await sut.execute({ slug: project.slug, requesterId: userId.toString() })
+
+    expect(result.isLeft()).toBeTruthy()
+    if (result.isLeft()) {
+      expect(result.value).toBeInstanceOf(ProjectNotFoundError)
+    }
+  })
 
   it('não deve permitir ao coautor de outro projeto ver um rascunho que não é dele', async () => {
     const { userId } = setupMember(ProjectStatus.SKETCH, ProjectMemberStatus.ACCEPTED)

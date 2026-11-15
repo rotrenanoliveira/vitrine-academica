@@ -2,6 +2,8 @@ import { revalidatePath } from 'next/cache'
 
 export function revalidateEvents(slugOrId?: string) {
   revalidatePath('/eventos')
+  revalidatePath('/me')
+  revalidatePath('/me/inscricoes')
   revalidatePath('/instituicoes', 'layout')
 
   if (slugOrId) {
