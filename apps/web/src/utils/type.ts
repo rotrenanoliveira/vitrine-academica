@@ -325,6 +325,22 @@ export const eventRegistrationSchema = z.object({
 export type EventRegistration = z.infer<typeof eventRegistrationSchema>
 export type EventRegistrationStatus = z.infer<typeof eventRegistrationStatusSchema>
 
+export const eventRegistrationWithContextSchema = eventRegistrationSchema.extend({
+  event: z.object({
+    id: z.string(),
+    slug: z.string(),
+    name: z.string().nullable(),
+    phase: eventPhaseSchema,
+  }),
+  project: z.object({
+    id: z.string(),
+    slug: z.string(),
+    title: z.string(),
+  }),
+})
+
+export type EventRegistrationWithContext = z.infer<typeof eventRegistrationWithContextSchema>
+
 export const eventVoteCounterSchema = z.object({
   themeId: z.string(),
   votes: z.number().int(),
