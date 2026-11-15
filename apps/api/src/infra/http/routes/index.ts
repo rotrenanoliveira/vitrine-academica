@@ -27,6 +27,7 @@ import { fetchApprovedParticipantsRoute } from './events/fetch-approved-particip
 import { fetchApprovedThemesRoute } from './events/fetch-approved-themes'
 import { fetchEventRegistrationsRoute } from './events/fetch-event-registrations'
 import { fetchInstitutionEventsRoute } from './events/fetch-institution-events'
+import { fetchMyEventRegistrationsRoute } from './events/fetch-my-event-registrations'
 import { fetchPublicEventsRoute } from './events/fetch-public-events'
 import { getCurrentThemeSelectionRoute } from './events/get-current-theme-selection'
 import { getMyVoteRoute } from './events/get-my-vote'
@@ -167,6 +168,8 @@ export async function routes(app: FastifyInstance) {
   await app.register(selectInstitutionalThemeRoute)
   /** POST /events/:eventId/registrations */
   await app.register(registerProjectInEventRoute)
+  /** GET /events/me/registrations */
+  await app.register(fetchMyEventRegistrationsRoute)
   /** GET /events/:eventId/registrations */
   await app.register(fetchEventRegistrationsRoute)
   /** PATCH /events/registrations/:registrationId/review */

@@ -1,3 +1,4 @@
+import type { EventRegistrationWithContext } from '@/domain/event/application/dtos/event-registration-with-context'
 import type { ThemeVoteCounter } from '@/domain/event/application/repositories/votes-repository'
 import type { Event } from '@/domain/event/enterprise/entities/event'
 import type { EventRegistration } from '@/domain/event/enterprise/entities/event-registration'
@@ -80,6 +81,23 @@ export class EventRegistrationPresenter {
       reviewedAt: registration.reviewedAt?.toISOString() ?? null,
       reviewReason: registration.reviewReason,
       registeredAt: registration.registeredAt.toISOString(),
+    }
+  }
+
+  static toHTTPWithContext({ registration, event, project }: EventRegistrationWithContext) {
+    return {
+      ...EventRegistrationPresenter.toHTTP(registration),
+      event: {
+        id: event.id.toString(),
+        slug: event.slug,
+        name: event.name,
+        phase: event.phase,
+      },
+      project: {
+        id: project.id.toString(),
+        slug: project.slug,
+        title: project.title,
+      },
     }
   }
 }

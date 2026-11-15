@@ -40,6 +40,16 @@ export class DrizzleEventRegistrationsRepository implements EventRegistrationsRe
     return rows.map(DrizzleEventRegistrationMapper.toDomain)
   }
 
+  async findManyByResponsibleUserId(userId: string): Promise<EventRegistration[]> {
+    const rows = await this.db
+      .select()
+      .from(eventRegistrations)
+      .where(eq(eventRegistrations.responsibleUserId, userId))
+      .orderBy(desc(eventRegistrations.registeredAt))
+
+    return rows.map(DrizzleEventRegistrationMapper.toDomain)
+  }
+
   async findApprovedProjectIdsByEventId(eventId: string): Promise<string[]> {
     const rows = await this.db
       .select({ projectId: eventRegistrations.projectId })

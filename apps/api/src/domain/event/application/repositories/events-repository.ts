@@ -30,6 +30,7 @@ export interface FetchInstitutionEventsParams {
 export interface EventsRepository {
   findById(id: string): Promise<Event | null>
   findBySlug(slug: string): Promise<Event | null>
+  findManyByIds(ids: string[]): Promise<Event[]>
   findManyPublic(params?: FetchPublicEventsParams): Promise<FetchPublicEventsResult>
   findManyByInstitutionId(params: FetchInstitutionEventsParams): Promise<EventListItem[]>
   findDueForThemeSelectionClose(now: Date): Promise<Event[]>
