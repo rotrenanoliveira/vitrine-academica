@@ -70,6 +70,20 @@ export const registrationHttpSchema = z.object({
   registeredAt: z.iso.datetime(),
 })
 
+export const registrationWithContextHttpSchema = registrationHttpSchema.extend({
+  event: z.object({
+    id: z.string(),
+    slug: z.string(),
+    name: z.string().nullable(),
+    phase: eventPhaseSchema,
+  }),
+  project: z.object({
+    id: z.string(),
+    slug: z.string(),
+    title: z.string(),
+  }),
+})
+
 export const voteCounterHttpSchema = z.object({
   themeId: z.string(),
   votes: z.number().int(),

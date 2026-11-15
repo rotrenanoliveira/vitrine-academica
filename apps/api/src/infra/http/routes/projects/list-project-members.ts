@@ -16,7 +16,7 @@ export async function listProjectMembersRoute(app: FastifyInstance) {
         tags: ['projects'],
         summary: 'Listar os membros de um projeto',
         description:
-          'O dono vê todos os convites. Visitantes e outras pessoas veem só os coautores que aceitaram, e só em projetos publicados',
+          'O dono vê todos os convites. Visitantes e outras pessoas veem só os coautores que aceitaram. Em projeto não publicado, só o dono, o coautor aceito e o convite pendente acessam a lista.',
         params: z.object({
           projectId: z.uuid().describe('O ID do projeto'),
         }),

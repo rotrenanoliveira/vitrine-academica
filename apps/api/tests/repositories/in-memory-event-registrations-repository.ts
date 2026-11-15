@@ -24,6 +24,12 @@ export class InMemoryEventRegistrationsRepository implements EventRegistrationsR
       .sort((a, b) => b.registeredAt.getTime() - a.registeredAt.getTime())
   }
 
+  async findManyByResponsibleUserId(userId: string): Promise<EventRegistration[]> {
+    return this.items
+      .filter((item) => item.responsibleUserId.toString() === userId)
+      .sort((a, b) => b.registeredAt.getTime() - a.registeredAt.getTime())
+  }
+
   async findApprovedProjectIdsByEventId(eventId: string): Promise<string[]> {
     return this.items
       .filter((item) => item.eventId.toString() === eventId && item.status === EventRegistrationStatus.APPROVED)

@@ -64,6 +64,50 @@ describe('(E2E) - GET /api/v1/projects/:projectId/members', () => {
     ])
   })
 
+  it('listar membros: como convite pendente em rascunho, deve retornar 200 só com quem aceitou', async () => {
+    const { accessToken, user } = await authenticateUser()
+    const { user: owner } = await makeUserOnDatabase()
+    const { project } = await makeProjectOnDatabase({ author: owner.id, status: ProjectStatus.SKETCH })
+    await makeProjectMemberOnDatabase({
+      projectId: project.id,
+      userId: user.id,
+      status: ProjectMemberStatus.PENDING,
+    })
+    const accepted = await addMember(project.id, ProjectMemberStatus.ACCEPTED, 'Pessoa Aceita')
+    await addMember(project.id, ProjectMemberStatus.PENDING, 'Outra Pessoa Pendente')
+    await addMember(project.id, ProjectMemberStatus.REJECTED, 'Pessoa Recusada')
+
+    const response = await listMembers(project.id.toString(), accessToken)
+
+    expect(response.status).toBe(200)
+    expect(response.body.members).toEqual([
+      {
+        id: accepted.projectMember.id.toString(),
+        userId: accepted.user.id.toString(),
+        name: 'Pessoa Aceita',
+        status: 'ACCEPTED',
+        createdAt: expect.any(String),
+      },
+    ])
+  })
+
+  it('listar membros: como quem recusou o convite em rascunho, deve retornar 404', async () => {
+    const { accessToken, user } = await authenticateUser()
+    const { user: owner } = await makeUserOnDatabase()
+    const { project } = await makeProjectOnDatabase({ author: owner.id, status: ProjectStatus.SKETCH })
+    await makeProjectMemberOnDatabase({
+      projectId: project.id,
+      userId: user.id,
+      status: ProjectMemberStatus.REJECTED,
+    })
+    await addMember(project.id, ProjectMemberStatus.ACCEPTED, 'Pessoa Aceita')
+
+    const response = await listMembers(project.id.toString(), accessToken)
+
+    expect(response.status).toBe(404)
+    expect(response.body.message).toBe('Projeto não encontrado')
+  })
+
   it('listar membros: como outra pessoa em projeto não publicado, deve retornar 404', async () => {
     const { accessToken } = await authenticateUser()
     const { user: owner } = await makeUserOnDatabase()

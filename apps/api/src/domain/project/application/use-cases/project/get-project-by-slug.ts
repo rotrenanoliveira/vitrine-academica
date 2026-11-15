@@ -29,18 +29,20 @@ export class GetProjectBySlugUseCase {
     const isOwner = Boolean(requesterId) && project.author.toString() === requesterId
     const isPublished = project.status === ProjectStatus.PUBLISHED
 
-    // Visitante só vê publicado; logado que não é dono/coautor aceito também só vê publicado
-    if (!isOwner && !isPublished && !(requesterId && (await this.isAcceptedMember(projectId, requesterId)))) {
+    // Visitante só vê publicado. Dono vê qualquer status. Coautor aceito e convite pendente também leem.
+    if (!isOwner && !isPublished && !(requesterId && (await this.canReadUnpublished(projectId, requesterId)))) {
       return left(new ProjectNotFoundError())
     }
 
     return right({ project })
   }
 
-  // Só o convite aceito dá acesso: pendente e recusado não contam
-  private async isAcceptedMember(projectId: string, userId: string): Promise<boolean> {
+  // Convite recusado não conta: só aceito ou pendente leem o projeto ainda não publicado
+  private async canReadUnpublished(projectId: string, userId: string): Promise<boolean> {
     const projectMember = await this.projectMembersRepository.findByProjectAndUser(projectId, userId)
 
-    return projectMember?.status === ProjectMemberStatus.ACCEPTED
+    return (
+      projectMember?.status === ProjectMemberStatus.ACCEPTED || projectMember?.status === ProjectMemberStatus.PENDING
+    )
   }
 }

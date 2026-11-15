@@ -1,6 +1,12 @@
-import type { Event, EventListItem, EventPhase } from '@/utils/type'
+import type { Event, EventListItem, EventPhase, EventRegistrationStatus } from '@/utils/type'
 
 type EventLinkFields = Pick<Event | EventListItem, 'slug' | 'phase'>
+
+export const eventRegistrationStatusLabels: Record<EventRegistrationStatus, string> = {
+  PENDING: 'Pendente',
+  APPROVED: 'Aprovado',
+  REJECTED: 'Rejeitado',
+}
 
 export const phaseLabels: Record<EventPhase, string> = {
   THEME_SELECTION: 'Escolha de tema',

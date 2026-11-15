@@ -24,6 +24,16 @@ export class DrizzleEventsRepository implements EventsRepository {
     return row ? DrizzleEventMapper.toDomain(row) : null
   }
 
+  async findManyByIds(ids: string[]): Promise<Event[]> {
+    if (ids.length === 0) {
+      return []
+    }
+
+    const rows = await this.db.select().from(events).where(inArray(events.id, ids))
+
+    return rows.map(DrizzleEventMapper.toDomain)
+  }
+
   private buildPublicVisibilityCondition(phases?: EventPhase[]): SQL | undefined {
     if (phases && phases.length > 0) {
       return inArray(events.phase, phases)
