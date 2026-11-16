@@ -9,7 +9,7 @@ import { DrizzleUsersRepository } from '@/infra/database/repositories/drizzle-us
 import { makeEmail } from '@/infra/mail/make-mail'
 import { startSendPendingNotificationsJob } from './send-pending-notifications-job'
 
-export function startNewsletterScheduler(logger: FastifyBaseLogger) {
+export function startNewsletterScheduler(logger: FastifyBaseLogger, intervalInMs?: number) {
   const sendPendingNotifications = new SendPendingNotificationsUseCase(
     new DrizzlePublicationNotificationsRepository(db),
     new DrizzleAuthorSubscriptionsRepository(db),
@@ -21,6 +21,7 @@ export function startNewsletterScheduler(logger: FastifyBaseLogger) {
   return startSendPendingNotificationsJob({
     sendPendingNotifications,
     webUrl: env.WEB_URL,
+    intervalInMs,
     onSent: ({ sent, failed }) => logger.info(`[Newsletter]: ${sent} e-mail(s) enviado(s), ${failed} falha(s)`),
     onError: (error) => logger.error({ err: error }, '[Newsletter]: falha ao enviar os avisos pendentes'),
   })

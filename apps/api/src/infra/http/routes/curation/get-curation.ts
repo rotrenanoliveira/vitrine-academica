@@ -16,7 +16,10 @@ export async function getCurationRoute(app: FastifyInstance) {
         description:
           'Devolve projetos em destaque da banca (avaliações de professores) e/ou da comunidade (estrelas), com capa resolvida. Use scope para filtrar a origem.',
         querystring: z.object({
-          institutionId: z.string().optional().describe('Só projetos de autores com vínculo ativo nesta instituição'),
+          institutionIds: z
+            .union([z.uuid(), z.array(z.uuid())])
+            .optional()
+            .describe('Só projetos de autores com vínculo ativo em alguma destas instituições'),
           months: z.coerce.number().int().min(1).max(12).optional().describe('Período em meses. Padrão: 3'),
           limit: z.coerce.number().int().min(1).max(50).optional().describe('Quantidade máxima de projetos'),
           scope: z
@@ -39,12 +42,14 @@ export async function getCurationRoute(app: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const { tags } = request.query
+      const { tags, institutionIds } = request.query
       const tagIds = tags === undefined ? undefined : Array.isArray(tags) ? tags : [tags]
+      const normalizedInstitutionIds =
+        institutionIds === undefined ? undefined : Array.isArray(institutionIds) ? institutionIds : [institutionIds]
 
       return getCurationController.handle(
         {
-          institutionId: request.query.institutionId,
+          institutionIds: normalizedInstitutionIds,
           months: request.query.months,
           limit: request.query.limit,
           scope: request.query.scope,

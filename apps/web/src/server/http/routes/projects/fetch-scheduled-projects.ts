@@ -24,7 +24,7 @@ export async function fetchScheduledProjects() {
 
 export async function fetchScheduledProjectsWithCover() {
   const { scheduledProjects } = await fetchScheduledProjects()
-  return scheduledProjects.map(({ project }) => project)
+  return scheduledProjects
 }
 
 export const getCachedScheduledProjects = cache(async () => fetchScheduledProjects())

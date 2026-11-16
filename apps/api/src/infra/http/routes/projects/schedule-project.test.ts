@@ -103,6 +103,33 @@ describe('(E2E) - POST /api/v1/projects/:projectId/schedule', () => {
     })
   })
 
+  it('agendar: com agendamento passado em rascunho, deve retornar 201 com a nova data', async () => {
+    const { accessToken, user } = await authenticateUser()
+    const { project } = await makeProjectOnDatabase({ author: user.id, status: ProjectStatus.SKETCH })
+    const { projectScheduled } = await makeProjectScheduledOnDatabase({
+      projectId: project.id,
+      publishedIn: new Date('2020-01-15T12:00:00.000Z'),
+    })
+    const publishedIn = new Date('2030-03-20T12:00:00.000Z')
+
+    const response = await request(app.server)
+      .post(`/api/v1/projects/${project.id.toString()}/schedule`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        publishedIn: publishedIn.toISOString(),
+      })
+
+    expect(response.status).toBe(201)
+    expect(response.body).toEqual({
+      projectScheduled: {
+        id: projectScheduled.id.toString(),
+        projectId: project.id.toString(),
+        publishedIn: publishedIn.toISOString(),
+        createdAt: expect.any(String),
+      },
+    })
+  })
+
   it('agendar: com projeto fora de rascunho, deve retornar 400 com mensagem', async () => {
     const { accessToken, user } = await authenticateUser()
     const { project } = await makeProjectOnDatabase({

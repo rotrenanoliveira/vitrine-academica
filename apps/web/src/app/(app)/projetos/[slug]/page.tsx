@@ -17,7 +17,7 @@ import { fetchAuthorProjectsSafe } from '@/server/http/routes/authors/fetch-auth
 import { getCachedMyInstitutionMemberships } from '@/server/http/routes/institutions/get-my-institution-memberships'
 import { getMyStarOnProject } from '@/server/http/routes/projects/get-my-star-on-project'
 import { getMyTeacherRatingOnProject } from '@/server/http/routes/projects/get-my-teacher-rating-on-project'
-import { getProjectBySlug } from '@/server/http/routes/projects/get-project-by-slug'
+import { getProjectBySlug, type ProjectDetail } from '@/server/http/routes/projects/get-project-by-slug'
 import { getProjectRatings } from '@/server/http/routes/projects/get-project-ratings'
 import { listActiveRatingCriteria } from '@/server/http/routes/projects/list-active-rating-criteria'
 import { listProjectMembers } from '@/server/http/routes/projects/list-project-members'
@@ -25,6 +25,7 @@ import { listProjectTeacherRatings } from '@/server/http/routes/projects/list-pr
 import { getCachedTags } from '@/server/http/routes/tags/fetch-tags'
 import { resolveProjectCoverUrl } from '@/server/projects/resolve-project-cover-url'
 import { canRateAsTeacher } from '@/utils/can-rate-as-teacher'
+import { formatBrasiliaDateTime } from '@/utils/date-time'
 
 export const metadata: Metadata = {
   title: 'Projeto',
@@ -40,6 +41,24 @@ const statusLabels = {
   PUBLISHED: 'Publicado',
   ARCHIVED: 'Arquivado',
 } as const
+
+function formatProjectDates(project: ProjectDetail) {
+  const createdAt = formatBrasiliaDateTime(project.createdAt)
+
+  if (project.status === 'SKETCH') {
+    return `Criado em ${createdAt}`
+  }
+
+  if (project.status === 'SCHEDULED') {
+    const scheduledAt = project.publishedIn ? `Agendado para ${formatBrasiliaDateTime(project.publishedIn)} · ` : ''
+
+    return `${scheduledAt}Criado em ${createdAt}`
+  }
+
+  const publishedAt = project.publishedIn ? formatBrasiliaDateTime(project.publishedIn) : createdAt
+
+  return `Publicado em ${publishedAt}`
+}
 
 export default async function ProjectDetailPage({ params }: PageProps) {
   const { slug } = await params
@@ -113,9 +132,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           <div className="min-w-0 flex-1 space-y-3">
             <p className="text-xs tracking-wider text-muted-foreground uppercase">{statusLabels[project.status]}</p>
             <h1 className="font-heading text-3xl font-semibold">{project.title}</h1>
-            <p className="text-xs text-muted-foreground">
-              Publicado em {new Date(project.createdAt).toLocaleString('pt-BR')}
-            </p>
+            <p className="text-xs text-muted-foreground">{formatProjectDates(project)}</p>
             <ProjectAuthors author={{ id: project.authorId, name: authorName }} coauthors={coauthors} />
           </div>
 

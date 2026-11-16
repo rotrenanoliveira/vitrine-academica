@@ -1,4 +1,5 @@
 import { criterionShortLabel } from '@/utils/criterion-short-label'
+import { formatBrasiliaDate } from '@/utils/date-time'
 import type { ProjectTeacherRating, RatingCriterion } from '@/utils/type'
 
 type VoteItem = {
@@ -84,7 +85,7 @@ export function ProjectTeacherVotesTable({
                       <div className="min-w-0">
                         <p className="truncate font-medium">{teacher.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          Avaliado em {new Date(rating.ratedAt).toLocaleDateString('pt-BR')}
+                          Avaliado em {formatBrasiliaDate(rating.ratedAt)}
                         </p>
                       </div>
                     </div>

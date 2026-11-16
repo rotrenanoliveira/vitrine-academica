@@ -124,25 +124,65 @@ describe('(UC) - Schedule Project', () => {
   })
 
   it('should not be able to schedule a project that is already scheduled', async () => {
+    const now = new Date('2026-09-09T10:00:00.000Z')
     const { project } = makeProject({ status: ProjectStatus.SKETCH })
     projectsRepository.items.push(project)
 
-    const { projectScheduled } = makeProjectScheduled({ projectId: project.id })
+    const { projectScheduled } = makeProjectScheduled({
+      projectId: project.id,
+      publishedIn: new Date('2026-09-10T10:00:00.000Z'),
+    })
     projectScheduledRepository.items.push(projectScheduled)
 
     const result = await sut.execute({
       projectId: project.id.toString(),
       authorId: project.author.toString(),
-      publishedIn: new Date(),
+      publishedIn: new Date('2026-09-11T10:00:00.000Z'),
+      now,
     })
 
     expect(result.isLeft()).toBeTruthy()
+    expect(project.status).toBe(ProjectStatus.SKETCH)
+    expect(projectScheduled.publishedIn).toEqual(new Date('2026-09-10T10:00:00.000Z'))
     expect(auditLogsRepository.items).toHaveLength(1)
     expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.FAILURE)
 
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(ProjectAlreadyScheduledError)
     }
+  })
+
+  it('should reschedule a sketch project whose previous publication date is in the past', async () => {
+    const now = new Date('2026-09-09T10:00:00.000Z')
+    const previousPublishedIn = new Date('2026-09-01T10:00:00.000Z')
+    const publishedIn = new Date('2026-09-20T10:00:00.000Z')
+    const { project } = makeProject({ status: ProjectStatus.SKETCH })
+    projectsRepository.items.push(project)
+
+    const { projectScheduled } = makeProjectScheduled({
+      projectId: project.id,
+      publishedIn: previousPublishedIn,
+    })
+    projectScheduledRepository.items.push(projectScheduled)
+
+    const result = await sut.execute({
+      projectId: project.id.toString(),
+      authorId: project.author.toString(),
+      publishedIn,
+      now,
+    })
+
+    expect(result.isRight()).toBeTruthy()
+    expect(project.status).toBe(ProjectStatus.SCHEDULED)
+    expect(projectScheduledRepository.items).toHaveLength(1)
+    expect(projectScheduledRepository.items[0].id).toEqual(projectScheduled.id)
+    expect(projectScheduledRepository.items[0].publishedIn).toEqual(publishedIn)
+    expect(auditLogsRepository.items).toHaveLength(1)
+    expect(auditLogsRepository.items[0].action).toBe(AuditLogAction.UPDATE)
+    expect(auditLogsRepository.items[0].status).toBe(AuditLogStatus.SUCCESS)
+    expect(auditLogsRepository.items[0].diff).toEqual({
+      publishedIn: { old: previousPublishedIn.toISOString(), new: publishedIn.toISOString() },
+    })
   })
 
   it('should not be able to schedule a project with a publication date in the past', async () => {

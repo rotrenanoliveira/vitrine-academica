@@ -3,6 +3,7 @@ import { makeAccessCodeOnDatabase } from '@tests/factories/make-access-code'
 import { makeAccountOnDatabase } from '@tests/factories/make-account'
 import { makeProjectOnDatabase } from '@tests/factories/make-project'
 import { makeProjectMemberOnDatabase } from '@tests/factories/make-project-member'
+import { makeProjectScheduledOnDatabase } from '@tests/factories/make-project-scheduled'
 import { makeUserOnDatabase } from '@tests/factories/make-user'
 import request from 'supertest'
 import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
@@ -84,6 +85,22 @@ describe('(E2E) - GET /api/v1/projects/slug/:slug', () => {
 
     expect(response.status).toBe(200)
     expect(response.body.project.id).toBe(project.id.toString())
+    expect(response.body.project.publishedIn).toBeNull()
+  })
+
+  it('deve devolver publishedIn quando o projeto tem agenda', async () => {
+    const { user: owner } = await makeUserOnDatabase()
+    const { project } = await makeProjectOnDatabase({
+      author: owner.id,
+      status: ProjectStatus.PUBLISHED,
+    })
+    const publishedIn = new Date('2030-01-15T15:00:00.000Z')
+    await makeProjectScheduledOnDatabase({ projectId: project.id, publishedIn })
+
+    const response = await request(app.server).get(`/api/v1/projects/slug/${project.slug}`)
+
+    expect(response.status).toBe(200)
+    expect(response.body.project.publishedIn).toBe(publishedIn.toISOString())
   })
 
   it('não deve permitir visitante sem autenticação ver rascunho', async () => {
