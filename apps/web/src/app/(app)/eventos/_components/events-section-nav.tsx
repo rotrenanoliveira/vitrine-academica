@@ -11,7 +11,7 @@ const tabs = [
   { href: '/eventos/encerrados', label: 'Encerrados' },
 ]
 
-export function EventsSectionNav() {
+export function EventsSectionNav({ canCreateEvent = false }: { canCreateEvent?: boolean }) {
   const pathname = usePathname()
 
   return (
@@ -29,9 +29,11 @@ export function EventsSectionNav() {
         </Link>
       ))}
 
-      <Link href="/eventos/novo" className={cn(buttonVariants({ variant: 'outline' }), 'ml-auto')}>
-        Novo evento
-      </Link>
+      {canCreateEvent ? (
+        <Link href="/eventos/novo" className={cn(buttonVariants({ variant: 'outline' }), 'ml-auto')}>
+          Novo evento
+        </Link>
+      ) : null}
     </nav>
   )
 }
