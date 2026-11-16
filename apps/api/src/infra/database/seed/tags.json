@@ -1,0 +1,804 @@
+{
+  "tags": [
+    {
+      "name": "Inteligência Artificial",
+      "slug": "inteligencia-artificial"
+    },
+    {
+      "name": "Aprendizado de Máquina",
+      "slug": "aprendizado-de-maquina"
+    },
+    {
+      "name": "Ciência de Dados",
+      "slug": "ciencia-de-dados"
+    },
+    {
+      "name": "Visão Computacional",
+      "slug": "visao-computacional"
+    },
+    {
+      "name": "Processamento de Linguagem Natural",
+      "slug": "processamento-de-linguagem-natural"
+    },
+    {
+      "name": "Robótica",
+      "slug": "robotica"
+    },
+    {
+      "name": "Internet das Coisas",
+      "slug": "internet-das-coisas"
+    },
+    {
+      "name": "Computação em Nuvem",
+      "slug": "computacao-em-nuvem"
+    },
+    {
+      "name": "Cibersegurança",
+      "slug": "ciberseguranca"
+    },
+    {
+      "name": "Desenvolvimento Web",
+      "slug": "desenvolvimento-web"
+    },
+    {
+      "name": "Desenvolvimento Mobile",
+      "slug": "desenvolvimento-mobile"
+    },
+    {
+      "name": "Engenharia de Software",
+      "slug": "engenharia-de-software"
+    },
+    {
+      "name": "Bancos de Dados",
+      "slug": "bancos-de-dados"
+    },
+    {
+      "name": "DevOps",
+      "slug": "devops"
+    },
+    {
+      "name": "UX/UI Design",
+      "slug": "uxui-design"
+    },
+    {
+      "name": "Realidade Aumentada",
+      "slug": "realidade-aumentada"
+    },
+    {
+      "name": "Realidade Virtual",
+      "slug": "realidade-virtual"
+    },
+    {
+      "name": "Blockchain",
+      "slug": "blockchain"
+    },
+    {
+      "name": "Sistemas Embarcados",
+      "slug": "sistemas-embarcados"
+    },
+    {
+      "name": "Redes de Computadores",
+      "slug": "redes-de-computadores"
+    },
+    {
+      "name": "Educação",
+      "slug": "educacao"
+    },
+    {
+      "name": "Educação a Distância",
+      "slug": "educacao-a-distancia"
+    },
+    {
+      "name": "Metodologias Ativas",
+      "slug": "metodologias-ativas"
+    },
+    {
+      "name": "Educação Inclusiva",
+      "slug": "educacao-inclusiva"
+    },
+    {
+      "name": "Alfabetização Digital",
+      "slug": "alfabetizacao-digital"
+    },
+    {
+      "name": "Didática",
+      "slug": "didatica"
+    },
+    {
+      "name": "Avaliação Educacional",
+      "slug": "avaliacao-educacional"
+    },
+    {
+      "name": "Psicologia da Educação",
+      "slug": "psicologia-da-educacao"
+    },
+    {
+      "name": "Gestão Escolar",
+      "slug": "gestao-escolar"
+    },
+    {
+      "name": "Tecnologias Educacionais",
+      "slug": "tecnologias-educacionais"
+    },
+    {
+      "name": "Sustentabilidade",
+      "slug": "sustentabilidade"
+    },
+    {
+      "name": "Mudanças Climáticas",
+      "slug": "mudancas-climaticas"
+    },
+    {
+      "name": "Energias Renováveis",
+      "slug": "energias-renovaveis"
+    },
+    {
+      "name": "Gestão Ambiental",
+      "slug": "gestao-ambiental"
+    },
+    {
+      "name": "Economia Circular",
+      "slug": "economia-circular"
+    },
+    {
+      "name": "Agricultura Sustentável",
+      "slug": "agricultura-sustentavel"
+    },
+    {
+      "name": "Recursos Hídricos",
+      "slug": "recursos-hidricos"
+    },
+    {
+      "name": "Biodiversidade",
+      "slug": "biodiversidade"
+    },
+    {
+      "name": "ESG",
+      "slug": "esg"
+    },
+    {
+      "name": "Cidades Inteligentes",
+      "slug": "cidades-inteligentes"
+    },
+    {
+      "name": "Saúde Pública",
+      "slug": "saude-publica"
+    },
+    {
+      "name": "Epidemiologia",
+      "slug": "epidemiologia"
+    },
+    {
+      "name": "Enfermagem",
+      "slug": "enfermagem"
+    },
+    {
+      "name": "Farmacologia",
+      "slug": "farmacologia"
+    },
+    {
+      "name": "Nutrição",
+      "slug": "nutricao"
+    },
+    {
+      "name": "Saúde Mental",
+      "slug": "saude-mental"
+    },
+    {
+      "name": "Fisioterapia",
+      "slug": "fisioterapia"
+    },
+    {
+      "name": "Telemedicina",
+      "slug": "telemedicina"
+    },
+    {
+      "name": "Bioinformática",
+      "slug": "bioinformatica"
+    },
+    {
+      "name": "Biotecnologia",
+      "slug": "biotecnologia"
+    },
+    {
+      "name": "Genética",
+      "slug": "genetica"
+    },
+    {
+      "name": "Microbiologia",
+      "slug": "microbiologia"
+    },
+    {
+      "name": "Imunologia",
+      "slug": "imunologia"
+    },
+    {
+      "name": "Química Analítica",
+      "slug": "quimica-analitica"
+    },
+    {
+      "name": "Química Verde",
+      "slug": "quimica-verde"
+    },
+    {
+      "name": "Física Aplicada",
+      "slug": "fisica-aplicada"
+    },
+    {
+      "name": "Astronomia",
+      "slug": "astronomia"
+    },
+    {
+      "name": "Matemática Aplicada",
+      "slug": "matematica-aplicada"
+    },
+    {
+      "name": "Estatística",
+      "slug": "estatistica"
+    },
+    {
+      "name": "Modelagem Matemática",
+      "slug": "modelagem-matematica"
+    },
+    {
+      "name": "Engenharia Civil",
+      "slug": "engenharia-civil"
+    },
+    {
+      "name": "Engenharia Elétrica",
+      "slug": "engenharia-eletrica"
+    },
+    {
+      "name": "Engenharia Mecânica",
+      "slug": "engenharia-mecanica"
+    },
+    {
+      "name": "Engenharia de Produção",
+      "slug": "engenharia-de-producao"
+    },
+    {
+      "name": "Engenharia Química",
+      "slug": "engenharia-quimica"
+    },
+    {
+      "name": "Materiais Avançados",
+      "slug": "materiais-avancados"
+    },
+    {
+      "name": "Automação Industrial",
+      "slug": "automacao-industrial"
+    },
+    {
+      "name": "Logística",
+      "slug": "logistica"
+    },
+    {
+      "name": "Gestão de Projetos",
+      "slug": "gestao-de-projetos"
+    },
+    {
+      "name": "Empreendedorismo",
+      "slug": "empreendedorismo"
+    },
+    {
+      "name": "Inovação",
+      "slug": "inovacao"
+    },
+    {
+      "name": "Startups",
+      "slug": "startups"
+    },
+    {
+      "name": "Marketing Digital",
+      "slug": "marketing-digital"
+    },
+    {
+      "name": "Administração Pública",
+      "slug": "administracao-publica"
+    },
+    {
+      "name": "Economia",
+      "slug": "economia"
+    },
+    {
+      "name": "Finanças",
+      "slug": "financas"
+    },
+    {
+      "name": "Contabilidade",
+      "slug": "contabilidade"
+    },
+    {
+      "name": "Direito Digital",
+      "slug": "direito-digital"
+    },
+    {
+      "name": "Direitos Humanos",
+      "slug": "direitos-humanos"
+    },
+    {
+      "name": "Políticas Públicas",
+      "slug": "politicas-publicas"
+    },
+    {
+      "name": "Sociologia",
+      "slug": "sociologia"
+    },
+    {
+      "name": "Antropologia",
+      "slug": "antropologia"
+    },
+    {
+      "name": "História",
+      "slug": "historia"
+    },
+    {
+      "name": "Geografia",
+      "slug": "geografia"
+    },
+    {
+      "name": "Relações Internacionais",
+      "slug": "relacoes-internacionais"
+    },
+    {
+      "name": "Comunicação Social",
+      "slug": "comunicacao-social"
+    },
+    {
+      "name": "Jornalismo",
+      "slug": "jornalismo"
+    },
+    {
+      "name": "Produção Audiovisual",
+      "slug": "producao-audiovisual"
+    },
+    {
+      "name": "Design Gráfico",
+      "slug": "design-grafico"
+    },
+    {
+      "name": "Fotografia",
+      "slug": "fotografia"
+    },
+    {
+      "name": "Música",
+      "slug": "musica"
+    },
+    {
+      "name": "Artes Visuais",
+      "slug": "artes-visuais"
+    },
+    {
+      "name": "Literatura",
+      "slug": "literatura"
+    },
+    {
+      "name": "Linguística",
+      "slug": "linguistica"
+    },
+    {
+      "name": "Tradução",
+      "slug": "traducao"
+    },
+    {
+      "name": "Arquitetura",
+      "slug": "arquitetura"
+    },
+    {
+      "name": "Urbanismo",
+      "slug": "urbanismo"
+    },
+    {
+      "name": "Extensão Universitária",
+      "slug": "extensao-universitaria"
+    },
+    {
+      "name": "Iniciação Científica",
+      "slug": "iniciacao-cientifica"
+    },
+    {
+      "name": "Metodologia Científica",
+      "slug": "metodologia-cientifica"
+    },
+    {
+      "name": "Deep Learning",
+      "slug": "deep-learning"
+    },
+    {
+      "name": "Análise Preditiva",
+      "slug": "analise-preditiva"
+    },
+    {
+      "name": "Business Intelligence",
+      "slug": "business-intelligence"
+    },
+    {
+      "name": "ETL de Dados",
+      "slug": "etl-de-dados"
+    },
+    {
+      "name": "Visualização de Dados",
+      "slug": "visualizacao-de-dados"
+    },
+    {
+      "name": "MLOps",
+      "slug": "mlops"
+    },
+    {
+      "name": "Engenharia de Prompt",
+      "slug": "engenharia-de-prompt"
+    },
+    {
+      "name": "Agentes Autônomos",
+      "slug": "agentes-autonomos"
+    },
+    {
+      "name": "Computação Quântica",
+      "slug": "computacao-quantica"
+    },
+    {
+      "name": "Computação de Alto Desempenho",
+      "slug": "computacao-de-alto-desempenho"
+    },
+    {
+      "name": "Arquitetura de Software",
+      "slug": "arquitetura-de-software"
+    },
+    {
+      "name": "Testes de Software",
+      "slug": "testes-de-software"
+    },
+    {
+      "name": "Qualidade de Software",
+      "slug": "qualidade-de-software"
+    },
+    {
+      "name": "Acessibilidade Digital",
+      "slug": "acessibilidade-digital"
+    },
+    {
+      "name": "Design de Interação",
+      "slug": "design-de-interacao"
+    },
+    {
+      "name": "Design Thinking",
+      "slug": "design-thinking"
+    },
+    {
+      "name": "Product Management",
+      "slug": "product-management"
+    },
+    {
+      "name": "Scrum",
+      "slug": "scrum"
+    },
+    {
+      "name": "Kanban",
+      "slug": "kanban"
+    },
+    {
+      "name": "API REST",
+      "slug": "api-rest"
+    },
+    {
+      "name": "GraphQL",
+      "slug": "graphql"
+    },
+    {
+      "name": "Microserviços",
+      "slug": "microservicos"
+    },
+    {
+      "name": "Containers",
+      "slug": "containers"
+    },
+    {
+      "name": "Kubernetes",
+      "slug": "kubernetes"
+    },
+    {
+      "name": "Observabilidade",
+      "slug": "observabilidade"
+    },
+    {
+      "name": "Segurança da Informação",
+      "slug": "seguranca-da-informacao"
+    },
+    {
+      "name": "Privacidade de Dados",
+      "slug": "privacidade-de-dados"
+    },
+    {
+      "name": "LGPD",
+      "slug": "lgpd"
+    },
+    {
+      "name": "Governança de Dados",
+      "slug": "governanca-de-dados"
+    },
+    {
+      "name": "Dados Abertos",
+      "slug": "dados-abertos"
+    },
+    {
+      "name": "SIG e Geoprocessamento",
+      "slug": "sig-e-geoprocessamento"
+    },
+    {
+      "name": "Sensoriamento Remoto",
+      "slug": "sensoriamento-remoto"
+    },
+    {
+      "name": "Cartografia Digital",
+      "slug": "cartografia-digital"
+    },
+    {
+      "name": "Impressão 3D",
+      "slug": "impressao-3d"
+    },
+    {
+      "name": "Prototipagem Rápida",
+      "slug": "prototipagem-rapida"
+    },
+    {
+      "name": "Eletrônica Digital",
+      "slug": "eletronica-digital"
+    },
+    {
+      "name": "Instrumentação",
+      "slug": "instrumentacao"
+    },
+    {
+      "name": "Controle e Automação",
+      "slug": "controle-e-automacao"
+    },
+    {
+      "name": "Mecatrônica",
+      "slug": "mecatronica"
+    },
+    {
+      "name": "Energia Solar",
+      "slug": "energia-solar"
+    },
+    {
+      "name": "Energia Eólica",
+      "slug": "energia-eolica"
+    },
+    {
+      "name": "Eficiência Energética",
+      "slug": "eficiencia-energetica"
+    },
+    {
+      "name": "Análise de Ciclo de Vida",
+      "slug": "analise-de-ciclo-de-vida"
+    },
+    {
+      "name": "Resíduos Sólidos",
+      "slug": "residuos-solidos"
+    },
+    {
+      "name": "Saneamento Ambiental",
+      "slug": "saneamento-ambiental"
+    },
+    {
+      "name": "Qualidade do Ar",
+      "slug": "qualidade-do-ar"
+    },
+    {
+      "name": "Agroecologia",
+      "slug": "agroecologia"
+    },
+    {
+      "name": "Segurança Alimentar",
+      "slug": "seguranca-alimentar"
+    },
+    {
+      "name": "Ciência dos Alimentos",
+      "slug": "ciencia-dos-alimentos"
+    },
+    {
+      "name": "Farmacotécnica",
+      "slug": "farmacotecnica"
+    },
+    {
+      "name": "Análises Clínicas",
+      "slug": "analises-clinicas"
+    },
+    {
+      "name": "Diagnóstico por Imagem",
+      "slug": "diagnostico-por-imagem"
+    },
+    {
+      "name": "Odontologia",
+      "slug": "odontologia"
+    },
+    {
+      "name": "Fonoaudiologia",
+      "slug": "fonoaudiologia"
+    },
+    {
+      "name": "Terapia Ocupacional",
+      "slug": "terapia-ocupacional"
+    },
+    {
+      "name": "Psicologia Clínica",
+      "slug": "psicologia-clinica"
+    },
+    {
+      "name": "Neurociência",
+      "slug": "neurociencia"
+    },
+    {
+      "name": "Educação Especial",
+      "slug": "educacao-especial"
+    },
+    {
+      "name": "Educação Infantil",
+      "slug": "educacao-infantil"
+    },
+    {
+      "name": "Ensino Médio Técnico",
+      "slug": "ensino-medio-tecnico"
+    },
+    {
+      "name": "Formação de Professores",
+      "slug": "formacao-de-professores"
+    },
+    {
+      "name": "Currículo Escolar",
+      "slug": "curriculo-escolar"
+    },
+    {
+      "name": "Educação Maker",
+      "slug": "educacao-maker"
+    },
+    {
+      "name": "Gamificação",
+      "slug": "gamificacao"
+    },
+    {
+      "name": "Storytelling",
+      "slug": "storytelling"
+    },
+    {
+      "name": "Redação Científica",
+      "slug": "redacao-cientifica"
+    },
+    {
+      "name": "Escrita Acadêmica",
+      "slug": "escrita-academica"
+    },
+    {
+      "name": "Revisão Sistemática",
+      "slug": "revisao-sistematica"
+    },
+    {
+      "name": "Pesquisa Qualitativa",
+      "slug": "pesquisa-qualitativa"
+    },
+    {
+      "name": "Pesquisa Quantitativa",
+      "slug": "pesquisa-quantitativa"
+    },
+    {
+      "name": "Análise de Conteúdo",
+      "slug": "analise-de-conteudo"
+    },
+    {
+      "name": "Entrevistas e Focus Group",
+      "slug": "entrevistas-e-focus-group"
+    },
+    {
+      "name": "Ética em Pesquisa",
+      "slug": "etica-em-pesquisa"
+    },
+    {
+      "name": "Integridade Científica",
+      "slug": "integridade-cientifica"
+    },
+    {
+      "name": "Propriedade Intelectual",
+      "slug": "propriedade-intelectual"
+    },
+    {
+      "name": "Transferência de Tecnologia",
+      "slug": "transferencia-de-tecnologia"
+    },
+    {
+      "name": "Inovação Social",
+      "slug": "inovacao-social"
+    },
+    {
+      "name": "Economia Criativa",
+      "slug": "economia-criativa"
+    },
+    {
+      "name": "Economia Solidária",
+      "slug": "economia-solidaria"
+    },
+    {
+      "name": "Cooperativismo",
+      "slug": "cooperativismo"
+    },
+    {
+      "name": "Impacto Social",
+      "slug": "impacto-social"
+    },
+    {
+      "name": "Monitoramento e Avaliação",
+      "slug": "monitoramento-e-avaliacao"
+    },
+    {
+      "name": "Indicadores de Desempenho",
+      "slug": "indicadores-de-desempenho"
+    },
+    {
+      "name": "Planejamento Estratégico",
+      "slug": "planejamento-estrategico"
+    },
+    {
+      "name": "Gestão do Conhecimento",
+      "slug": "gestao-do-conhecimento"
+    },
+    {
+      "name": "Liderança",
+      "slug": "lideranca"
+    },
+    {
+      "name": "Comunicação Interpessoal",
+      "slug": "comunicacao-interpessoal"
+    },
+    {
+      "name": "Facilitação de Grupos",
+      "slug": "facilitacao-de-grupos"
+    },
+    {
+      "name": "Mediação de Conflitos",
+      "slug": "mediacao-de-conflitos"
+    },
+    {
+      "name": "Libras",
+      "slug": "libras"
+    },
+    {
+      "name": "Acessibilidade Comunicacional",
+      "slug": "acessibilidade-comunicacional"
+    },
+    {
+      "name": "Cultura Maker",
+      "slug": "cultura-maker"
+    },
+    {
+      "name": "Fablab",
+      "slug": "fablab"
+    },
+    {
+      "name": "Museologia",
+      "slug": "museologia"
+    },
+    {
+      "name": "Patrimônio Cultural",
+      "slug": "patrimonio-cultural"
+    },
+    {
+      "name": "Turismo Educacional",
+      "slug": "turismo-educacional"
+    },
+    {
+      "name": "Trabalho de Campo",
+      "slug": "trabalho-de-campo"
+    },
+    {
+      "name": "Laboratório Didático",
+      "slug": "laboratorio-didatico"
+    },
+    {
+      "name": "Divulgação Científica",
+      "slug": "divulgacao-cientifica"
+    },
+    {
+      "name": "Ciência Cidadã",
+      "slug": "ciencia-cidada"
+    }
+  ]
+}
