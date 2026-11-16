@@ -42,7 +42,7 @@ function statusMessage(phase: string, votingOpen: boolean) {
   return 'A escolha de tema deste ciclo já foi concluída.'
 }
 
-export function ThemeSelection({ slug, userId }: { slug: string; userId: string }) {
+export function ThemeSelection({ slug, userId }: { slug: string; userId?: string }) {
   const selectionQuery = useQuery({
     queryKey: ['event-theme-selection', slug],
     queryFn: () => getThemeSelection(slug),
@@ -51,6 +51,7 @@ export function ThemeSelection({ slug, userId }: { slug: string; userId: string 
   const membershipsQuery = useQuery({
     queryKey: ['my-institution-memberships'],
     queryFn: () => getMyInstitutionMemberships(),
+    enabled: Boolean(userId),
   })
 
   if (selectionQuery.isPending) {
@@ -64,7 +65,7 @@ export function ThemeSelection({ slug, userId }: { slug: string; userId: string 
   const { event, themes } = selectionQuery.data
   const votingOpen = event.phase === 'THEME_SELECTION'
   const members = membershipsQuery.data?.members ?? []
-  const canEdit = canManageInstitution(members, event.institutionId, userId)
+  const canEdit = userId ? canManageInstitution(members, event.institutionId, userId) : false
 
   return (
     <div className="flex flex-1 flex-col gap-12">
@@ -86,10 +87,21 @@ export function ThemeSelection({ slug, userId }: { slug: string; userId: string 
       {votingOpen ? (
         <>
           <section className="space-y-3">
-            <VoteThemeList eventId={event.id} eventSlug={slug} themes={themes} />
+            <VoteThemeList eventId={event.id} eventSlug={slug} themes={themes} canVote={Boolean(userId)} />
           </section>
 
-          <SuggestThemeForm eventId={event.id} eventSlug={slug} />
+          {userId ? (
+            <SuggestThemeForm eventId={event.id} eventSlug={slug} />
+          ) : (
+            <div className="w-full max-w-xl border border-border p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-muted-foreground">Entre na sua conta para sugerir um tema.</p>
+                <Button nativeButton={false} variant="outline" render={<Link href="/sign-in" />}>
+                  Entrar para sugerir
+                </Button>
+              </div>
+            </div>
+          )}
         </>
       ) : null}
     </div>

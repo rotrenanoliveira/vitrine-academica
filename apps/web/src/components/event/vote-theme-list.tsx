@@ -11,10 +11,12 @@ export function VoteThemeList({
   eventId,
   eventSlug,
   themes,
+  canVote = true,
 }: {
   eventId: string
   eventSlug: string
   themes: EventTheme[]
+  canVote?: boolean
 }) {
   const queryClient = useQueryClient()
   const [, startTransition] = useTransition()
@@ -47,7 +49,13 @@ export function VoteThemeList({
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {approved.map((theme) => (
-        <ThemeVoteCard key={theme.id} theme={theme} voting={votingThemeId === theme.id} onVote={vote} />
+        <ThemeVoteCard
+          key={theme.id}
+          theme={theme}
+          voting={votingThemeId === theme.id}
+          canVote={canVote}
+          onVote={vote}
+        />
       ))}
     </div>
   )
