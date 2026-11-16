@@ -5,6 +5,7 @@ import { useQueryStates } from 'nuqs'
 import { CallGalleryCard } from '@/components/call/call-gallery-card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { fetchCalls } from '@/server/http/routes/calls/fetch-calls'
+import { fetchTags } from '@/server/http/routes/tags/fetch-tags'
 import { callsSearchParams, callsUrlKeys } from '../search-params'
 
 function CallsGallerySkeleton() {
@@ -32,28 +33,43 @@ export function CallsGalleryList() {
     shallow: true,
   })
 
-  const tags = filters.tags && filters.tags.length > 0 ? filters.tags : undefined
+  const selectedTagIds = filters.tags ?? []
+  const hasTagFilter = selectedTagIds.length > 0
 
-  const { data, isPending, isError } = useQuery({
-    queryKey: ['calls', { tags }],
-    queryFn: () => fetchCalls({ ...(tags ? { tags } : {}) }),
+  const tagsQuery = useQuery({
+    queryKey: ['tags'],
+    queryFn: () => fetchTags(),
+    enabled: hasTagFilter,
   })
 
-  if (isPending) {
+  const { data, isPending, isError } = useQuery({
+    queryKey: ['calls'],
+    queryFn: () => fetchCalls(),
+  })
+
+  if (isPending || (hasTagFilter && tagsQuery.isPending)) {
     return <CallsGallerySkeleton />
   }
 
-  if (isError) {
+  if (isError || (hasTagFilter && tagsQuery.isError)) {
     return <p className="text-sm text-muted-foreground">Não foi possível carregar os chamados.</p>
   }
 
-  if (data.calls.length === 0) {
+  const selectedTagNames = new Set(
+    (tagsQuery.data?.tags ?? []).filter((tag) => selectedTagIds.includes(tag.id)).map((tag) => tag.name),
+  )
+
+  const calls = hasTagFilter
+    ? data.calls.filter((call) => call.skills.some((skill) => selectedTagNames.has(skill)))
+    : data.calls
+
+  if (calls.length === 0) {
     return <p className="text-sm text-muted-foreground">Nenhum chamado encontrado.</p>
   }
 
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {data.calls.map((call) => (
+      {calls.map((call) => (
         <CallGalleryCard key={call.id} call={call} />
       ))}
     </div>

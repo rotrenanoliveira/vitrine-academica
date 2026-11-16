@@ -24,6 +24,7 @@ type LogParams = {
   resourceId: string
   text: string
   status: AuditLogStatus
+  action?: AuditLogAction
   diff?: Record<string, { old: unknown; new: unknown }> | null
 }
 
@@ -43,11 +44,11 @@ export class ScheduleProjectUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
-  private async log({ actorId, resourceId, text, status, diff }: LogParams) {
+  private async log({ actorId, resourceId, text, status, diff, action = AuditLogAction.CREATE }: LogParams) {
     await this.registerLog.execute({
       actorId,
       sessionId: null,
-      action: AuditLogAction.CREATE,
+      action,
       resource: 'project.scheduled',
       resourceId,
       diff: diff ?? null,
@@ -97,9 +98,9 @@ export class ScheduleProjectUseCase {
       return left(new InvalidProjectStatusError('Somente projetos em rascunho podem ser agendados'))
     }
 
-    const projectAlreadyScheduled = await this.projectScheduledRepository.findById(projectId)
+    const existingSchedule = await this.projectScheduledRepository.findById(projectId)
 
-    if (projectAlreadyScheduled) {
+    if (existingSchedule && existingSchedule.publishedIn.getTime() > now.getTime()) {
       await this.log({
         actorId: authorId,
         resourceId: projectId,
@@ -121,12 +122,33 @@ export class ScheduleProjectUseCase {
       return left(new InvalidScheduleDateError())
     }
 
+    project.status = ProjectStatus.SCHEDULED
+
+    if (existingSchedule) {
+      const previousPublishedIn = existingSchedule.publishedIn
+      existingSchedule.publishedIn = publishedIn
+
+      await this.projectScheduledRepository.save(existingSchedule)
+      await this.projectsRepository.save(project)
+
+      await this.log({
+        actorId: authorId,
+        resourceId: existingSchedule.id.toString(),
+        action: AuditLogAction.UPDATE,
+        text: `Projeto ${projectId} reagendado com sucesso com data de publicação ${publishedIn.toISOString()}.`,
+        status: AuditLogStatus.SUCCESS,
+        diff: {
+          publishedIn: { old: previousPublishedIn.toISOString(), new: publishedIn.toISOString() },
+        },
+      })
+
+      return right({ projectScheduled: existingSchedule })
+    }
+
     const projectScheduled = ProjectScheduled.create({
       projectId: new UniqueEntityId(projectId),
       publishedIn,
     })
-
-    project.status = ProjectStatus.SCHEDULED
 
     await this.projectScheduledRepository.create(projectScheduled)
     await this.projectsRepository.save(project)

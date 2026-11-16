@@ -7,7 +7,7 @@ const DEFAULT_PERIOD_IN_MONTHS = 3
 export type CurationScope = 'board' | 'community' | 'all'
 
 interface GetCurationUseCaseRequest {
-  institutionId?: string | undefined
+  institutionIds?: string[] | undefined
   months?: number | undefined
   limit?: number | undefined
   scope?: CurationScope | undefined
@@ -32,7 +32,7 @@ export class GetCurationUseCase {
   constructor(private readonly curationRepository: CurationRepository) {}
 
   async execute({
-    institutionId,
+    institutionIds,
     months = DEFAULT_PERIOD_IN_MONTHS,
     limit,
     scope = 'all',
@@ -46,7 +46,7 @@ export class GetCurationUseCase {
     const normalizedTitle = title?.trim()
     const filters = {
       since,
-      institutionId,
+      institutionIds: institutionIds && institutionIds.length > 0 ? institutionIds : undefined,
       title: normalizedTitle ? normalizedTitle : undefined,
       tagIds: tagIds && tagIds.length > 0 ? tagIds : undefined,
       limit: undefined as number | undefined,

@@ -27,7 +27,10 @@ export class GetProjectBySlugController {
     }
 
     return reply.status(200).send({
-      project: ProjectPresenter.toHTTP(result.value.project),
+      project: {
+        ...ProjectPresenter.toHTTP(result.value.project),
+        publishedIn: result.value.publishedIn?.toISOString() ?? null,
+      },
     })
   }
 }

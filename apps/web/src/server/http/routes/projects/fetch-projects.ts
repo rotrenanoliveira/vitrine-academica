@@ -20,7 +20,7 @@ type FetchProjectsResponse = {
   projects: ProjectListItem[]
 }
 
-export async function fetchProjects({ scope, status, title, tags, page = 1, limit = 100 }: FetchProjectsParams = {}) {
+export async function fetchProjects({ scope, status, title, tags, page = 1, limit = 25 }: FetchProjectsParams = {}) {
   const searchParams = new URLSearchParams()
 
   if (scope) searchParams.set('scope', scope)

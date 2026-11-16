@@ -1,0 +1,1224 @@
+{
+  "events": [
+    {
+      "name": "Mostra de Ideias Sustentáveis",
+      "participationScope": "INSTITUTION",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Campus carbono zero",
+          "description": "Propostas para reduzir emissões e consumo energético nas instalações acadêmicas."
+        },
+        {
+          "title": "Economia circular no laboratório",
+          "description": "Reaproveitamento de materiais, resíduos e equipamentos em ambientes de ensino e pesquisa."
+        },
+        {
+          "title": "Agricultura urbana acadêmica",
+          "description": "Hortas, compostagem e educação ambiental integradas à rotina universitária."
+        },
+        {
+          "title": "Mobilidade ativa no campus",
+          "description": "Soluções de deslocamento sustentável entre blocos, residências e acessos externos."
+        }
+      ]
+    },
+    {
+      "name": "Semana de Temas em Saúde Digital",
+      "participationScope": "GLOBAL",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Teleorientação estudantil",
+          "description": "Modelos de cuidado remoto para saúde mental e atenção básica na comunidade acadêmica."
+        },
+        {
+          "title": "Dados clínicos responsáveis",
+          "description": "Uso ético de dados de saúde em pesquisa, com privacidade e consentimento."
+        },
+        {
+          "title": "Dispositivos de reabilitação",
+          "description": "Protótipos vestíveis e sensores para apoio a terapias e acompanhamento clínico."
+        }
+      ]
+    },
+    {
+      "name": "Fórum de Temas em Educação Inovadora",
+      "participationScope": "INSTITUTION",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Metodologias ativas na graduação",
+          "description": "Práticas de sala de aula centradas no estudante e na aprendizagem por projetos."
+        },
+        {
+          "title": "Acessibilidade no material didático",
+          "description": "Design inclusivo de conteúdos digitais e impressos para todos os perfis de aprendizagem."
+        },
+        {
+          "title": "Avaliação formativa com tecnologia",
+          "description": "Ferramentas e protocolos para feedback contínuo em disciplinas numerosas."
+        },
+        {
+          "title": "Educação maker no currículo",
+          "description": "Integração de laboratórios maker, prototipagem e cultura hands-on nas disciplinas."
+        }
+      ]
+    },
+    {
+      "name": "Conclave de Temas em Dados Abertos",
+      "participationScope": "GLOBAL",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Transparência de indicadores acadêmicos",
+          "description": "Publicação compreensível de métricas institucionais para a comunidade."
+        },
+        {
+          "title": "Catálogos de pesquisa reutilizáveis",
+          "description": "Padronização de metadados e datasets para reuso científico."
+        },
+        {
+          "title": "Governança de dados universitários",
+          "description": "Papéis, qualidade e políticas de atualização de bases institucionais."
+        }
+      ]
+    },
+    {
+      "name": "Hackathon de Escolha Temática em IA",
+      "participationScope": "INSTITUTION",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "IA para apoio estudantil",
+          "description": "Assistentes e recomendações que melhoram orientação acadêmica e inclusão."
+        },
+        {
+          "title": "Visão computacional em laboratório",
+          "description": "Análise automatizada de imagens científicas e didáticas."
+        },
+        {
+          "title": "PLN para sumarização científica",
+          "description": "Ferramentas de leitura acelerada de artigos e relatórios técnicos."
+        },
+        {
+          "title": "Ética e vieses em modelos",
+          "description": "Avaliação de riscos, justiça algorítmica e limites de uso em contexto acadêmico."
+        }
+      ]
+    },
+    {
+      "name": "Assembleia Temática de Extensão",
+      "participationScope": "GLOBAL",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Extensão em territórios vulneráveis",
+          "description": "Ações com impacto social mensurável em comunidades parceiras."
+        },
+        {
+          "title": "Cultura e patrimônio local",
+          "description": "Mapeamento, memória e salvaguarda participativa do patrimônio cultural."
+        },
+        {
+          "title": "Educação popular e literacia digital",
+          "description": "Oficinas e mediação tecnológica para públicos diversos."
+        }
+      ]
+    },
+    {
+      "name": "Urna Temática de Engenharia Aplicada",
+      "participationScope": "INSTITUTION",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Sensorização de laboratórios",
+          "description": "Instrumentação e IoT para monitoramento de consumo e segurança."
+        },
+        {
+          "title": "Prototipagem com materiais sustentáveis",
+          "description": "Peças didáticas e protótipos com menor impacto ambiental."
+        },
+        {
+          "title": "Automação de processos acadêmicos",
+          "description": "Melhoria de fluxos administrativos e logísticos no campus."
+        },
+        {
+          "title": "Acessibilidade física construída",
+          "description": "Diagnósticos e intervenções de engenharia para espaços mais inclusivos."
+        }
+      ]
+    },
+    {
+      "name": "Consulta Temática de Comunicação Científica",
+      "participationScope": "GLOBAL",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Documentário científico curto",
+          "description": "Narrativas audiovisuais sobre pesquisas de impacto social."
+        },
+        {
+          "title": "Jornalismo de laboratório",
+          "description": "Cobertura clara e precisa de achados acadêmicos para o público amplo."
+        },
+        {
+          "title": "Identidade visual de grupos de pesquisa",
+          "description": "Sistemas gráficos para comunicação consistente de laboratórios e núcleos."
+        }
+      ]
+    },
+    {
+      "name": "Painel de Temas em Direito e Sociedade",
+      "participationScope": "INSTITUTION",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Privacidade na universidade digital",
+          "description": "LGPD, consentimento e práticas de proteção de dados no campus."
+        },
+        {
+          "title": "Direitos humanos e acesso ao conhecimento",
+          "description": "Barreiras legais e sociais ao acesso educacional e científico."
+        },
+        {
+          "title": "Políticas públicas educacionais",
+          "description": "Análise de implementação e efeitos de políticas em redes de ensino."
+        },
+        {
+          "title": "Ética em pesquisa com humanos",
+          "description": "Consentimento, risco e integridade em investigações sociais e clínicas."
+        }
+      ]
+    },
+    {
+      "name": "Seleção Temática de Economia Criativa",
+      "participationScope": "GLOBAL",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Empreendedorismo cultural estudantil",
+          "description": "Negócios e coletivos que conectam arte, tecnologia e comunidade."
+        },
+        {
+          "title": "Economia solidária no campus",
+          "description": "Cooperativas, feiras e circuitos de troca com impacto local."
+        },
+        {
+          "title": "Inovação social mensurável",
+          "description": "Modelos de impacto e indicadores para iniciativas extensionistas."
+        }
+      ]
+    },
+    {
+      "name": "Votação Temática de Cidades e Campus",
+      "participationScope": "INSTITUTION",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Espaços colaborativos regenerados",
+          "description": "Requalificação de áreas ociosas para estudo, prototipagem e convivência."
+        },
+        {
+          "title": "Urbanismo tático universitário",
+          "description": "Intervenções de baixo custo para melhorar permanência e acessibilidade."
+        },
+        {
+          "title": "Mapas colaborativos do entorno",
+          "description": "Cartografia participativa de equipamentos, riscos e oportunidades locais."
+        },
+        {
+          "title": "Campus sensível ao clima",
+          "description": "Adaptação de áreas verdes, drenagem e conforto térmico."
+        }
+      ]
+    },
+    {
+      "name": "Escolha Temática de Biociências",
+      "participationScope": "GLOBAL",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Biotecnologia educacional",
+          "description": "Experimentos e kits didáticos com rigor e segurança laboratorial."
+        },
+        {
+          "title": "Biodiversidade urbana monitorada",
+          "description": "Ciência cidadã e inventários de espécies em áreas verdes."
+        },
+        {
+          "title": "Química verde em aulas práticas",
+          "description": "Substituição de protocolos por rotas mais seguras e limpas."
+        }
+      ]
+    },
+    {
+      "name": "Mostra de Temas em Trabalho e Gestão",
+      "participationScope": "INSTITUTION",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Gestão do conhecimento acadêmico",
+          "description": "Práticas para capturar, compartilhar e reutilizar aprendizados institucionais."
+        },
+        {
+          "title": "Liderança em times interdisciplinares",
+          "description": "Modelos de coordenação para projetos com múltiplas áreas."
+        },
+        {
+          "title": "Indicadores de desempenho extensionista",
+          "description": "Métricas úteis para acompanhar alcance, qualidade e impacto."
+        },
+        {
+          "title": "Planejamento estratégico estudantil",
+          "description": "Ferramentas de priorização para centros acadêmicos e atléticas."
+        }
+      ]
+    },
+    {
+      "name": "Consulta Aberta de Temas Maker",
+      "participationScope": "GLOBAL",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Fablab como espaço curricular",
+          "description": "Integração do laboratório maker a disciplinas e projetos de extensão."
+        },
+        {
+          "title": "Impressão 3D didática",
+          "description": "Peças, modelos e kits para apoio ao ensino de ciências e engenharias."
+        },
+        {
+          "title": "Robótica educacional itinerante",
+          "description": "Oficinas móveis e kits para escolas parceiras."
+        }
+      ]
+    },
+    {
+      "name": "Urna de Temas em Linguagens",
+      "participationScope": "INSTITUTION",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Corpus de português brasileiro",
+          "description": "Coleta e anotação colaborativa para pesquisa e PLN."
+        },
+        {
+          "title": "Tradução acadêmica colaborativa",
+          "description": "Fluxos de tradução e revisão para internacionalização da pesquisa."
+        },
+        {
+          "title": "Literatura e divulgação científica",
+          "description": "Narrativas literárias que aproximam ciência e público amplo."
+        },
+        {
+          "title": "Acessibilidade comunicacional",
+          "description": "Libras, linguagem simples e formatos alternativos em eventos acadêmicos."
+        }
+      ]
+    },
+    {
+      "name": "Fórum Temático de Segurança Digital",
+      "participationScope": "GLOBAL",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Hardening de sistemas acadêmicos",
+          "description": "Auditoria e melhoria de autenticação, logs e permissões."
+        },
+        {
+          "title": "Cultura de privacidade no campus",
+          "description": "Campanhas e práticas cotidianas de proteção de dados pessoais."
+        },
+        {
+          "title": "Resposta a incidentes estudantis",
+          "description": "Playbooks e capacitação para vazamentos e ataques comuns."
+        }
+      ]
+    },
+    {
+      "name": "Seleção Temática de Energia e Clima",
+      "participationScope": "INSTITUTION",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Fotovoltaica no campus",
+          "description": "Estudos de viabilidade e monitoramento de geração solar institucional."
+        },
+        {
+          "title": "Eficiência energética predial",
+          "description": "Diagnósticos e ações de redução de consumo em edificações."
+        },
+        {
+          "title": "Educação climática prática",
+          "description": "Oficinas e indicadores para engajar a comunidade nas metas ambientais."
+        },
+        {
+          "title": "Recursos hídricos monitorados",
+          "description": "Modelagem e sensores para uso racional da água."
+        }
+      ]
+    },
+    {
+      "name": "Painel de Temas em Inclusão",
+      "participationScope": "GLOBAL",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Educação inclusiva na prática",
+          "description": "Adaptações pedagógicas e tecnológicas para trajetórias diversas."
+        },
+        {
+          "title": "Tecnologia assistiva acadêmica",
+          "description": "Ferramentas que ampliam participação em aulas e pesquisas."
+        },
+        {
+          "title": "Formação docente inclusiva",
+          "description": "Capacitação de professores para desenho universal de aprendizagem."
+        }
+      ]
+    },
+    {
+      "name": "Consulta Temática de Startups Acadêmicas",
+      "participationScope": "INSTITUTION",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Edtech de feedback formativo",
+          "description": "Produtos que melhoram avaliação e acompanhamento em larga escala."
+        },
+        {
+          "title": "Marketplace científico estudantil",
+          "description": "Conexão entre demandas de laboratório e colaboradores."
+        },
+        {
+          "title": "Validação com usuários reais",
+          "description": "Discovery e experimentos para MVPs nascidos na universidade."
+        },
+        {
+          "title": "Propriedade intelectual consciente",
+          "description": "Orientação sobre proteção, licenças e transferência de tecnologia."
+        }
+      ]
+    },
+    {
+      "name": "Votação de Temas em História e Memória",
+      "participationScope": "GLOBAL",
+      "phase": "THEME_SELECTION",
+      "themes": [
+        {
+          "title": "Acervos digitais institucionais",
+          "description": "Curadoria, metadados e acesso público a documentos históricos."
+        },
+        {
+          "title": "Memória oral do campus",
+          "description": "Coleta de relatos de estudantes, técnicos e docentes ao longo das décadas."
+        },
+        {
+          "title": "Patrimônio edificado universitário",
+          "description": "Inventário e valorização de espaços históricos da instituição."
+        }
+      ]
+    },
+    {
+      "name": "Mostra Acadêmica Aberta 2026",
+      "participationScope": "GLOBAL",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Pesquisa e extensão para o bem comum",
+      "themes": [
+        {
+          "title": "Pesquisa e extensão para o bem comum",
+          "description": "Projetos que conectam produção científica e impacto social nas comunidades locais."
+        },
+        {
+          "title": "Inovação com responsabilidade social",
+          "description": "Soluções tecnológicas avaliadas também por efeitos sociais e ambientais."
+        },
+        {
+          "title": "Ciência aberta na graduação",
+          "description": "Práticas de compartilhamento de dados, métodos e resultados desde a formação inicial."
+        }
+      ]
+    },
+    {
+      "name": "Feira de Tecnologia Aplicada",
+      "participationScope": "INSTITUTION",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Inovação tecnológica aplicada",
+      "themes": [
+        {
+          "title": "Inovação tecnológica aplicada",
+          "description": "Soluções digitais, hardware e software com foco em problemas reais do mercado e do campus."
+        },
+        {
+          "title": "Protótipos de baixo custo",
+          "description": "Experimentos e dispositivos acessíveis para ensino e extensão."
+        },
+        {
+          "title": "Integração software-hardware",
+          "description": "Sistemas embarcados e aplicações que conversam com sensores e atuadores."
+        }
+      ]
+    },
+    {
+      "name": "Semana de Inovação Interdisciplinar",
+      "participationScope": "GLOBAL",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Empreendedorismo e criatividade interdisciplinar",
+      "themes": [
+        {
+          "title": "Empreendedorismo e criatividade interdisciplinar",
+          "description": "Ideias que cruzam áreas do conhecimento para gerar produtos e serviços originais."
+        },
+        {
+          "title": "Design thinking no currículo",
+          "description": "Processos de descoberta e prototipação aplicados a desafios acadêmicos."
+        },
+        {
+          "title": "Times mistos de alta performance",
+          "description": "Organização de equipes com perfis complementares em projetos de curta duração."
+        }
+      ]
+    },
+    {
+      "name": "Mostra Técnica Profissionalizante",
+      "participationScope": "INSTITUTION",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Formação técnica e práticas de oficina",
+      "themes": [
+        {
+          "title": "Formação técnica e práticas de oficina",
+          "description": "Trabalhos que demonstram domínio técnico e aplicação prática em ambientes produtivos."
+        },
+        {
+          "title": "Segurança e qualidade em laboratório",
+          "description": "Protocolos, padronização e cultura de segurança nas práticas técnicas."
+        },
+        {
+          "title": "Visitas técnicas documentadas",
+          "description": "Registros analíticos de experiências em plantas e empresas parceiras."
+        }
+      ]
+    },
+    {
+      "name": "Encontro Colaborativo de Projetos",
+      "participationScope": "GLOBAL",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Colaboração aberta e projetos comunitários",
+      "themes": [
+        {
+          "title": "Colaboração aberta e projetos comunitários",
+          "description": "Iniciativas colaborativas que fortalecem redes acadêmicas e produção cultural compartilhada."
+        },
+        {
+          "title": "Ciência cidadã no entorno",
+          "description": "Protocolos participativos de coleta e interpretação de dados com a comunidade."
+        },
+        {
+          "title": "Redes de extensão interinstitucionais",
+          "description": "Parcerias entre campi e organizações para ampliar alcance e aprendizado."
+        }
+      ]
+    },
+    {
+      "name": "Festival de Projetos em Saúde",
+      "participationScope": "INSTITUTION",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Cuidado em rede e prevenção",
+      "themes": [
+        {
+          "title": "Cuidado em rede e prevenção",
+          "description": "Ações de promoção da saúde, educação e articulação com serviços locais."
+        },
+        {
+          "title": "Tecnologias assistivas clínicas",
+          "description": "Dispositivos e softwares que apoiam reabilitação e autonomia."
+        },
+        {
+          "title": "Epidemiologia aplicada ao território",
+          "description": "Análises e intervenções baseadas em indicadores locais de saúde."
+        }
+      ]
+    },
+    {
+      "name": "Maratona de Projetos Educacionais",
+      "participationScope": "GLOBAL",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Aprendizagem significativa com tecnologia",
+      "themes": [
+        {
+          "title": "Aprendizagem significativa com tecnologia",
+          "description": "Recursos digitais a serviço de objetivos pedagógicos claros e avaliáveis."
+        },
+        {
+          "title": "Gamificação responsável",
+          "description": "Mecânicas de jogo que aumentam engajamento sem banalizar o conteúdo."
+        },
+        {
+          "title": "Materiais didáticos acessíveis",
+          "description": "Produção multimodal com atenção a barreiras sensoriais e cognitivas."
+        }
+      ]
+    },
+    {
+      "name": "Expo Dados e Sociedade",
+      "participationScope": "INSTITUTION",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Dados para decisão pública",
+      "themes": [
+        {
+          "title": "Dados para decisão pública",
+          "description": "Análises e visualizações que apoiam gestores e comunidades com clareza."
+        },
+        {
+          "title": "Qualidade e linhagem de dados",
+          "description": "Práticas de documentação, limpeza e rastreabilidade analítica."
+        },
+        {
+          "title": "Visualização acessível",
+          "description": "Gráficos e painéis compreensíveis a públicos não técnicos."
+        }
+      ]
+    },
+    {
+      "name": "Circuito de Projetos Ambientais",
+      "participationScope": "GLOBAL",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Campus e cidade sustentáveis",
+      "themes": [
+        {
+          "title": "Campus e cidade sustentáveis",
+          "description": "Intervenções ambientais que articulam universidade e território."
+        },
+        {
+          "title": "Monitoramento com IoT ambiental",
+          "description": "Sensores e painéis para qualidade do ar, água e energia."
+        },
+        {
+          "title": "Educação ambiental participativa",
+          "description": "Oficinas e campanhas com engajamento de estudantes e vizinhos."
+        }
+      ]
+    },
+    {
+      "name": "Salão de Engenharia e Prototipagem",
+      "participationScope": "INSTITUTION",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Do conceito ao protótipo funcional",
+      "themes": [
+        {
+          "title": "Do conceito ao protótipo funcional",
+          "description": "Ciclo completo de ideação, fabricação, teste e documentação técnica."
+        },
+        {
+          "title": "Manufatura digital didática",
+          "description": "Uso de CNC, 3D e eletrônica em projetos de ensino."
+        },
+        {
+          "title": "Validação com usuários finais",
+          "description": "Testes de usabilidade e desempenho com público-alvo real."
+        }
+      ]
+    },
+    {
+      "name": "Bienal Estudantil de Artes e Mídias",
+      "participationScope": "GLOBAL",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Arte, ciência e mediação cultural",
+      "themes": [
+        {
+          "title": "Arte, ciência e mediação cultural",
+          "description": "Obras e processos que traduzem conhecimento científico em experiência estética."
+        },
+        {
+          "title": "Instalações interativas",
+          "description": "Peças que respondem ao público com som, imagem ou sensores."
+        },
+        {
+          "title": "Acervos vivos",
+          "description": "Curadorias digitais e presenciais com participação da comunidade."
+        }
+      ]
+    },
+    {
+      "name": "Congresso Júnior de Metodologia",
+      "participationScope": "INSTITUTION",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Rigor e reprodutibilidade na iniciação científica",
+      "themes": [
+        {
+          "title": "Rigor e reprodutibilidade na iniciação científica",
+          "description": "Projetos que documentam protocolo, limitações e evidências com clareza."
+        },
+        {
+          "title": "Escrita científica formativa",
+          "description": "Artigos, pôsteres e relatórios com qualidade argumentativa."
+        },
+        {
+          "title": "Ética e integridade desde o início",
+          "description": "Boas práticas de citação, dados e relação com participantes."
+        }
+      ]
+    },
+    {
+      "name": "Arena de Projetos em Direito Digital",
+      "participationScope": "GLOBAL",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Privacidade, plataformas e cidadania",
+      "themes": [
+        {
+          "title": "Privacidade, plataformas e cidadania",
+          "description": "Estudos e protótipos sobre direitos digitais no cotidiano acadêmico e social."
+        },
+        {
+          "title": "Compliance LGPD aplicado",
+          "description": "Diagnósticos e planos de adequação para serviços digitais."
+        },
+        {
+          "title": "Acesso à justiça com tecnologia",
+          "description": "Ferramentas que facilitam informação jurídica compreensível."
+        }
+      ]
+    },
+    {
+      "name": "Summit de Projetos Empreendedores",
+      "participationScope": "INSTITUTION",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Negócios de impacto nascidos na universidade",
+      "themes": [
+        {
+          "title": "Negócios de impacto nascidos na universidade",
+          "description": "Ventures acadêmicas com proposta de valor clara e métricas de impacto."
+        },
+        {
+          "title": "Validação de mercado com ética",
+          "description": "Entrevistas, experimentos e pivôs sem extrair valor indevido de comunidades."
+        },
+        {
+          "title": "Pitch e storytelling de evidências",
+          "description": "Comunicação persuasiva ancorada em dados e aprendizados reais."
+        }
+      ]
+    },
+    {
+      "name": "Laboratório Aberto de IoT",
+      "participationScope": "GLOBAL",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Internet das coisas para o bem público",
+      "themes": [
+        {
+          "title": "Internet das coisas para o bem público",
+          "description": "Sensores e redes a serviço de saúde, ambiente, mobilidade e educação."
+        },
+        {
+          "title": "Edge computing educacional",
+          "description": "Processamento local confiável para experimentos e demos."
+        },
+        {
+          "title": "Observabilidade de dispositivos",
+          "description": "Logs, métricas e manutenção de frotas de sensores acadêmicos."
+        }
+      ]
+    },
+    {
+      "name": "Mostra de Projetos em Nutrição e Bem-Estar",
+      "participationScope": "INSTITUTION",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Hábitos saudáveis na vida universitária",
+      "themes": [
+        {
+          "title": "Hábitos saudáveis na vida universitária",
+          "description": "Intervenções e apps que apoiam alimentação, sono e rotina de estudos."
+        },
+        {
+          "title": "Segurança alimentar local",
+          "description": "Diagnósticos e ações com cantinas, hortas e equipamentos públicos."
+        },
+        {
+          "title": "Educação nutricional acessível",
+          "description": "Materiais e oficinas com linguagem clara e culturalmente adequada."
+        }
+      ]
+    },
+    {
+      "name": "Jornada de Projetos em Geoinformação",
+      "participationScope": "GLOBAL",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Mapas que orientam decisões locais",
+      "themes": [
+        {
+          "title": "Mapas que orientam decisões locais",
+          "description": "Produtos cartográficos e análises espaciais úteis a gestores e comunidades."
+        },
+        {
+          "title": "Sensoriamento remoto aplicado",
+          "description": "Uso de imagens e índices para monitoramento ambiental e urbano."
+        },
+        {
+          "title": "SIG colaborativo",
+          "description": "Bases espaciais atualizadas por múltiplos atores com qualidade controlada."
+        }
+      ]
+    },
+    {
+      "name": "Vitrine de Projetos em Acessibilidade",
+      "participationScope": "INSTITUTION",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Universidade sem barreiras",
+      "themes": [
+        {
+          "title": "Universidade sem barreiras",
+          "description": "Projetos que removem obstáculos físicos, digitais e comunicacionais."
+        },
+        {
+          "title": "Desenho universal de serviços",
+          "description": "Fluxos acadêmicos pensados para a maior diversidade possível de usuários."
+        },
+        {
+          "title": "Avaliação com pessoas com deficiência",
+          "description": "Testes e cocriação com quem vivencia as barreiras no dia a dia."
+        }
+      ]
+    },
+    {
+      "name": "Encontro de Projetos em Finanças Sociais",
+      "participationScope": "GLOBAL",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Educação financeira e impacto coletivo",
+      "themes": [
+        {
+          "title": "Educação financeira e impacto coletivo",
+          "description": "Oficinas, ferramentas e pesquisas sobre finanças pessoais e solidárias."
+        },
+        {
+          "title": "Contabilidade social de projetos",
+          "description": "Prestação de contas transparente para financiadores e comunidades."
+        },
+        {
+          "title": "Cooperativismo estudantil",
+          "description": "Modelos associativos para serviços e economia no campus."
+        }
+      ]
+    },
+    {
+      "name": "Simpósio Aberto de Robótica Educacional",
+      "participationScope": "INSTITUTION",
+      "phase": "OPEN",
+      "winnerThemeTitle": "Robótica para aprender e ensinar",
+      "themes": [
+        {
+          "title": "Robótica para aprender e ensinar",
+          "description": "Kits, desafios e mediação pedagógica com foco em escolas e graduação."
+        },
+        {
+          "title": "Competições formativas",
+          "description": "Torneios que valorizam processo, documentação e colaboração."
+        },
+        {
+          "title": "Manutenção e documentação de kits",
+          "description": "Práticas para tornar a robótica sustentável em laboratórios didáticos."
+        }
+      ]
+    },
+    {
+      "name": "Mostra Acadêmica Encerrada 2025",
+      "participationScope": "GLOBAL",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Ciência com impacto territorial",
+      "themes": [
+        {
+          "title": "Ciência com impacto territorial",
+          "description": "Projetos que demonstraram resultados concretos em comunidades e instituições parceiras."
+        },
+        {
+          "title": "Parcerias público-acadêmicas",
+          "description": "Arranjos de colaboração com órgãos públicos e evidências de entrega."
+        },
+        {
+          "title": "Avaliação de impacto retrospectiva",
+          "description": "Análises pós-projeto sobre alcance, qualidade e aprendizados."
+        }
+      ]
+    },
+    {
+      "name": "Feira Tecnológica 2025",
+      "participationScope": "INSTITUTION",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Soluções digitais maduras",
+      "themes": [
+        {
+          "title": "Soluções digitais maduras",
+          "description": "Produtos e serviços com validação técnica, testes e documentação completa."
+        },
+        {
+          "title": "DevOps acadêmico",
+          "description": "Pipelines e operação confiável para sistemas nascidos em projetos de curso."
+        },
+        {
+          "title": "Qualidade de software educacional",
+          "description": "Testes, usabilidade e manutenção de plataformas de ensino."
+        }
+      ]
+    },
+    {
+      "name": "Semana de Extensão Concluída",
+      "participationScope": "GLOBAL",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Extensão como diálogo de saberes",
+      "themes": [
+        {
+          "title": "Extensão como diálogo de saberes",
+          "description": "Ações que reconheceram conhecimento popular e acadêmico em cocriação."
+        },
+        {
+          "title": "Metodologias participativas",
+          "description": "Processos de escuta, decisão compartilhada e devolutiva à comunidade."
+        },
+        {
+          "title": "Memória das ações extensionistas",
+          "description": "Registros audiovisuais e textuais para continuidade institucional."
+        }
+      ]
+    },
+    {
+      "name": "Hackathon ESG Encerrado",
+      "participationScope": "INSTITUTION",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Governança sustentável no campus",
+      "themes": [
+        {
+          "title": "Governança sustentável no campus",
+          "description": "Diagnósticos ESG e planos de ação com indicadores acompanháveis."
+        },
+        {
+          "title": "Cadeias de suprimento responsáveis",
+          "description": "Critérios ambientais e sociais em compras e contratos acadêmicos."
+        },
+        {
+          "title": "Comunicação de resultados ESG",
+          "description": "Relatos claros para a comunidade interna e parceiros externos."
+        }
+      ]
+    },
+    {
+      "name": "Mostra de Saúde Coletiva 2025",
+      "participationScope": "GLOBAL",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Prevenção e vigilância comunitária",
+      "themes": [
+        {
+          "title": "Prevenção e vigilância comunitária",
+          "description": "Estratégias de educação em saúde e monitoramento territorial."
+        },
+        {
+          "title": "Redes de cuidado estudantil",
+          "description": "Acolhimento, encaminhamento e continuidade do cuidado no campus."
+        },
+        {
+          "title": "Teleatendimento responsável",
+          "description": "Protocolos éticos e clínicos para orientação remota."
+        }
+      ]
+    },
+    {
+      "name": "Congresso de Educação Inclusiva",
+      "participationScope": "INSTITUTION",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Trajetórias escolares sem exclusão",
+      "themes": [
+        {
+          "title": "Trajetórias escolares sem exclusão",
+          "description": "Práticas e tecnologias que sustentam permanência e aprendizagem."
+        },
+        {
+          "title": "Formação continuada inclusiva",
+          "description": "Capacitação docente com foco em desenho universal."
+        },
+        {
+          "title": "Acessibilidade comunicacional consolidada",
+          "description": "Materiais e mediações em Libras, audiodescrição e linguagem simples."
+        }
+      ]
+    },
+    {
+      "name": "Encontro de Dados Abertos 2025",
+      "participationScope": "GLOBAL",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Publicação confiável de dados institucionais",
+      "themes": [
+        {
+          "title": "Publicação confiável de dados institucionais",
+          "description": "Pipelines, metadados e versionamento para conjuntos públicos."
+        },
+        {
+          "title": "Literacia de dados na gestão",
+          "description": "Capacitação de equipes para ler e usar indicadores com responsabilidade."
+        },
+        {
+          "title": "Auditoria de qualidade de bases",
+          "description": "Checklists e rotinas de verificação antes da liberação."
+        }
+      ]
+    },
+    {
+      "name": "Salão de Artes e Patrimônio",
+      "participationScope": "INSTITUTION",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Memória cultural em rede",
+      "themes": [
+        {
+          "title": "Memória cultural em rede",
+          "description": "Inventários, exposições e acervos digitais construídos com a comunidade."
+        },
+        {
+          "title": "Mediação museológica inovadora",
+          "description": "Roteiros e experiências que ampliam o acesso ao patrimônio."
+        },
+        {
+          "title": "Preservação digital de acervos",
+          "description": "Padrões técnicos de digitalização, backup e descrição."
+        }
+      ]
+    },
+    {
+      "name": "Arena de Empreendedorismo Social",
+      "participationScope": "GLOBAL",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Negócios com métricas de impacto",
+      "themes": [
+        {
+          "title": "Negócios com métricas de impacto",
+          "description": "Empreendimentos que mediram mudança social além da receita."
+        },
+        {
+          "title": "Incubação ética de ideias",
+          "description": "Mentoria, validação e proteção de participantes e comunidades."
+        },
+        {
+          "title": "Parcerias de longo prazo",
+          "description": "Arranjos sustentáveis entre universidade, poder público e coletivos."
+        }
+      ]
+    },
+    {
+      "name": "Simpósio de Engenharia Sustentável",
+      "participationScope": "INSTITUTION",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Infraestrutura acadêmica regenerativa",
+      "themes": [
+        {
+          "title": "Infraestrutura acadêmica regenerativa",
+          "description": "Projetos de edifícios, energia e água com menor pegada ambiental."
+        },
+        {
+          "title": "Análise de ciclo de vida aplicada",
+          "description": "Comparação de materiais e processos com critérios ambientais."
+        },
+        {
+          "title": "Manutenção preditiva de campus",
+          "description": "Sensores e modelos para antecipar falhas e reduzir desperdício."
+        }
+      ]
+    },
+    {
+      "name": "Jornada de Comunicação Científica",
+      "participationScope": "GLOBAL",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Traduzir ciência sem perder rigor",
+      "themes": [
+        {
+          "title": "Traduzir ciência sem perder rigor",
+          "description": "Peças e reportagens que mantêm fidelidade científica com linguagem acessível."
+        },
+        {
+          "title": "Estratégias multiplataforma",
+          "description": "Distribuição coordenada em redes, imprensa e eventos presenciais."
+        },
+        {
+          "title": "Combate à desinformação",
+          "description": "Protocolos de verificação e resposta rápida a rumores científicos."
+        }
+      ]
+    },
+    {
+      "name": "Mostra de Projetos Maker Encerrada",
+      "participationScope": "INSTITUTION",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Fabricação digital com propósito pedagógico",
+      "themes": [
+        {
+          "title": "Fabricação digital com propósito pedagógico",
+          "description": "Protótipos maker alinhados a objetivos de aprendizagem e extensão."
+        },
+        {
+          "title": "Documentação aberta de builds",
+          "description": "Instruções reutilizáveis para replicar projetos em outros laboratórios."
+        },
+        {
+          "title": "Segurança e gestão de fablabs",
+          "description": "Rotinas de uso, manutenção e capacitação de monitores."
+        }
+      ]
+    },
+    {
+      "name": "Fórum de Políticas Educacionais",
+      "participationScope": "GLOBAL",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Evidências para melhorar a escola",
+      "themes": [
+        {
+          "title": "Evidências para melhorar a escola",
+          "description": "Pesquisas-ação e avaliações que informam decisões em redes de ensino."
+        },
+        {
+          "title": "Currículo e formação docente",
+          "description": "Propostas concretas de atualização curricular e capacitação."
+        },
+        {
+          "title": "Participação das comunidades escolares",
+          "description": "Processos deliberativos com famílias, estudantes e profissionais."
+        }
+      ]
+    },
+    {
+      "name": "Circuito de Projetos em Mobilidade",
+      "participationScope": "INSTITUTION",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Deslocamentos mais seguros e inclusivos",
+      "themes": [
+        {
+          "title": "Deslocamentos mais seguros e inclusivos",
+          "description": "Diagnósticos e intervenções de mobilidade no campus e entorno."
+        },
+        {
+          "title": "Dados de fluxo e percepção",
+          "description": "Contagens, pesquisas e mapas de conflitos viários."
+        },
+        {
+          "title": "Desenho de espaços de permanência",
+          "description": "Melhorias de sombra, abrigo e convivência em pontos de espera."
+        }
+      ]
+    },
+    {
+      "name": "Encontro Encerrado de IA Responsável",
+      "participationScope": "GLOBAL",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Inteligência artificial com salvaguardas",
+      "themes": [
+        {
+          "title": "Inteligência artificial com salvaguardas",
+          "description": "Sistemas avaliados quanto a vieses, privacidade e utilidade real."
+        },
+        {
+          "title": "Avaliação humana de modelos",
+          "description": "Protocolos de revisão e métricas além de acurácia bruta."
+        },
+        {
+          "title": "Transparência algorítmica acadêmica",
+          "description": "Documentação de dados, hipóteses e limites para a comunidade."
+        }
+      ]
+    },
+    {
+      "name": "Mostra Técnica de Química Verde",
+      "participationScope": "INSTITUTION",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Laboratórios mais limpos e seguros",
+      "themes": [
+        {
+          "title": "Laboratórios mais limpos e seguros",
+          "description": "Substituição de práticas e gestão responsável de resíduos químicos."
+        },
+        {
+          "title": "Ensino experimental redesenhado",
+          "description": "Roteiros didáticos com menor risco e igual potência formativa."
+        },
+        {
+          "title": "Indicadores ambientais de laboratório",
+          "description": "Medição de consumo, resíduos e ganhos após as mudanças."
+        }
+      ]
+    },
+    {
+      "name": "Congresso de Iniciação Científica 2025",
+      "participationScope": "GLOBAL",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Perguntas bem formuladas, métodos sólidos",
+      "themes": [
+        {
+          "title": "Perguntas bem formuladas, métodos sólidos",
+          "description": "Trabalhos de IC com clareza de problema, método e evidência."
+        },
+        {
+          "title": "Mentoria formativa",
+          "description": "Práticas de orientação que desenvolvem autonomia investigativa."
+        },
+        {
+          "title": "Comunicação de resultados júnior",
+          "description": "Pôsteres, seminários e artigos com padrão científico adequado."
+        }
+      ]
+    },
+    {
+      "name": "Feira de Logística e Operações",
+      "participationScope": "INSTITUTION",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Fluxos acadêmicos mais eficientes",
+      "themes": [
+        {
+          "title": "Fluxos acadêmicos mais eficientes",
+          "description": "Otimização de estoques, entregas e atendimento em serviços do campus."
+        },
+        {
+          "title": "Indicadores operacionais úteis",
+          "description": "KPIs simples para gestão contínua de melhorias."
+        },
+        {
+          "title": "Distribuição de kits e materiais",
+          "description": "Rotas, rastreio e redução de perdas em projetos de extensão."
+        }
+      ]
+    },
+    {
+      "name": "Salão Encerrado de Design e UX",
+      "participationScope": "GLOBAL",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Experiências digitais centradas em pessoas",
+      "themes": [
+        {
+          "title": "Experiências digitais centradas em pessoas",
+          "description": "Interfaces e serviços acadêmicos validados com usuários reais."
+        },
+        {
+          "title": "Pesquisa com usuários éticos",
+          "description": "Protocolos de recrutamento, consentimento e análise de achados."
+        },
+        {
+          "title": "Design systems institucionais",
+          "description": "Componentes e padrões para consistência entre sistemas do campus."
+        }
+      ]
+    },
+    {
+      "name": "Vitrine Encerrada de Projetos Sociais",
+      "participationScope": "INSTITUTION",
+      "phase": "CLOSED",
+      "winnerThemeTitle": "Impacto social com evidência",
+      "themes": [
+        {
+          "title": "Impacto social com evidência",
+          "description": "Projetos que mediram mudanças e aprenderam com o percurso."
+        },
+        {
+          "title": "Monitoramento e avaliação contínua",
+          "description": "Rotinas de coleta, baseline e relatos para stakeholders."
+        },
+        {
+          "title": "Sustentabilidade das ações",
+          "description": "Estratégias para continuidade após o ciclo acadêmico inicial."
+        }
+      ]
+    }
+  ]
+}

@@ -143,7 +143,9 @@ export function FormRegisterProject({ variant = 'page', tags }: FormRegisterProj
       <div className="space-y-2">
         <Label htmlFor="cover-attachment">Capa</Label>
         <Input id="cover-attachment" name="cover-attachment" type="file" accept="image/png,image/jpeg,image/jpg" />
-        <p className="text-xs text-muted-foreground">Opcional. PNG ou JPG de até 5 MB.</p>
+        <p className="text-xs text-muted-foreground">
+          Opcional. PNG ou JPG de até 5 MB. Recomendado: 1920×1080 px (proporção 16:9).
+        </p>
       </div>
 
       <div className="flex w-full items-end justify-end">

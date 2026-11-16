@@ -1,33 +1,42 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import { useQueryStates } from 'nuqs'
 import { getCuration } from '@/server/http/routes/curation/get-curation'
 import type { CurationScope } from '@/utils/curation-types'
+import { destaquesSearchParams, destaquesUrlKeys } from '../search-params'
 import { DestaquesProjectsGrid } from './destaques-projects-grid'
 import { DestaquesProjectsGridSkeleton } from './destaques-projects-grid-skeleton'
 
 type DestaquesTypeListProps = {
   type: Exclude<CurationScope, 'all'>
-  title?: string | undefined
-  institutionId?: string | undefined
-  tagIds?: string[] | undefined
-  months: number
 }
 
-export function DestaquesTypeList({ type, title, institutionId, tagIds, months }: DestaquesTypeListProps) {
+export function DestaquesTypeList({ type }: DestaquesTypeListProps) {
+  const [filters] = useQueryStates(destaquesSearchParams, {
+    urlKeys: destaquesUrlKeys,
+    shallow: true,
+  })
+
+  const title = filters.title?.trim() || undefined
+  const institutionIds =
+    filters.institutionIds && filters.institutionIds.length > 0 ? filters.institutionIds : undefined
+  const tagIds = filters.tags && filters.tags.length > 0 ? filters.tags : undefined
+  const months = Number(filters.months)
+
   const {
     data,
     isPending: isCurationPending,
     isError: isCurationError,
   } = useQuery({
-    queryKey: ['curation', { scope: type, title, institutionId, tagIds, months }],
+    queryKey: ['curation', { scope: type, title, institutionIds, tagIds, months }],
     queryFn: () =>
       getCuration({
         scope: type,
         months,
         ...(title ? { title } : {}),
-        ...(institutionId ? { institutionId } : {}),
-        ...(tagIds && tagIds.length > 0 ? { tags: tagIds } : {}),
+        ...(institutionIds ? { institutionIds } : {}),
+        ...(tagIds ? { tags: tagIds } : {}),
       }),
   })
 

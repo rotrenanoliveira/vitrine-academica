@@ -3,6 +3,7 @@ import { type Project, ProjectStatus } from '../../../enterprise/entities/projec
 import { ProjectMemberStatus } from '../../../enterprise/entities/project-member'
 import { ProjectNotFoundError } from '../../_errors/project-not-found-error'
 import type { ProjectMembersRepository } from '../../repositories/project-members-repository'
+import type { ProjectScheduledRepository } from '../../repositories/project-scheduled-repository'
 import type { ProjectsRepository } from '../../repositories/projects-repositories'
 
 interface GetProjectBySlugUseCaseRequest {
@@ -10,12 +11,13 @@ interface GetProjectBySlugUseCaseRequest {
   requesterId?: string
 }
 
-type GetProjectBySlugUseCaseResponse = Either<ProjectNotFoundError, { project: Project }>
+type GetProjectBySlugUseCaseResponse = Either<ProjectNotFoundError, { project: Project; publishedIn: Date | null }>
 
 export class GetProjectBySlugUseCase {
   constructor(
     private readonly projectsRepository: ProjectsRepository,
     private readonly projectMembersRepository: ProjectMembersRepository,
+    private readonly projectScheduledRepository: ProjectScheduledRepository,
   ) {}
 
   async execute({ slug, requesterId }: GetProjectBySlugUseCaseRequest): Promise<GetProjectBySlugUseCaseResponse> {
@@ -34,7 +36,9 @@ export class GetProjectBySlugUseCase {
       return left(new ProjectNotFoundError())
     }
 
-    return right({ project })
+    const schedule = await this.projectScheduledRepository.findById(projectId)
+
+    return right({ project, publishedIn: schedule?.publishedIn ?? null })
   }
 
   // Convite recusado não conta: só aceito ou pendente leem o projeto ainda não publicado

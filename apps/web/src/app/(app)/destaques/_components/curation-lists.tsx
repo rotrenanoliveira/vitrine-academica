@@ -77,7 +77,7 @@ function toRankedItems(projects: ProjectListItem[]): RankedItem[] {
 export async function CurationLists({ institutionId, months }: CurationListsProps) {
   const sharedParams = {
     months,
-    ...(institutionId ? { institutionId } : {}),
+    ...(institutionId ? { institutionIds: [institutionId] } : {}),
   }
 
   const [board, community] = await Promise.all([

@@ -15,14 +15,14 @@ import { projects } from '../drizzle/schemas/projects'
 export class DrizzleCurationRepository implements CurationRepository {
   constructor(private readonly db: DrizzleClient) {}
 
-  private projectConditions({ since, institutionId, title, tagIds }: CurationFilters) {
+  private projectConditions({ since, institutionIds, title, tagIds }: CurationFilters) {
     const conditions: SQL[] = [eq(projects.status, 'PUBLISHED'), gte(projects.createdAt, since)]
 
-    if (institutionId) {
+    if (institutionIds && institutionIds.length > 0) {
       const institutionAuthors = this.db
         .select({ userId: institutionMembers.userId })
         .from(institutionMembers)
-        .where(and(eq(institutionMembers.institutionId, institutionId), eq(institutionMembers.status, 'ACTIVE')))
+        .where(and(inArray(institutionMembers.institutionId, institutionIds), eq(institutionMembers.status, 'ACTIVE')))
 
       conditions.push(inArray(projects.authorId, institutionAuthors))
     }

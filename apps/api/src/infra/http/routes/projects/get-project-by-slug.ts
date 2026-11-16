@@ -23,7 +23,9 @@ export async function getProjectBySlugRoute(app: FastifyInstance) {
         }),
         response: {
           200: z.object({
-            project: projectHttpSchema,
+            project: projectHttpSchema.extend({
+              publishedIn: z.iso.datetime().nullable(),
+            }),
           }),
           401: z.object({
             message: z.string(),
