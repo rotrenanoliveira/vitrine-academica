@@ -19,7 +19,8 @@ export function DestaquesTypeList({ type }: DestaquesTypeListProps) {
   })
 
   const title = filters.title?.trim() || undefined
-  const institutionIds = filters.institutionIds && filters.institutionIds.length > 0 ? filters.institutionIds : undefined
+  const institutionIds =
+    filters.institutionIds && filters.institutionIds.length > 0 ? filters.institutionIds : undefined
   const tagIds = filters.tags && filters.tags.length > 0 ? filters.tags : undefined
   const months = Number(filters.months)
 

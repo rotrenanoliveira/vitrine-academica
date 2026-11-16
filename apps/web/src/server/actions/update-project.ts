@@ -35,7 +35,9 @@ function getProjectImageFiles(data: FormData): File[] {
 }
 
 function getKeptAttachmentIds(data: FormData): string[] {
-  return data.getAll('kept-attachment-id').filter((value): value is string => typeof value === 'string' && value.length > 0)
+  return data
+    .getAll('kept-attachment-id')
+    .filter((value): value is string => typeof value === 'string' && value.length > 0)
 }
 
 function validateImageFile(file: File, label: string): string | null {
