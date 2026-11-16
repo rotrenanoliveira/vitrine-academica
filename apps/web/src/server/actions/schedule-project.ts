@@ -1,6 +1,7 @@
 'use server'
 
 import z from 'zod'
+import { parseDateTimeLocalValue } from '@/utils/date-time'
 import { scheduleProject } from '../http/routes/projects/schedule-project'
 import { revalidateProjects } from '../revalidate-projects'
 
@@ -22,13 +23,11 @@ export async function actionScheduleProject(data: FormData) {
 
   const projectId = formResult.data['project-id']
   const projectSlug = formResult.data['project-slug']
-  const publishedInDate = new Date(formResult.data['published-in'])
+  const publishedIn = parseDateTimeLocalValue(formResult.data['published-in'])
 
-  if (Number.isNaN(publishedInDate.getTime())) {
+  if (!publishedIn) {
     return { success: false, message: 'Informe uma data de publicação válida.' }
   }
-
-  const publishedIn = publishedInDate.toISOString()
 
   const [_, responseError] = await scheduleProject({
     projectId,

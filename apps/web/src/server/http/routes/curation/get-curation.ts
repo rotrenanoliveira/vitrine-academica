@@ -5,7 +5,7 @@ import { fetcher } from '@/utils/fetcher'
 import { api } from '../../api-client'
 
 type GetCurationParams = {
-  institutionId?: string
+  institutionIds?: string[]
   months?: number
   limit?: number
   scope?: CurationScope
@@ -15,12 +15,17 @@ type GetCurationParams = {
 
 export async function getCuration(params: GetCurationParams = {}) {
   const searchParams = new URLSearchParams({
-    ...(params.institutionId && { institutionId: params.institutionId }),
     ...(params.months && { months: params.months.toString() }),
     ...(params.limit && { limit: params.limit.toString() }),
     ...(params.scope && { scope: params.scope }),
     ...(params.title && { title: params.title }),
   })
+
+  if (params.institutionIds) {
+    for (const institutionId of params.institutionIds) {
+      searchParams.append('institutionIds', institutionId)
+    }
+  }
 
   if (params.tags) {
     const tags = Array.isArray(params.tags) ? params.tags : [params.tags]

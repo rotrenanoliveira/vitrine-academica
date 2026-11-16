@@ -9,7 +9,7 @@ import { CallSkillCard } from '@/components/call/call-skill-card'
 import { CloseCallButton } from '@/components/call/close-call-button'
 import { FormApplyToCall } from '@/components/call/form-apply-to-call'
 import { Button } from '@/components/ui/button'
-import { requireUser } from '@/server/auth/require-user'
+import { getCurrentUser } from '@/server/auth/require-user'
 import { getCall } from '@/server/http/routes/calls/get-call'
 import { getMyCallApplications } from '@/server/http/routes/calls/get-my-call-applications'
 import { getCachedTags } from '@/server/http/routes/tags/fetch-tags'
@@ -28,11 +28,11 @@ export default async function CallDetailPage({ params }: PageProps) {
 
   if (!z.uuid().safeParse(id).success) notFound()
 
-  const user = await requireUser()
+  const user = await getCurrentUser()
   const [{ call }, { tags }] = await Promise.all([getCall(id), getCachedTags()])
 
-  const isAuthor = user.id === call.authorId
-  const { applications: myApplications } = isAuthor ? { applications: [] } : await getMyCallApplications()
+  const isAuthor = user !== null && user.id === call.authorId
+  const { applications: myApplications } = user && !isAuthor ? await getMyCallApplications() : { applications: [] }
   const myApplication = myApplications.find((application) => application.callId === call.id)
   const accepting = isCallAcceptingApplications(call)
   const tagNames = new Map(tags.map((tag) => [tag.id, tag.name]))
@@ -70,7 +70,7 @@ export default async function CallDetailPage({ params }: PageProps) {
 
         {isAuthor && <CallApplicationsPanel callId={call.id} />}
 
-        {!isAuthor && myApplication && (
+        {!isAuthor && myApplication && user && (
           <section className="space-y-3">
             <h2 className="font-heading text-lg font-semibold">Sua candidatura</h2>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -87,7 +87,16 @@ export default async function CallDetailPage({ params }: PageProps) {
 
         {!isAuthor && !myApplication && accepting && (
           <div className="border border-border p-4">
-            <FormApplyToCall callId={call.id} />
+            {user ? (
+              <FormApplyToCall callId={call.id} />
+            ) : (
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-muted-foreground">Entre na sua conta para se candidatar a este chamado.</p>
+                <Button nativeButton={false} variant="outline" render={<Link href="/sign-in" />}>
+                  Entrar para se candidatar
+                </Button>
+              </div>
+            )}
           </div>
         )}
 

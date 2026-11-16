@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { ProjectStarButton } from '@/components/project/project-star-button'
+import { formatBrasiliaDate } from '@/utils/date-time'
 import type { Project } from '@/utils/type'
 
 type ProjectWithCover = Project & { coverUrl: string | null }
@@ -57,9 +58,7 @@ export function HomeProjectsList({
                     </Link>
                   </h2>
                   <p className="line-clamp-2 text-sm text-muted-foreground">{project.description}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Publicado em {new Date(project.createdAt).toLocaleDateString('pt-BR')}
-                  </p>
+                  <p className="text-xs text-muted-foreground">Publicado em {formatBrasiliaDate(project.createdAt)}</p>
                 </div>
 
                 <div className="shrink-0">

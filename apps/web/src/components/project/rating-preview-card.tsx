@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { BeigeActionCard } from '@/components/me/beige-action-card'
+import { formatBrasiliaDate } from '@/utils/date-time'
 import type { TeacherRatedProjectItem } from '@/utils/type'
 
 type RatingPreviewCardProps = {
@@ -19,7 +20,7 @@ export function RatingPreviewCard({ item }: RatingPreviewCardProps) {
       meta={
         <>
           <p>Média {rating.overallScore.toFixed(1)}</p>
-          <p>Avaliado em {new Date(rating.ratedAt).toLocaleDateString('pt-BR')}</p>
+          <p>Avaliado em {formatBrasiliaDate(rating.ratedAt)}</p>
         </>
       }
       description={<p className="line-clamp-3">{project.description}</p>}

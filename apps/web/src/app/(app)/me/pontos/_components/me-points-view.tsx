@@ -6,6 +6,7 @@ import { MyPointsTransactions } from '@/components/points/my-points-transactions
 import { Skeleton } from '@/components/ui/skeleton'
 import { getMyPointsBalance } from '@/server/http/routes/points/get-my-points-balance'
 import { listMyStarredProjects } from '@/server/http/routes/projects/list-my-starred-projects'
+import { formatBrasiliaDateTime } from '@/utils/date-time'
 import { PROMOTION_COST, PROMOTION_DURATION_DAYS } from '@/utils/point-type'
 
 export function MePointsView() {
@@ -76,9 +77,7 @@ export function MePointsView() {
                 <Link href={`/projetos/${project.slug}`} className="font-heading text-lg font-semibold hover:underline">
                   {project.title}
                 </Link>
-                <p className="text-xs text-muted-foreground">
-                  Apoiado em {new Date(star.ratedAt).toLocaleString('pt-BR')}
-                </p>
+                <p className="text-xs text-muted-foreground">Apoiado em {formatBrasiliaDateTime(star.ratedAt)}</p>
               </li>
             ))}
           </ul>

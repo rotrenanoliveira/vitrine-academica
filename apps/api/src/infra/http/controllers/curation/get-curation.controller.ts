@@ -6,7 +6,7 @@ import { env } from '@/environment-variables'
 import { ProjectPresenter } from '../../presenters/project-presenter'
 
 interface GetCurationQuery {
-  institutionId?: string | undefined
+  institutionIds?: string[] | undefined
   months?: number | undefined
   limit?: number | undefined
   scope?: CurationScope | undefined

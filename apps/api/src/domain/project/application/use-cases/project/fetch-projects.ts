@@ -32,7 +32,7 @@ export class FetchProjectsUseCase {
     tagIds,
     title,
     page = 1,
-    limit = 100,
+    limit = 25,
   }: FetchProjectsUseCaseRequest): Promise<FetchProjectsUseCaseResponse> {
     let ids: string[] | undefined
 

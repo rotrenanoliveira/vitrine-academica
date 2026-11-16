@@ -1,6 +1,7 @@
 'use server'
 
 import z from 'zod'
+import { getCurrentUser } from '../auth/require-user'
 import { suggestTheme } from '../http/routes/events/suggest-theme'
 import { revalidateEvents } from '../revalidate-events'
 
@@ -19,6 +20,12 @@ export async function actionSuggestEventTheme(input: z.infer<typeof schema>) {
       success: false as const,
       message: z.prettifyError(parsed.error).replace('✖ ', '').split('\n')[0],
     }
+  }
+
+  const user = await getCurrentUser()
+
+  if (!user) {
+    return { success: false as const, message: 'Faça login para sugerir um tema.' }
   }
 
   const { eventSlug, ...payload } = parsed.data

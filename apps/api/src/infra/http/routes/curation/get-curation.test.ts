@@ -147,10 +147,41 @@ describe('(E2E) - GET /api/v1/curation', () => {
       await starProject(project.id, 1)
     }
 
-    const response = await getCuration(`?institutionId=${institution.id.toString()}`)
+    const response = await getCuration(`?institutionIds=${institution.id.toString()}`)
 
     expect(response.status).toBe(200)
     expect(idsOf(response.body.projects)).toEqual([active.id.toString()])
+  })
+
+  it('curadoria: o filtro de instituições deve aceitar mais de uma', async () => {
+    const registrar = (await makeUserOnDatabase()).user.id
+    const { institution: first } = await makeInstitutionOnDatabase({ registerBy: registrar })
+    const { institution: second } = await makeInstitutionOnDatabase({ registerBy: registrar })
+    const { project: fromFirst, author: firstAuthor } = await createProject({ createdAt: monthsAgo(1) })
+    const { project: fromSecond, author: secondAuthor } = await createProject()
+    const { project: outsider } = await createProject()
+
+    await makeInstitutionMemberOnDatabase({
+      institutionId: first.id.toString(),
+      userId: firstAuthor.id.toString(),
+      status: InstitutionMemberStatus.ACTIVE,
+    })
+    await makeInstitutionMemberOnDatabase({
+      institutionId: second.id.toString(),
+      userId: secondAuthor.id.toString(),
+      status: InstitutionMemberStatus.ACTIVE,
+    })
+
+    for (const project of [fromFirst, fromSecond, outsider]) {
+      await rateByTeacher(project.id, 8)
+    }
+
+    const response = await getCuration(
+      `?scope=board&institutionIds=${first.id.toString()}&institutionIds=${second.id.toString()}`,
+    )
+
+    expect(response.status).toBe(200)
+    expect(idsOf(response.body.projects)).toEqual([fromSecond.id.toString(), fromFirst.id.toString()])
   })
 
   it('curadoria: o limite deve restringir o tamanho da lista', async () => {

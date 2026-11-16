@@ -37,6 +37,7 @@ export function FormScheduleProject({ projectId, projectSlug }: FormScheduleProj
       <div className="space-y-2">
         <Label htmlFor="published-in">Data de publicação</Label>
         <Input id="published-in" name="published-in" type="datetime-local" max="9999-12-31T23:59" required />
+        <p className="text-xs text-muted-foreground">Horário de Brasília.</p>
       </div>
 
       <div className="flex w-full items-end justify-end">
