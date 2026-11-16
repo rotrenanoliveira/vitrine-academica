@@ -32,8 +32,7 @@ export default async function CallDetailPage({ params }: PageProps) {
   const [{ call }, { tags }] = await Promise.all([getCall(id), getCachedTags()])
 
   const isAuthor = user !== null && user.id === call.authorId
-  const { applications: myApplications } =
-    user && !isAuthor ? await getMyCallApplications() : { applications: [] }
+  const { applications: myApplications } = user && !isAuthor ? await getMyCallApplications() : { applications: [] }
   const myApplication = myApplications.find((application) => application.callId === call.id)
   const accepting = isCallAcceptingApplications(call)
   const tagNames = new Map(tags.map((tag) => [tag.id, tag.name]))
@@ -92,9 +91,7 @@ export default async function CallDetailPage({ params }: PageProps) {
               <FormApplyToCall callId={call.id} />
             ) : (
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Entre na sua conta para se candidatar a este chamado.
-                </p>
+                <p className="text-sm text-muted-foreground">Entre na sua conta para se candidatar a este chamado.</p>
                 <Button nativeButton={false} variant="outline" render={<Link href="/sign-in" />}>
                   Entrar para se candidatar
                 </Button>

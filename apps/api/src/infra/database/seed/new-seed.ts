@@ -249,7 +249,7 @@ async function seedInstitutions(registerBy: UniqueEntityId) {
   const institutions = []
 
   for (let index = 0; index < INSTITUTION_COUNT; index++) {
-    const type = INSTITUTION_TYPES[index % INSTITUTION_TYPES.length]!
+    const type = INSTITUTION_TYPES[index % INSTITUTION_TYPES.length]
     const { name, slug } = uniqueInstitutionName(type, usedSlugs)
 
     const { institution } = await makeInstitutionOnDatabase({
@@ -409,6 +409,7 @@ async function seedCalls(users: User[], tags: Tag[]) {
       throw new Error('Não há chamados suficientes em seed/chamados.json para a distribuição do seed')
     }
 
+    // biome-ignore lint/style/noNonNullAssertion: seed
     return availableCalls.shift()!
   }
 
@@ -501,7 +502,7 @@ function takeSeedEvent(
   }
 
   const cursor = cursorByPhase[phase] ?? 0
-  const seedEvent = pool[cursor % pool.length]!
+  const seedEvent = pool[cursor % pool.length]
   cursorByPhase[phase] = cursor + 1
 
   return seedEvent
@@ -558,7 +559,7 @@ async function createEventFromSeed({
 
   for (const [themeIndex, seedTheme] of seedEvent.themes.entries()) {
     const isWinner = needsWinner && seedTheme.title === seedEvent.winnerThemeTitle
-    const author = authors[themeIndex % authors.length]!
+    const author = authors[themeIndex % authors.length]
 
     const { theme } = await makeThemeOnDatabase(
       {
@@ -620,7 +621,7 @@ async function seedEvents({
     const authors = pickInstitutionUsers(usersById, members, institution.id.toString())
 
     for (let eventIndex = 0; eventIndex < EVENTS_PER_INSTITUTION; eventIndex++) {
-      const phase = EVENT_PHASE_ROTATION[eventIndex % EVENT_PHASE_ROTATION.length]!
+      const phase = EVENT_PHASE_ROTATION[eventIndex % EVENT_PHASE_ROTATION.length]
       const seedEvent = takeSeedEvent(eventsByPhase[phase], cursorByPhase, phase)
 
       const created = await createEventFromSeed({
