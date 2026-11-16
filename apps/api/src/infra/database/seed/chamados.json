@@ -1,0 +1,1436 @@
+{
+  "calls": [
+    {
+      "title": "Busco desenvolvedor(a) para protótipo de aplicativo educacional",
+      "description": "Estamos montando um protótipo de aplicativo para apoiar atividades de ensino na graduação. Buscamos alguém com experiência em desenvolvimento mobile e design de interfaces para transformar o fluxo pedagógico em telas usáveis, validar com estudantes e entregar um MVP navegável em oito semanas.",
+      "skills": [
+        {
+          "tagSlug": "desenvolvimento-mobile",
+          "description": "Implementar telas e fluxos principais do aplicativo, integrar APIs simples e preparar build de demonstração para testes com alunos."
+        },
+        {
+          "tagSlug": "uxui-design",
+          "description": "Desenhar a experiência do usuário, protótipos de baixa e alta fidelidade e critérios de usabilidade alinhados ao contexto educacional."
+        },
+        {
+          "tagSlug": "educacao",
+          "description": "Apoiar a tradução de objetivos pedagógicos em funcionalidades claras e ajudar na validação com professores e estudantes."
+        }
+      ]
+    },
+    {
+      "title": "Equipe para pesquisa em inteligência artificial aplicada à saúde",
+      "description": "Projeto de pesquisa que investiga modelos de IA para apoio à triagem e análise de dados clínicos anonimizados. Procuramos colaboradores para preparar datasets, treinar modelos e documentar resultados com rigor metodológico e atenção à ética em pesquisa.",
+      "skills": [
+        {
+          "tagSlug": "inteligencia-artificial",
+          "description": "Propor e avaliar arquiteturas de modelos, definir métricas de desempenho e documentar limitações clínicas dos algoritmos."
+        },
+        {
+          "tagSlug": "aprendizado-de-maquina",
+          "description": "Preparar pipelines de treino e validação, comparar baselines e organizar experimentos reprodutíveis."
+        },
+        {
+          "tagSlug": "saude-publica",
+          "description": "Contextualizar o problema clínico, apoiar a interpretação dos resultados e orientar cuidados éticos no uso de dados de saúde."
+        }
+      ]
+    },
+    {
+      "title": "Colaboração em projeto de ciência de dados para políticas públicas",
+      "description": "Vamos analisar bases abertas para apoiar decisões de políticas públicas locais. O trabalho envolve limpeza de dados, visualizações e relatórios acessíveis a gestores. Buscamos pessoas com perfil analítico e interesse em impacto social.",
+      "skills": [
+        {
+          "tagSlug": "ciencia-de-dados",
+          "description": "Tratar, cruzar e analisar bases públicas, produzir insights acionáveis e documentar o processo analítico."
+        },
+        {
+          "tagSlug": "visualizacao-de-dados",
+          "description": "Criar painéis e gráficos claros para comunicação com gestores e equipes técnicas."
+        },
+        {
+          "tagSlug": "politicas-publicas",
+          "description": "Ajudar a formular perguntas de pesquisa relevantes para o ciclo de política pública e validar a leitura dos achados."
+        }
+      ]
+    },
+    {
+      "title": "Procuro designer UX/UI para plataforma de extensão universitária",
+      "description": "Estamos redesenhando a plataforma digital de extensão universitária para melhorar a jornada de inscrição em projetos. Precisamos de alguém com olhar para acessibilidade, pesquisa com usuários e prototipagem rápida.",
+      "skills": [
+        {
+          "tagSlug": "uxui-design",
+          "description": "Conduzir pesquisa rápida com usuários, mapear jornadas e entregar protótipos navegáveis das telas prioritárias."
+        },
+        {
+          "tagSlug": "acessibilidade-digital",
+          "description": "Garantir critérios de acessibilidade nas interfaces e orientar a equipe sobre boas práticas WCAG aplicáveis ao projeto."
+        },
+        {
+          "tagSlug": "extensao-universitaria",
+          "description": "Apoiar o entendimento do fluxo de extensão e validar se a solução atende coordenadores, alunos e comunidade."
+        }
+      ]
+    },
+    {
+      "title": "Chamado para revisão sistemática em educação inclusiva",
+      "description": "Grupo de pesquisa inicia uma revisão sistemática sobre práticas de educação inclusiva na educação básica. Buscamos colaboradores para triagem de artigos, extração de dados e síntese dos achados segundo protocolo PRISMA.",
+      "skills": [
+        {
+          "tagSlug": "revisao-sistematica",
+          "description": "Aplicar protocolo de busca e triagem, registrar decisões e apoiar a síntese dos estudos incluídos."
+        },
+        {
+          "tagSlug": "educacao-inclusiva",
+          "description": "Contribuir com o recorte temático, critérios de elegibilidade e interpretação pedagógica dos resultados."
+        },
+        {
+          "tagSlug": "escrita-academica",
+          "description": "Ajudar na redação do protocolo, tabelas de evidência e versão preliminar do artigo."
+        }
+      ]
+    },
+    {
+      "title": "Parceiros para oficina de metodologias ativas na graduação",
+      "description": "Queremos oferecer oficinas práticas de metodologias ativas para docentes e monitores. O material precisa ser aplicável em sala de aula, com roteiros, dinâmicas e avaliação formativa.",
+      "skills": [
+        {
+          "tagSlug": "metodologias-ativas",
+          "description": "Planejar dinâmicas, roteiros de oficina e materiais de apoio para aplicação imediata em disciplinas."
+        },
+        {
+          "tagSlug": "didatica",
+          "description": "Ajustar a sequência didática, objetivos de aprendizagem e estratégias de mediação em sala."
+        },
+        {
+          "tagSlug": "formacao-de-professores",
+          "description": "Apoiar a adaptação dos conteúdos ao público docente e coletar feedback pós-oficina."
+        }
+      ]
+    },
+    {
+      "title": "Equipe interdisciplinar para monitoramento ambiental com IoT",
+      "description": "Projeto de extensão que irá instalar sensores de qualidade ambiental em áreas do campus e entorno. Precisamos de equipe para hardware, transmissão de dados e visualização pública dos indicadores.",
+      "skills": [
+        {
+          "tagSlug": "internet-das-coisas",
+          "description": "Selecionar sensores, montar nós de coleta e garantir transmissão estável dos dados ambientais."
+        },
+        {
+          "tagSlug": "sistemas-embarcados",
+          "description": "Programar firmware, calibrar dispositivos e documentar o protocolo de instalação em campo."
+        },
+        {
+          "tagSlug": "gestao-ambiental",
+          "description": "Definir indicadores relevantes, apoiar a leitura dos dados e comunicar resultados à comunidade."
+        }
+      ]
+    },
+    {
+      "title": "Busco especialista em energias renováveis para estudo de caso local",
+      "description": "Estudo de caso sobre viabilidade de geração renovável em edificações universitárias. O trabalho inclui levantamento técnico, análise comparativa e recomendações para gestão campus.",
+      "skills": [
+        {
+          "tagSlug": "energias-renovaveis",
+          "description": "Avaliar alternativas de geração, estimar potencial local e estruturar o estudo de viabilidade."
+        },
+        {
+          "tagSlug": "energia-solar",
+          "description": "Dimensionar cenários fotovoltaicos, estimar geração e apoiar a análise de custos e benefícios."
+        },
+        {
+          "tagSlug": "eficiencia-energetica",
+          "description": "Propor medidas complementares de redução de consumo e integrar recomendações ao relatório final."
+        }
+      ]
+    },
+    {
+      "title": "Colaboradores para mapeamento de biodiversidade urbana",
+      "description": "Iniciativa de ciência cidadã para mapear espécies em áreas verdes urbanas. Buscamos pessoas para trabalho de campo, registro georreferenciado e organização de um catálogo acessível à comunidade.",
+      "skills": [
+        {
+          "tagSlug": "biodiversidade",
+          "description": "Identificar espécies, organizar critérios de registro e validar observações coletadas em campo."
+        },
+        {
+          "tagSlug": "ciencia-cidada",
+          "description": "Desenhar protocolo participativo, engajar voluntários e garantir qualidade dos dados colaborativos."
+        },
+        {
+          "tagSlug": "sig-e-geoprocessamento",
+          "description": "Georreferenciar pontos, produzir mapas e manter a base espacial atualizada."
+        }
+      ]
+    },
+    {
+      "title": "Projeto de agricultura sustentável precisa de analista de dados",
+      "description": "Projeto piloto em hortas experimentais coleta dados de irrigação, produtividade e condições climáticas. Precisamos de analista para consolidar as medições e indicar padrões úteis à gestão sustentável.",
+      "skills": [
+        {
+          "tagSlug": "agricultura-sustentavel",
+          "description": "Ajudar a interpretar indicadores agronômicos e conectar achados a práticas sustentáveis de manejo."
+        },
+        {
+          "tagSlug": "ciencia-de-dados",
+          "description": "Organizar as planilhas de campo, limpar dados e produzir análises descritivas e preditivas básicas."
+        },
+        {
+          "tagSlug": "visualizacao-de-dados",
+          "description": "Criar painéis simples para acompanhamento semanal da equipe do projeto."
+        }
+      ]
+    },
+    {
+      "title": "Chamado para desenvolvimento de chatbot de apoio estudantil",
+      "description": "Queremos um chatbot que responda dúvidas frequentes sobre calendário, bolsas e serviços acadêmicos. A solução deve usar PLN, ter tom acolhedor e permitir handoff para atendimento humano.",
+      "skills": [
+        {
+          "tagSlug": "processamento-de-linguagem-natural",
+          "description": "Modelar intenções, treinar ou configurar o fluxo conversacional e avaliar qualidade das respostas."
+        },
+        {
+          "tagSlug": "inteligencia-artificial",
+          "description": "Definir arquitetura do assistente, critérios de confiança e estratégia de melhoria contínua."
+        },
+        {
+          "tagSlug": "desenvolvimento-web",
+          "description": "Integrar o chatbot ao portal estudantil e preparar interface de monitoramento das conversas."
+        }
+      ]
+    },
+    {
+      "title": "Procuro pesquisador(a) em saúde mental e tecnologias digitais",
+      "description": "Pesquisa exploratória sobre o uso de tecnologias digitais no cuidado em saúde mental estudantil. Buscamos alguém para apoiar entrevistas, análise qualitativa e recomendações éticas para intervenções digitais.",
+      "skills": [
+        {
+          "tagSlug": "saude-mental",
+          "description": "Contribuir com o referencial clínico-psicossocial e orientar o cuidado ético com participantes."
+        },
+        {
+          "tagSlug": "pesquisa-qualitativa",
+          "description": "Apoiar roteiros de entrevista, codificação e síntese temática dos relatos."
+        },
+        {
+          "tagSlug": "telemedicina",
+          "description": "Ajudar a analisar práticas de cuidado remoto e mapear riscos e oportunidades tecnológicas."
+        }
+      ]
+    },
+    {
+      "title": "Equipe para telemedicina em comunidades remotas",
+      "description": "Projeto de extensão testa um fluxo de teleorientação para comunidades com acesso limitado a serviços de saúde. Precisamos de equipe multidisciplinar para protocolo clínico, logística e suporte tecnológico.",
+      "skills": [
+        {
+          "tagSlug": "telemedicina",
+          "description": "Desenhar o fluxo de atendimento remoto, critérios de encaminhamento e documentação clínica mínima."
+        },
+        {
+          "tagSlug": "enfermagem",
+          "description": "Apoiar triagem, educação em saúde e acompanhamento dos casos no território."
+        },
+        {
+          "tagSlug": "saude-publica",
+          "description": "Avaliar impacto comunitário, indicadores de acesso e articulação com a rede local de saúde."
+        }
+      ]
+    },
+    {
+      "title": "Busco biomédico(a) para análise de dados epidemiológicos",
+      "description": "Estudo epidemiológico com bases secundárias sobre indicadores de saúde regional. Procuramos alguém com experiência em análises clínicas e epidemiológicas para apoiar tratamento de dados e interpretação dos achados.",
+      "skills": [
+        {
+          "tagSlug": "epidemiologia",
+          "description": "Definir indicadores, desenhar análises e interpretar padrões temporais e territoriais."
+        },
+        {
+          "tagSlug": "analises-clinicas",
+          "description": "Apoiar a leitura de variáveis clínicas e a coerência dos dados laboratoriais quando aplicável."
+        },
+        {
+          "tagSlug": "estatistica",
+          "description": "Aplicar testes e modelos adequados, reportar intervalos de confiança e limitações estatísticas."
+        }
+      ]
+    },
+    {
+      "title": "Colaboração em protótipo de dispositivo vestível para reabilitação",
+      "description": "Equipe interdisciplinar desenvolve um wearable para acompanhar exercícios de reabilitação. Buscamos apoio em sensores, validação clínica e interface de acompanhamento para profissionais de saúde.",
+      "skills": [
+        {
+          "tagSlug": "sistemas-embarcados",
+          "description": "Integrar sensores, otimizar consumo energético e estabilizar a coleta de sinais do dispositivo."
+        },
+        {
+          "tagSlug": "fisioterapia",
+          "description": "Validar protocolos de exercício, critérios de segurança e utilidade clínica do protótipo."
+        },
+        {
+          "tagSlug": "desenvolvimento-mobile",
+          "description": "Desenvolver aplicativo complementar para visualização dos dados de sessão e feedback ao usuário."
+        }
+      ]
+    },
+    {
+      "title": "Chamado para modelagem matemática de recursos hídricos",
+      "description": "Projeto de pesquisa modela disponibilidade e demanda hídrica em bacias de interesse regional. Precisamos de colaboradores para modelagem, calibração e comunicação dos cenários a gestores ambientais.",
+      "skills": [
+        {
+          "tagSlug": "modelagem-matematica",
+          "description": "Formular e calibrar modelos, analisar sensibilidade e documentar hipóteses matemáticas."
+        },
+        {
+          "tagSlug": "recursos-hidricos",
+          "description": "Aportar conhecimento hidrológico, variáveis de interesse e interpretação dos cenários simulados."
+        },
+        {
+          "tagSlug": "matematica-aplicada",
+          "description": "Apoiar a resolução numérica, verificação dos resultados e estruturação dos experimentos computacionais."
+        }
+      ]
+    },
+    {
+      "title": "Procuro estatístico(a) para análise de desempenho acadêmico",
+      "description": "Coordenação acadêmica deseja analisar indicadores de retenção, aprovação e evasão. Buscamos alguém para estruturar a análise estatística com rigor e comunicar achados de forma compreensível à gestão.",
+      "skills": [
+        {
+          "tagSlug": "estatistica",
+          "description": "Selecionar métodos, tratar dados longitudinais e produzir relatórios com qualidade metodológica."
+        },
+        {
+          "tagSlug": "analise-preditiva",
+          "description": "Explorar modelos preditivos de risco de evasão e validar desempenho com métricas adequadas."
+        },
+        {
+          "tagSlug": "indicadores-de-desempenho",
+          "description": "Ajudar a definir KPIs acadêmicos e traduzir resultados estatísticos em recomendações de gestão."
+        }
+      ]
+    },
+    {
+      "title": "Equipe de robótica educacional para feira de ciências",
+      "description": "Grupo de extensão prepara kits e oficinas de robótica para feira de ciências com escolas parceiras. Precisamos de equipe para montagem, programação e mediação pedagógica das atividades.",
+      "skills": [
+        {
+          "tagSlug": "robotica",
+          "description": "Montar e programar protótipos didáticos robustos para demonstração e uso por estudantes."
+        },
+        {
+          "tagSlug": "educacao-maker",
+          "description": "Desenhar desafios hands-on, roteiros de oficina e materiais de apoio para a feira."
+        },
+        {
+          "tagSlug": "cultura-maker",
+          "description": "Apoiar a dinâmica colaborativa, documentação dos projetos e engajamento do público visitante."
+        }
+      ]
+    },
+    {
+      "title": "Busco engenheiro(a) de software para API de repositório acadêmico",
+      "description": "Vamos construir uma API para repositório de produções acadêmicas com autenticação, busca e versionamento de metadados. Procuramos pessoa com experiência em engenharia de software e boas práticas de API.",
+      "skills": [
+        {
+          "tagSlug": "engenharia-de-software",
+          "description": "Definir arquitetura, padrões de código, testes e documentação técnica da API."
+        },
+        {
+          "tagSlug": "api-rest",
+          "description": "Modelar endpoints, contratos, paginação e versionamento da interface de programação."
+        },
+        {
+          "tagSlug": "bancos-de-dados",
+          "description": "Projetar o esquema de dados, índices de busca e estratégias de persistência dos metadados."
+        }
+      ]
+    },
+    {
+      "title": "Parceiros para laboratório aberto de eletrônica embarcada",
+      "description": "Estamos abrindo um laboratório didático de eletrônica embarcada para projetos de extensão e iniciação científica. Buscamos colaboradores para organizar bancadas, roteiros e suporte técnico aos usuários.",
+      "skills": [
+        {
+          "tagSlug": "eletronica-digital",
+          "description": "Preparar experimentos, listar componentes e apoiar montagens de circuitos digitais."
+        },
+        {
+          "tagSlug": "sistemas-embarcados",
+          "description": "Orientar projetos com microcontroladores, firmware básico e boas práticas de prototipagem."
+        },
+        {
+          "tagSlug": "laboratorio-didatico",
+          "description": "Organizar rotinas de uso do espaço, segurança e documentação dos kits disponíveis."
+        }
+      ]
+    },
+    {
+      "title": "Chamado para estudo de cidades inteligentes e mobilidade",
+      "description": "Pesquisa aplicada sobre mobilidade urbana e soluções de cidades inteligentes em escala local. O time vai cruzar dados de deslocamento, percepções da comunidade e propostas de intervenção.",
+      "skills": [
+        {
+          "tagSlug": "cidades-inteligentes",
+          "description": "Mapear soluções tecnológicas e critérios de avaliação para intervenções urbanas inteligentes."
+        },
+        {
+          "tagSlug": "urbanismo",
+          "description": "Analisar o espaço urbano, fluxos de mobilidade e impactos territoriais das propostas."
+        },
+        {
+          "tagSlug": "sig-e-geoprocessamento",
+          "description": "Produzir mapas temáticos, análises espaciais e camadas de apoio à tomada de decisão."
+        }
+      ]
+    },
+    {
+      "title": "Procuro profissional de cibersegurança para auditoria de sistema",
+      "description": "Plataforma acadêmica interna precisa de auditoria de segurança antes de ampliar o número de usuários. Buscamos alguém para revisar autenticação, permissões, logs e recomendações de hardening.",
+      "skills": [
+        {
+          "tagSlug": "ciberseguranca",
+          "description": "Executar checklist de auditoria, identificar vulnerabilidades e priorizar remediações."
+        },
+        {
+          "tagSlug": "seguranca-da-informacao",
+          "description": "Avaliar controles, políticas de acesso e práticas de gestão de risco da informação."
+        },
+        {
+          "tagSlug": "lgpd",
+          "description": "Verificar conformidade no tratamento de dados pessoais e sugerir ajustes de privacidade."
+        }
+      ]
+    },
+    {
+      "title": "Equipe para produção audiovisual de documentário científico",
+      "description": "Produção de um documentário curto sobre pesquisas de impacto social desenvolvidas na universidade. Precisamos de equipe para roteiro, captura, edição e divulgação.",
+      "skills": [
+        {
+          "tagSlug": "producao-audiovisual",
+          "description": "Planejar captação, edição e entrega do documentário com padrão de exibição institucional."
+        },
+        {
+          "tagSlug": "divulgacao-cientifica",
+          "description": "Traduzir conteúdos técnicos em narrativa acessível e revisar a fidelidade científica do roteiro."
+        },
+        {
+          "tagSlug": "storytelling",
+          "description": "Estruturar arco narrativo, entrevistas e recursos visuais que sustentem o engajamento do público."
+        }
+      ]
+    },
+    {
+      "title": "Busco jornalista científico(a) para divulgação de pesquisas",
+      "description": "Núcleo de comunicação científica busca apoio para transformar resultados de pesquisa em matérias, posts e releases compreensíveis ao público amplo.",
+      "skills": [
+        {
+          "tagSlug": "jornalismo",
+          "description": "Apurar, entrevistar pesquisadores e redigir textos claros com precisão factual."
+        },
+        {
+          "tagSlug": "divulgacao-cientifica",
+          "description": "Adaptar linguagem científica, selecionar ângulos de interesse público e revisar conteúdo final."
+        },
+        {
+          "tagSlug": "comunicacao-social",
+          "description": "Planejar canais de distribuição e medir alcance das peças publicadas."
+        }
+      ]
+    },
+    {
+      "title": "Colaboração em projeto de literacia digital para idosos",
+      "description": "Projeto de extensão oferece oficinas de literacia digital para idosos em centros comunitários. Buscamos colaboradores para currículo, mediação e materiais acessíveis.",
+      "skills": [
+        {
+          "tagSlug": "alfabetizacao-digital",
+          "description": "Desenhar módulos progressivos de uso de dispositivos, segurança básica e serviços digitais do cotidiano."
+        },
+        {
+          "tagSlug": "educacao-inclusiva",
+          "description": "Adaptar ritmos, linguagem e estratégias de apoio às necessidades do público idoso."
+        },
+        {
+          "tagSlug": "acessibilidade-comunicacional",
+          "description": "Preparar materiais com tipografia legível, linguagem simples e formatos alternativos."
+        }
+      ]
+    },
+    {
+      "title": "Chamado para design de material didático acessível",
+      "description": "Disciplina da graduação precisa redesenhar materiais didáticos com foco em acessibilidade. Procuramos apoio em design instrucional, tipografia e recursos multimídia inclusivos.",
+      "skills": [
+        {
+          "tagSlug": "acessibilidade-digital",
+          "description": "Aplicar diretrizes de acessibilidade em PDFs, slides e conteúdos digitais da disciplina."
+        },
+        {
+          "tagSlug": "design-grafico",
+          "description": "Produzir layout claro, hierarquia visual consistente e versões alternativas dos materiais."
+        },
+        {
+          "tagSlug": "didatica",
+          "description": "Alinhar o material aos objetivos de aprendizagem e à sequência pedagógica da disciplina."
+        }
+      ]
+    },
+    {
+      "title": "Procuro tradutor(a) para artigos em inglês e espanhol",
+      "description": "Grupo de pesquisa precisa traduzir e revisar artigos acadêmicos para submissão internacional. Buscamos alguém com domínio de inglês e espanhol e familiaridade com escrita científica.",
+      "skills": [
+        {
+          "tagSlug": "traducao",
+          "description": "Traduzir textos acadêmicos com fidelidade terminológica e revisar versões finais para submissão."
+        },
+        {
+          "tagSlug": "linguistica",
+          "description": "Apoiar escolhas lexicais, coesão textual e adequação ao registro científico."
+        },
+        {
+          "tagSlug": "redacao-cientifica",
+          "description": "Ajustar estrutura argumentativa e clareza dos manuscritos nas línguas-alvo."
+        }
+      ]
+    },
+    {
+      "title": "Equipe de extensão em empreendedorismo social",
+      "description": "Incubadora acadêmica apoia empreendimentos de impacto social liderados por estudantes. Precisamos de equipe para mentoria, modelagem de negócios e acompanhamento de indicadores sociais.",
+      "skills": [
+        {
+          "tagSlug": "empreendedorismo",
+          "description": "Orientar modelagem de negócio, proposta de valor e planos de validação com usuários."
+        },
+        {
+          "tagSlug": "inovacao-social",
+          "description": "Ajudar a estruturar soluções com foco em impacto e sustentabilidade social."
+        },
+        {
+          "tagSlug": "impacto-social",
+          "description": "Definir métricas de impacto, rotinas de monitoramento e relatos para parceiros."
+        }
+      ]
+    },
+    {
+      "title": "Busco mentor(a) de gestão de projetos para incubadora acadêmica",
+      "description": "Times incubados precisam de mentoria em gestão de projetos para organizar entregas, riscos e comunicação com stakeholders. Buscamos mentor(a) com experiência prática em frameworks ágeis.",
+      "skills": [
+        {
+          "tagSlug": "gestao-de-projetos",
+          "description": "Apoiar cronogramas, gestão de riscos, rituais de acompanhamento e priorização de entregas."
+        },
+        {
+          "tagSlug": "scrum",
+          "description": "Orientar cerimônias, papéis e práticas Scrum adaptadas ao contexto acadêmico."
+        },
+        {
+          "tagSlug": "product-management",
+          "description": "Ajudar a clarear visão do produto, backlog e critérios de aceite das funcionalidades."
+        }
+      ]
+    },
+    {
+      "title": "Parceiros para hackathon de inovação em sustentabilidade",
+      "description": "Organização de hackathon universitário focado em soluções sustentáveis. Precisamos de apoio para curadoria de desafios, mentoria técnica e avaliação das propostas.",
+      "skills": [
+        {
+          "tagSlug": "sustentabilidade",
+          "description": "Formular desafios reais, critérios de sustentabilidade e rubricas de avaliação."
+        },
+        {
+          "tagSlug": "inovacao",
+          "description": "Facilitar ideação, prototipagem rápida e pitch das equipes participantes."
+        },
+        {
+          "tagSlug": "design-thinking",
+          "description": "Conduzir dinâmicas de descoberta, prototipação e validação ao longo do evento."
+        }
+      ]
+    },
+    {
+      "title": "Chamado para pesquisa-ação em políticas públicas de educação",
+      "description": "Pesquisa-ação com redes escolares sobre implementação de políticas públicas educacionais. Buscamos colaboradores para trabalho de campo, mediação com escolas e análise participativa.",
+      "skills": [
+        {
+          "tagSlug": "politicas-publicas",
+          "description": "Mapear instrumentos de política, atores envolvidos e barreiras de implementação."
+        },
+        {
+          "tagSlug": "educacao",
+          "description": "Apoiar o diálogo com escolas e a leitura pedagógica das práticas observadas."
+        },
+        {
+          "tagSlug": "pesquisa-qualitativa",
+          "description": "Conduzir entrevistas, grupos focais e síntese colaborativa com os participantes."
+        }
+      ]
+    },
+    {
+      "title": "Procuro sociólogo(a) para pesquisa qualitativa em periferias",
+      "description": "Estudo qualitativo sobre práticas culturais e organização comunitária em periferias urbanas. Procuramos alguém com experiência em campo, ética de pesquisa e análise sociológica.",
+      "skills": [
+        {
+          "tagSlug": "sociologia",
+          "description": "Construir referencial teórico, hipóteses interpretativas e análise das dinâmicas sociais observadas."
+        },
+        {
+          "tagSlug": "entrevistas-e-focus-group",
+          "description": "Planejar e conduzir entrevistas e grupos focais com sensibilidade ao contexto local."
+        },
+        {
+          "tagSlug": "etica-em-pesquisa",
+          "description": "Apoiar consentimento, proteção de participantes e boas práticas de integridade no campo."
+        }
+      ]
+    },
+    {
+      "title": "Equipe para mapeamento cultural e patrimônio local",
+      "description": "Projeto de extensão mapeia bens culturais e memórias locais para um inventário colaborativo. Precisamos de equipe para pesquisa documental, registro fotográfico e curadoria do acervo.",
+      "skills": [
+        {
+          "tagSlug": "patrimonio-cultural",
+          "description": "Identificar bens e práticas culturais, aplicar critérios de inventário e registrar fichas descritivas."
+        },
+        {
+          "tagSlug": "museologia",
+          "description": "Organizar o acervo, metadados e estratégias de preservação e exposição."
+        },
+        {
+          "tagSlug": "fotografia",
+          "description": "Produzir documentação visual padronizada dos bens e espaços mapeados."
+        }
+      ]
+    },
+    {
+      "title": "Busco arquiteto(a) para proposta de espaço colaborativo no campus",
+      "description": "Planejamento de um espaço colaborativo no campus para estudo, prototipagem e eventos acadêmicos. Buscamos apoio em concepção espacial, acessibilidade e layout flexível.",
+      "skills": [
+        {
+          "tagSlug": "arquitetura",
+          "description": "Elaborar proposta espacial, fluxos de uso e memorial descritivo do espaço colaborativo."
+        },
+        {
+          "tagSlug": "urbanismo",
+          "description": "Avaliar inserção no campus, conexões com outros espaços e impactos de uso coletivo."
+        },
+        {
+          "tagSlug": "design-de-interacao",
+          "description": "Pensar a experiência de uso do espaço, sinalização e zonas de atividade colaborativa."
+        }
+      ]
+    },
+    {
+      "title": "Colaboração em urbanismo tático e espaços públicos",
+      "description": "Intervenção de urbanismo tático em praça próxima ao campus, com foco em permanência, sombra e convivência. Precisamos de colaboradores para diagnóstico, prototipagem e avaliação pós-ocupação.",
+      "skills": [
+        {
+          "tagSlug": "urbanismo",
+          "description": "Diagnosticar usos atuais, propor intervenções de baixo custo e avaliar resultados com a comunidade."
+        },
+        {
+          "tagSlug": "arquitetura",
+          "description": "Detalhar elementos construídos temporários, materiais e critérios de segurança."
+        },
+        {
+          "tagSlug": "trabalho-de-campo",
+          "description": "Conduzir observações, contagens e conversas com frequentadores antes e depois da intervenção."
+        }
+      ]
+    },
+    {
+      "title": "Chamado para desenvolvimento mobile de guia acadêmico",
+      "description": "Aplicativo mobile para guiar calouros em serviços, espaços e rotinas acadêmicas. Buscamos desenvolvimento nativo ou multiplataforma, com atenção a performance e usabilidade.",
+      "skills": [
+        {
+          "tagSlug": "desenvolvimento-mobile",
+          "description": "Implementar o aplicativo, navegação, offline básico e publicação de versão beta."
+        },
+        {
+          "tagSlug": "uxui-design",
+          "description": "Prototipar fluxos do guia, testar com calouros e refinar a interface."
+        },
+        {
+          "tagSlug": "educacao",
+          "description": "Organizar conteúdos institucionais e validar a utilidade pedagógica do guia."
+        }
+      ]
+    },
+    {
+      "title": "Procuro especialista em nuvem para migração de serviços institucionais",
+      "description": "Setor de TI acadêmica planeja migrar serviços internos para nuvem com foco em disponibilidade e custo. Precisamos de especialista para desenho da arquitetura, plano de migração e boas práticas de operação.",
+      "skills": [
+        {
+          "tagSlug": "computacao-em-nuvem",
+          "description": "Desenhar arquitetura-alvo, estimar custos e definir etapas de migração com rollback."
+        },
+        {
+          "tagSlug": "devops",
+          "description": "Automatizar provisionamento, pipelines e monitoramento dos serviços migrados."
+        },
+        {
+          "tagSlug": "observabilidade",
+          "description": "Configurar métricas, logs e alertas para acompanhar saúde e desempenho pós-migração."
+        }
+      ]
+    },
+    {
+      "title": "Equipe DevOps para pipeline de publicação de dados abertos",
+      "description": "Projeto de dados abertos precisa de pipeline confiável para publicar conjuntos atualizados com qualidade e versionamento. Buscamos equipe DevOps para CI/CD, validação e publicação automatizada.",
+      "skills": [
+        {
+          "tagSlug": "devops",
+          "description": "Montar pipeline de validação, versionamento e publicação contínua dos datasets."
+        },
+        {
+          "tagSlug": "dados-abertos",
+          "description": "Definir formatos, metadados e critérios de qualidade para liberação pública."
+        },
+        {
+          "tagSlug": "governanca-de-dados",
+          "description": "Estabelecer papéis, catálogo e políticas de atualização dos conjuntos publicados."
+        }
+      ]
+    },
+    {
+      "title": "Busco analista de banco de dados para repositório de pesquisas",
+      "description": "Repositório institucional de pesquisas precisa de modelagem e otimização de consultas. Procuramos analista para revisar schema, índices e rotinas de backup.",
+      "skills": [
+        {
+          "tagSlug": "bancos-de-dados",
+          "description": "Revisar modelagem, performance de consultas e estratégias de indexação do repositório."
+        },
+        {
+          "tagSlug": "etl-de-dados",
+          "description": "Organizar cargas periódicas, transformação de metadados e rotinas de consistência."
+        },
+        {
+          "tagSlug": "governanca-de-dados",
+          "description": "Apoiar dicionário de dados, qualidade e regras de acesso ao repositório."
+        }
+      ]
+    },
+    {
+      "title": "Parceiros para oficina de realidade aumentada em museus",
+      "description": "Museu universitário quer oficinas de realidade aumentada para enriquecer visitas educativas. Precisamos de parceiros para conteúdo, protótipos AR e mediação com o público.",
+      "skills": [
+        {
+          "tagSlug": "realidade-aumentada",
+          "description": "Desenvolver experiências AR estáveis para dispositivos móveis usados nas visitas."
+        },
+        {
+          "tagSlug": "museologia",
+          "description": "Alinhar a experiência ao acervo, narrativa expositiva e cuidados de preservação."
+        },
+        {
+          "tagSlug": "turismo-educacional",
+          "description": "Desenhar roteiros de visita e dinâmicas educativas mediadas pela tecnologia."
+        }
+      ]
+    },
+    {
+      "title": "Chamado para protótipo de realidade virtual em treinamento clínico",
+      "description": "Curso da área da saúde pretende testar módulo de realidade virtual para treinamento de procedimentos. Buscamos equipe para modelagem do cenário, interações e validação com docentes clínicos.",
+      "skills": [
+        {
+          "tagSlug": "realidade-virtual",
+          "description": "Prototipar cenário imersivo, interações e critérios de desempenho do módulo de treino."
+        },
+        {
+          "tagSlug": "enfermagem",
+          "description": "Validar fidelidade do procedimento, checklist clínico e segurança pedagógica da simulação."
+        },
+        {
+          "tagSlug": "laboratorio-didatico",
+          "description": "Apoiar a implantação do módulo no laboratório e a rotina de uso pelos estudantes."
+        }
+      ]
+    },
+    {
+      "title": "Procuro químico(a) para projeto de química verde laboratorial",
+      "description": "Laboratório didático quer substituir práticas por alternativas de química verde. Precisamos de apoio para selecionar protocolos, avaliar resíduos e treinar monitores.",
+      "skills": [
+        {
+          "tagSlug": "quimica-verde",
+          "description": "Propor substituições de reagentes e rotas mais seguras e ambientalmente responsáveis."
+        },
+        {
+          "tagSlug": "quimica-analitica",
+          "description": "Validar métodos analíticos das novas práticas e comparar desempenho com os protocolos atuais."
+        },
+        {
+          "tagSlug": "residuos-solidos",
+          "description": "Mapear geração de resíduos, rotas de descarte e indicadores de redução."
+        }
+      ]
+    },
+    {
+      "title": "Equipe de biotecnologia para cultivo e análise de microalgas",
+      "description": "Projeto investiga cultivo de microalgas para aplicações ambientais e educacionais. Buscamos equipe para manutenção de cultivos, análises e documentação dos experimentos.",
+      "skills": [
+        {
+          "tagSlug": "biotecnologia",
+          "description": "Conduzir cultivos, controlar parâmetros e registrar condições experimentais."
+        },
+        {
+          "tagSlug": "microbiologia",
+          "description": "Apoiar monitoramento de contaminações, técnicas assépticas e análises microbiológicas."
+        },
+        {
+          "tagSlug": "bioinformatica",
+          "description": "Organizar dados experimentais e apoiar análises computacionais quando necessário."
+        }
+      ]
+    },
+    {
+      "title": "Busco geneticista para apoio em análise de sequenciamento",
+      "description": "Grupo de pesquisa recebeu dados de sequenciamento e precisa de apoio para pipeline de análise e interpretação biológica. Procuramos geneticista com experiência em bioinformática aplicada.",
+      "skills": [
+        {
+          "tagSlug": "genetica",
+          "description": "Interpretar variantes e resultados biológicos com base no desenho experimental do estudo."
+        },
+        {
+          "tagSlug": "bioinformatica",
+          "description": "Executar pipeline de alinhamento, chamada de variantes e controle de qualidade."
+        },
+        {
+          "tagSlug": "integridade-cientifica",
+          "description": "Garantir rastreabilidade dos dados, versionamento de análises e documentação reprodutível."
+        }
+      ]
+    },
+    {
+      "title": "Colaboração em farmacologia e revisão de literatura",
+      "description": "Projeto de iniciação científica necessita revisão de literatura em farmacologia e organização de evidências para artigo de revisão narrativa.",
+      "skills": [
+        {
+          "tagSlug": "farmacologia",
+          "description": "Selecionar literatura relevante, organizar mecanismos e discutir evidências clínicas e pré-clínicas."
+        },
+        {
+          "tagSlug": "revisao-sistematica",
+          "description": "Apoiar estratégia de busca, critérios de inclusão e síntese estruturada das publicações."
+        },
+        {
+          "tagSlug": "redacao-cientifica",
+          "description": "Redigir seções do manuscrito, padronizar citações e revisar clareza do texto."
+        }
+      ]
+    },
+    {
+      "title": "Chamado para app de nutrição voltado a estudantes",
+      "description": "Equipe interdisciplinar quer desenvolver um aplicativo de educação nutricional para estudantes universitários, com foco em hábitos viáveis no cotidiano acadêmico.",
+      "skills": [
+        {
+          "tagSlug": "nutricao",
+          "description": "Definir conteúdos, recomendações e critérios educativos alinhados a evidências nutricionais."
+        },
+        {
+          "tagSlug": "desenvolvimento-mobile",
+          "description": "Implementar o app, rotinas de acompanhamento e recursos de personalização básica."
+        },
+        {
+          "tagSlug": "uxui-design",
+          "description": "Projetar interfaces acessíveis e jornadas que incentivem adesão sem sobrecarregar o usuário."
+        }
+      ]
+    },
+    {
+      "title": "Procuro fisioterapeuta para validação de protocolo digital",
+      "description": "Startup acadêmica desenvolveu protocolo digital de acompanhamento fisioterapêutico e precisa de validação clínica com profissionais da área.",
+      "skills": [
+        {
+          "tagSlug": "fisioterapia",
+          "description": "Avaliar segurança, aderência clínica e melhorias do protocolo digital proposto."
+        },
+        {
+          "tagSlug": "telemedicina",
+          "description": "Analisar a adequação do acompanhamento remoto e critérios de encaminhamento presencial."
+        },
+        {
+          "tagSlug": "monitoramento-e-avaliacao",
+          "description": "Definir indicadores de adesão, desfecho e qualidade do acompanhamento digital."
+        }
+      ]
+    },
+    {
+      "title": "Equipe de enfermagem para estudo de práticas assistenciais",
+      "description": "Estudo observacional sobre práticas assistenciais em serviços de saúde parceiros. Buscamos equipe de enfermagem para coleta padronizada, análise e discussão de melhorias.",
+      "skills": [
+        {
+          "tagSlug": "enfermagem",
+          "description": "Aplicar instrumentos de observação, registrar práticas e contribuir com a discussão assistencial."
+        },
+        {
+          "tagSlug": "saude-publica",
+          "description": "Contextualizar achados no sistema de saúde e propor recomendações de melhoria."
+        },
+        {
+          "tagSlug": "etica-em-pesquisa",
+          "description": "Garantir consentimentos, proteção de dados e conduta ética durante a coleta."
+        }
+      ]
+    },
+    {
+      "title": "Busco economista para modelagem de impacto social",
+      "description": "Programa de extensão quer estimar impacto social e econômico de suas ações. Procuramos economista para modelagem, coleta de indicadores e relatório executivo.",
+      "skills": [
+        {
+          "tagSlug": "economia",
+          "description": "Estruturar modelo de impacto, hipóteses e estimativas com base nos dados disponíveis."
+        },
+        {
+          "tagSlug": "impacto-social",
+          "description": "Definir teoria de mudança, indicadores e narrativa de resultados para stakeholders."
+        },
+        {
+          "tagSlug": "monitoramento-e-avaliacao",
+          "description": "Organizar rotina de coleta, baseline e avaliação periódica do programa."
+        }
+      ]
+    },
+    {
+      "title": "Parceiros para finanças pessoais e educação econômica",
+      "description": "Oficinas de educação financeira para estudantes de baixa renda. Precisamos de parceiros para currículo, materiais e mediação de encontros práticos.",
+      "skills": [
+        {
+          "tagSlug": "financas",
+          "description": "Preparar conteúdos de orçamento, crédito e planejamento financeiro aplicáveis ao público-alvo."
+        },
+        {
+          "tagSlug": "economia",
+          "description": "Apoiar a fundamentação dos temas e a adaptação de conceitos a exemplos do cotidiano estudantil."
+        },
+        {
+          "tagSlug": "educacao",
+          "description": "Desenhar a sequência pedagógica das oficinas e estratégias de avaliação da aprendizagem."
+        }
+      ]
+    },
+    {
+      "title": "Chamado para pesquisa em direito digital e privacidade",
+      "description": "Grupo de pesquisa analisa práticas de privacidade em serviços digitais usados por universidades. Buscamos colaboradores para revisão normativa, estudos de caso e recomendações de conformidade.",
+      "skills": [
+        {
+          "tagSlug": "direito-digital",
+          "description": "Analisar marcos legais aplicáveis e produzir notas técnicas sobre riscos e deveres institucionais."
+        },
+        {
+          "tagSlug": "privacidade-de-dados",
+          "description": "Mapear fluxos de dados pessoais e apontar medidas de privacidade desde a concepção."
+        },
+        {
+          "tagSlug": "lgpd",
+          "description": "Avaliar bases legais, direitos dos titulares e lacunas de conformidade LGPD."
+        }
+      ]
+    },
+    {
+      "title": "Procuro especialista em ESG para diagnóstico institucional",
+      "description": "Instituição de ensino deseja um diagnóstico ESG inicial com foco em governança, práticas ambientais e impacto social. Procuramos especialista para matriz de materialidade e plano de ação.",
+      "skills": [
+        {
+          "tagSlug": "esg",
+          "description": "Conduzir diagnóstico ESG, priorizar temas materiais e propor roadmap de melhorias."
+        },
+        {
+          "tagSlug": "sustentabilidade",
+          "description": "Avaliar práticas ambientais e indicadores de desempenho sustentável da instituição."
+        },
+        {
+          "tagSlug": "planejamento-estrategico",
+          "description": "Integrar recomendações ESG ao planejamento institucional e à governança de metas."
+        }
+      ]
+    },
+    {
+      "title": "Equipe de marketing digital para divulgação científica",
+      "description": "Laboratório quer estruturar presença digital para divulgar resultados e atrair colaboradores. Precisamos de equipe para calendário editorial, peças e análise de desempenho.",
+      "skills": [
+        {
+          "tagSlug": "marketing-digital",
+          "description": "Planejar canais, campanhas e métricas de alcance para a comunicação do laboratório."
+        },
+        {
+          "tagSlug": "divulgacao-cientifica",
+          "description": "Garantir fidelidade científica das peças e adaptar a linguagem a públicos diversos."
+        },
+        {
+          "tagSlug": "design-grafico",
+          "description": "Criar identidade visual consistente para posts, cards e materiais de divulgação."
+        }
+      ]
+    },
+    {
+      "title": "Busco designer gráfico para identidade visual de grupo de pesquisa",
+      "description": "Grupo de pesquisa consolidado precisa de identidade visual para site, relatórios e redes. Buscamos designer para sistema visual simples, aplicável e alinhado à área científica do grupo.",
+      "skills": [
+        {
+          "tagSlug": "design-grafico",
+          "description": "Desenvolver logotipo, paleta, tipografia e aplicações básicas da identidade."
+        },
+        {
+          "tagSlug": "comunicacao-social",
+          "description": "Apoiar o briefing de posicionamento e a adaptação da identidade aos canais do grupo."
+        }
+      ]
+    },
+    {
+      "title": "Colaboração em fotografia documental de projetos de extensão",
+      "description": "Núcleo de extensão deseja ensaio fotográfico documental das ações em território. Procuramos fotógrafo(a) para cobertura ética, edição e entrega de acervo organizado.",
+      "skills": [
+        {
+          "tagSlug": "fotografia",
+          "description": "Realizar cobertura documental, edição e catalogação das imagens produzidas."
+        },
+        {
+          "tagSlug": "extensao-universitaria",
+          "description": "Compreender a dinâmica das ações e respeitar acordos de imagem com a comunidade."
+        },
+        {
+          "tagSlug": "etica-em-pesquisa",
+          "description": "Orientar consentimento de imagem e cuidados no uso das fotografias."
+        }
+      ]
+    },
+    {
+      "title": "Chamado para composição musical em instalação interativa",
+      "description": "Instalação artística interativa no campus precisa de trilha e paisagens sonoras responsivas. Buscamos compositor(a) para criar camadas sonoras sincronizadas às interações do público.",
+      "skills": [
+        {
+          "tagSlug": "musica",
+          "description": "Compor trilha e texturas sonoras adequadas ao conceito da instalação."
+        },
+        {
+          "tagSlug": "artes-visuais",
+          "description": "Dialogar com a linguagem visual da obra e alinhar a experiência multimodal."
+        },
+        {
+          "tagSlug": "design-de-interacao",
+          "description": "Mapear gatilhos de interação e comportamentos sonoros correspondentes."
+        }
+      ]
+    },
+    {
+      "title": "Procuro artista visual para exposição colaborativa no campus",
+      "description": "Coletivo estudantil organiza exposição colaborativa sobre ciência e cidade. Procuramos artista visual para curadoria compartilhada, produção de obras e montagem.",
+      "skills": [
+        {
+          "tagSlug": "artes-visuais",
+          "description": "Produzir obras, participar da curadoria e apoiar a montagem expositiva."
+        },
+        {
+          "tagSlug": "museologia",
+          "description": "Ajudar no plano de montagem, legendas e cuidados de conservação durante a mostra."
+        }
+      ]
+    },
+    {
+      "title": "Equipe de linguística para corpus de português brasileiro",
+      "description": "Projeto constrói corpus anotado de português brasileiro para pesquisas em PLN e ensino de língua. Precisamos de equipe para coleta, anotação e controle de qualidade.",
+      "skills": [
+        {
+          "tagSlug": "linguistica",
+          "description": "Definir diretrizes de anotação, resolver casos ambíguos e validar a qualidade do corpus."
+        },
+        {
+          "tagSlug": "processamento-de-linguagem-natural",
+          "description": "Apoiar formatos de dados, ferramentas de anotação e usos futuros do corpus em PLN."
+        },
+        {
+          "tagSlug": "metodologia-cientifica",
+          "description": "Documentar protocolo de coleta, amostragem e critérios de inclusão textual."
+        }
+      ]
+    },
+    {
+      "title": "Busco historiador(a) para curadoria de acervo digital",
+      "description": "Digitalização de acervo histórico institucional precisa de curadoria para descrição, contextualização e seleção de itens prioritários.",
+      "skills": [
+        {
+          "tagSlug": "historia",
+          "description": "Contextualizar documentos, propor critérios curatoriais e redigir textos de apresentação."
+        },
+        {
+          "tagSlug": "museologia",
+          "description": "Organizar metadados, tipologias documentais e cuidados de preservação digital."
+        },
+        {
+          "tagSlug": "patrimonio-cultural",
+          "description": "Apoiar a valoração do acervo e estratégias de acesso público responsável."
+        }
+      ]
+    },
+    {
+      "title": "Parceiros para geoprocessamento e mapas colaborativos",
+      "description": "Projeto comunitário quer produzir mapas colaborativos de equipamentos públicos e demandas locais. Buscamos parceiros em geoprocessamento, cartografia digital e mediação comunitária.",
+      "skills": [
+        {
+          "tagSlug": "sig-e-geoprocessamento",
+          "description": "Estruturar a base espacial, processar camadas e publicar mapas atualizáveis."
+        },
+        {
+          "tagSlug": "cartografia-digital",
+          "description": "Definir simbologia, escalas e produtos cartográficos legíveis para o público."
+        },
+        {
+          "tagSlug": "ciencia-cidada",
+          "description": "Organizar coleta participativa e validação comunitária dos pontos mapeados."
+        }
+      ]
+    },
+    {
+      "title": "Chamado para relações internacionais e mobilidade acadêmica",
+      "description": "Escritório de internacionalização deseja melhorar processos de mobilidade acadêmica e materiais de acolhida. Procuramos apoio em mapeamento de editais, orientação a estudantes e comunicação bilíngue.",
+      "skills": [
+        {
+          "tagSlug": "relacoes-internacionais",
+          "description": "Mapear oportunidades de mobilidade, requisitos e boas práticas de acolhida internacional."
+        },
+        {
+          "tagSlug": "traducao",
+          "description": "Revisar e traduzir materiais orientativos para estudantes estrangeiros e parceiros."
+        },
+        {
+          "tagSlug": "comunicacao-interpessoal",
+          "description": "Apoiar plantões de orientação e mediação de dúvidas de candidatos à mobilidade."
+        }
+      ]
+    },
+    {
+      "title": "Procuro antropólogo(a) para etnografia em comunidade escolar",
+      "description": "Pesquisa etnográfica em comunidade escolar sobre práticas de cuidado e convivência. Buscamos antropólogo(a) para imersão, diário de campo e análise interpretativa.",
+      "skills": [
+        {
+          "tagSlug": "antropologia",
+          "description": "Conduzir etnografia, produzir notas de campo e elaborar análise cultural do contexto escolar."
+        },
+        {
+          "tagSlug": "trabalho-de-campo",
+          "description": "Organizar entrada em campo, relações de confiança e registro sistemático das observações."
+        },
+        {
+          "tagSlug": "etica-em-pesquisa",
+          "description": "Assegurar consentimentos, confidencialidade e devolutiva ética à comunidade escolar."
+        }
+      ]
+    },
+    {
+      "title": "Equipe de iniciação científica em aprendizado de máquina",
+      "description": "Grupo júnior de iniciação científica inicia trilha em aprendizado de máquina com datasets abertos. Precisamos de mentoria técnica e apoio na organização dos experimentos.",
+      "skills": [
+        {
+          "tagSlug": "aprendizado-de-maquina",
+          "description": "Orientar escolha de modelos, métricas e boas práticas de validação para iniciantes."
+        },
+        {
+          "tagSlug": "iniciacao-cientifica",
+          "description": "Ajudar no plano de trabalho, cronograma e registro científico das atividades."
+        },
+        {
+          "tagSlug": "metodologia-cientifica",
+          "description": "Estruturar hipóteses, protocolo experimental e critérios de reprodutibilidade."
+        }
+      ]
+    },
+    {
+      "title": "Busco orientador(a) de metodologia científica para grupo júnior",
+      "description": "Grupo júnior precisa de orientação em metodologia científica para formular perguntas, protocolos e relatórios de pesquisa com qualidade.",
+      "skills": [
+        {
+          "tagSlug": "metodologia-cientifica",
+          "description": "Orientar desenho de pesquisa, variáveis, amostragem e estrutura de relatórios."
+        },
+        {
+          "tagSlug": "escrita-academica",
+          "description": "Revisar textos, clareza argumentativa e normas de apresentação científica."
+        },
+        {
+          "tagSlug": "integridade-cientifica",
+          "description": "Discutir plágio, citação adequada e práticas responsáveis de pesquisa."
+        }
+      ]
+    },
+    {
+      "title": "Colaboração em revisão por pares de artigos estudantis",
+      "description": "Revista estudantil organiza ciclo de revisão por pares de artigos de iniciação científica. Buscamos revisores com disponibilidade para pareceres construtivos e formativos.",
+      "skills": [
+        {
+          "tagSlug": "escrita-academica",
+          "description": "Avaliar clareza, coerência e qualidade argumentativa dos manuscritos submetidos."
+        },
+        {
+          "tagSlug": "metodologia-cientifica",
+          "description": "Verificar adequação metodológica e apontar melhorias objetivas aos autores."
+        },
+        {
+          "tagSlug": "integridade-cientifica",
+          "description": "Observar ética, citações e potenciais problemas de integridade nos textos."
+        }
+      ]
+    },
+    {
+      "title": "Chamado para protótipo de blockchain em certificados acadêmicos",
+      "description": "Prova de conceito para emissão e verificação de certificados acadêmicos com blockchain. Precisamos de colaboradores para arquitetura, smart contracts e integração com sistemas institucionais.",
+      "skills": [
+        {
+          "tagSlug": "blockchain",
+          "description": "Prototipar emissão e verificação on-chain/off-chain de certificados com rastreabilidade."
+        },
+        {
+          "tagSlug": "engenharia-de-software",
+          "description": "Definir arquitetura da solução, testes e documentação técnica da prova de conceito."
+        },
+        {
+          "tagSlug": "ciberseguranca",
+          "description": "Avaliar riscos de segurança, chaves e controles de acesso do fluxo de certificação."
+        }
+      ]
+    },
+    {
+      "title": "Procuro engenheiro(a) civil para estudo de acessibilidade no campus",
+      "description": "Diagnóstico de acessibilidade física em edifícios e percursos do campus. Buscamos engenheiro(a) civil para levantamento técnico, prioridades de intervenção e estimativas preliminares.",
+      "skills": [
+        {
+          "tagSlug": "engenharia-civil",
+          "description": "Avaliar barreiras físicas, propor intervenções e estimar escopo técnico das melhorias."
+        },
+        {
+          "tagSlug": "arquitetura",
+          "description": "Apoiar soluções espaciais acessíveis e compatibilidade com o uso atual dos edifícios."
+        },
+        {
+          "tagSlug": "acessibilidade-digital",
+          "description": "Conectar o diagnóstico físico a recomendações de sinalização e comunicação acessível."
+        }
+      ]
+    },
+    {
+      "title": "Equipe de engenharia elétrica para sensorização de laboratórios",
+      "description": "Projeto de instrumentação para monitorar consumo elétrico e condições ambientais em laboratórios didáticos. Precisamos de equipe para projeto elétrico, sensores e painel de acompanhamento.",
+      "skills": [
+        {
+          "tagSlug": "engenharia-eletrica",
+          "description": "Dimensionar circuitos, proteções e instalação segura dos sensores no laboratório."
+        },
+        {
+          "tagSlug": "instrumentacao",
+          "description": "Selecionar e calibrar sensores, padronizar medições e registrar procedimentos."
+        },
+        {
+          "tagSlug": "internet-das-coisas",
+          "description": "Integrar a telemetria a um gateway e disponibilizar os dados em painel simples."
+        }
+      ]
+    },
+    {
+      "title": "Busco engenheiro(a) mecânico(a) para impressão 3D de peças didáticas",
+      "description": "Laboratório maker produz peças didáticas impressas em 3D para disciplinas de engenharia. Procuramos apoio em modelagem, impressão e validação dimensional das peças.",
+      "skills": [
+        {
+          "tagSlug": "engenharia-mecanica",
+          "description": "Projetar peças didáticas com tolerâncias adequadas e requisitos de montagem."
+        },
+        {
+          "tagSlug": "impressao-3d",
+          "description": "Preparar fatiamento, parâmetros de impressão e controle de qualidade das peças."
+        },
+        {
+          "tagSlug": "prototipagem-rapida",
+          "description": "Iterar protótipos rapidamente a partir de feedback de professores e monitores."
+        }
+      ]
+    },
+    {
+      "title": "Parceiros de engenharia de produção para otimização de processos",
+      "description": "Setor administrativo acadêmico busca otimizar fluxos de atendimento e estoque de materiais didáticos. Precisamos de parceiros em engenharia de produção para mapear processos e propor melhorias.",
+      "skills": [
+        {
+          "tagSlug": "engenharia-de-producao",
+          "description": "Mapear processos, gargalos e oportunidades de padronização com foco em eficiência."
+        },
+        {
+          "tagSlug": "logistica",
+          "description": "Reorganizar fluxo de materiais, estoques e prazos de reposição."
+        },
+        {
+          "tagSlug": "indicadores-de-desempenho",
+          "description": "Definir KPIs operacionais e rotina de acompanhamento das melhorias."
+        }
+      ]
+    },
+    {
+      "title": "Chamado para materiais avançados em protótipos sustentáveis",
+      "description": "Equipe de prototipagem busca alternativas de materiais avançados com menor impacto ambiental para peças de demonstração. O trabalho inclui seleção, testes e documentação comparativa.",
+      "skills": [
+        {
+          "tagSlug": "materiais-avancados",
+          "description": "Selecionar materiais candidatos, definir ensaios e comparar desempenho técnico."
+        },
+        {
+          "tagSlug": "analise-de-ciclo-de-vida",
+          "description": "Avaliar impactos ambientais relativos e apoiar a escolha com critérios de ciclo de vida."
+        },
+        {
+          "tagSlug": "prototipagem-rapida",
+          "description": "Fabricar protótipos de teste e registrar viabilidade de manufatura."
+        }
+      ]
+    },
+    {
+      "title": "Procuro especialista em automação industrial para visita técnica",
+      "description": "Curso técnico organiza visitas técnicas a plantas com automação industrial. Buscamos especialista para preparar roteiro técnico, mediação e material de apoio aos estudantes.",
+      "skills": [
+        {
+          "tagSlug": "automacao-industrial",
+          "description": "Elaborar roteiro técnico da visita, pontos de observação e discussão pós-visita."
+        },
+        {
+          "tagSlug": "controle-e-automacao",
+          "description": "Explicar malhas de controle, instrumentação e lógicas observadas em campo."
+        },
+        {
+          "tagSlug": "ensino-medio-tecnico",
+          "description": "Adaptar a linguagem e atividades ao nível dos estudantes do ensino técnico."
+        }
+      ]
+    },
+    {
+      "title": "Equipe de logística para distribuição de kits educacionais",
+      "description": "Projeto de extensão distribui kits educacionais a escolas parceiras e precisa organizar rota, estoque e rastreio das entregas.",
+      "skills": [
+        {
+          "tagSlug": "logistica",
+          "description": "Planejar rotas, janelas de entrega e controle de estoque dos kits."
+        },
+        {
+          "tagSlug": "gestao-de-projetos",
+          "description": "Coordenar cronograma, responsáveis e comunicação com escolas receptoras."
+        },
+        {
+          "tagSlug": "monitoramento-e-avaliacao",
+          "description": "Registrar entregas, pendências e indicadores de cobertura do projeto."
+        }
+      ]
+    },
+    {
+      "title": "Busco administrador(a) público(a) para estudo de transparência",
+      "description": "Estudo sobre práticas de transparência ativa em portais institucionais. Procuramos pessoa da área de administração pública para análise comparativa e recomendações.",
+      "skills": [
+        {
+          "tagSlug": "administracao-publica",
+          "description": "Analisar portais, obrigações de transparência e lacunas de publicação."
+        },
+        {
+          "tagSlug": "politicas-publicas",
+          "description": "Relacionar achados a instrumentos de política e governança da informação."
+        },
+        {
+          "tagSlug": "dados-abertos",
+          "description": "Avaliar qualidade, formatos e atualização dos conjuntos públicos disponibilizados."
+        }
+      ]
+    },
+    {
+      "title": "Colaboração em contabilidade social de projetos extensionistas",
+      "description": "Projetos de extensão querem adotar práticas de contabilidade social para prestar contas a financiadores e comunidades. Buscamos apoio técnico para indicadores e relatórios.",
+      "skills": [
+        {
+          "tagSlug": "contabilidade",
+          "description": "Estruturar registros, categorias de custo e demonstrativos adequados aos projetos."
+        },
+        {
+          "tagSlug": "impacto-social",
+          "description": "Integrar métricas sociais aos relatórios financeiros e narrativas de prestação de contas."
+        },
+        {
+          "tagSlug": "economia-solidaria",
+          "description": "Apoiar a leitura dos resultados no marco da economia solidária e extensão universitária."
+        }
+      ]
+    },
+    {
+      "title": "Chamado para startup acadêmica na área de edtech",
+      "description": "Time pré-incubado desenvolve edtech para feedback formativo em disciplinas grandes. Precisamos de apoio em produto, validação com docentes e preparo para pitch.",
+      "skills": [
+        {
+          "tagSlug": "startups",
+          "description": "Apoiar tração inicial, validação de mercado acadêmico e narrativa para investidores/incubadoras."
+        },
+        {
+          "tagSlug": "tecnologias-educacionais",
+          "description": "Avaliar aderência pedagógica da solução e critérios de adoção por docentes."
+        },
+        {
+          "tagSlug": "product-management",
+          "description": "Priorizar backlog do MVP, hipóteses de valor e experimentos de validação."
+        }
+      ]
+    },
+    {
+      "title": "Procuro product owner estudantil para MVP de marketplace científico",
+      "description": "MVP de marketplace científico para conectar demandas de laboratórios a colaboradores. Buscamos product owner estudantil para discovery, backlog e alinhamento com stakeholders.",
+      "skills": [
+        {
+          "tagSlug": "product-management",
+          "description": "Conduzir discovery, escrever histórias de usuário e manter o backlog priorizado."
+        },
+        {
+          "tagSlug": "scrum",
+          "description": "Facilitar rituais ágeis e sincronizar desenvolvimento com entregas do MVP."
+        },
+        {
+          "tagSlug": "empreendedorismo",
+          "description": "Apoiar proposta de valor, entrevistas com usuários e estratégia de go-to-market acadêmico."
+        }
+      ]
+    },
+    {
+      "title": "Equipe de QA para testes de usabilidade em plataforma acadêmica",
+      "description": "Plataforma acadêmica entra em fase de testes de usabilidade e regressão. Precisamos de equipe de QA para roteiros, execução e relatório de defeitos com severidade.",
+      "skills": [
+        {
+          "tagSlug": "testes-de-software",
+          "description": "Elaborar casos de teste, executar regressão e reportar defeitos de forma rastreável."
+        },
+        {
+          "tagSlug": "qualidade-de-software",
+          "description": "Definir critérios de aceite, cobertura mínima e padrão de evidências de teste."
+        },
+        {
+          "tagSlug": "uxui-design",
+          "description": "Conduzir sessões de usabilidade e sintetizar achados de experiência do usuário."
+        }
+      ]
+    },
+    {
+      "title": "Busco pesquisador(a) em visão computacional para análise de imagens",
+      "description": "Projeto analisa imagens de lâminas e sensores para apoiar classificação automática. Procuramos pesquisador(a) em visão computacional para pipeline de pré-processamento e modelos.",
+      "skills": [
+        {
+          "tagSlug": "visao-computacional",
+          "description": "Desenvolver pipeline de leitura, augmentação e classificação de imagens do domínio do projeto."
+        },
+        {
+          "tagSlug": "deep-learning",
+          "description": "Treinar e avaliar redes profundas, comparar architectures e registrar experimentos."
+        },
+        {
+          "tagSlug": "ciencia-de-dados",
+          "description": "Organizar datasets rotulados, splits e métricas de avaliação de forma reprodutível."
+        }
+      ]
+    },
+    {
+      "title": "Parceiros de PLN para sumarização de artigos científicos",
+      "description": "Ferramenta interna de sumarização de artigos científicos para grupos de estudo. Buscamos parceiros de PLN para modelos, avaliação humana e integração ao fluxo de leitura do grupo.",
+      "skills": [
+        {
+          "tagSlug": "processamento-de-linguagem-natural",
+          "description": "Implementar e avaliar sumarização abstrativa/extrativa com métricas e revisão humana."
+        },
+        {
+          "tagSlug": "engenharia-de-prompt",
+          "description": "Desenhar prompts, templates e estratégias de avaliação para sumários fiéis ao artigo."
+        },
+        {
+          "tagSlug": "redacao-cientifica",
+          "description": "Validar qualidade dos sumários quanto a precisão, cobertura e utilidade para estudo."
+        }
+      ]
+    }
+  ]
+}

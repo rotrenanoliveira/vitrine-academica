@@ -8,7 +8,7 @@ import { fetchProjects } from '@/server/http/routes/projects/fetch-projects'
 import { projectsSearchParams, projectsUrlKeys } from '../search-params'
 import { ProjectsPagination } from './projects-pagination'
 
-const PAGE_LIMIT = 100
+const PAGE_LIMIT = 25
 
 function ProjectsGallerySkeleton() {
   return (

@@ -25,7 +25,7 @@ export async function fetchProjectsRoute(app: FastifyInstance) {
           title: z.string().optional(),
           tags: z.union([z.uuid(), z.array(z.uuid())]).optional(),
           page: z.coerce.number().int().min(1).default(1).describe('Página da listagem'),
-          limit: z.coerce.number().int().min(1).max(100).default(100).describe('Quantidade de itens por página'),
+          limit: z.coerce.number().int().min(1).max(100).default(25).describe('Quantidade de itens por página'),
         }),
         response: {
           200: z.object({
