@@ -2,22 +2,17 @@ import { type Either, left, right } from '@/core/either'
 import { canManageInstitution } from '@/domain/institution/application/authorization/can-manage-institution'
 import type { InstitutionMembersRepository } from '@/domain/institution/application/repositories/institution-members-repository'
 import type { Event } from '../../../enterprise/entities/event'
-import type { Theme } from '../../../enterprise/entities/theme'
+import { type Theme, ThemeStatus } from '../../../enterprise/entities/theme'
 import { EventNotFoundError } from '../../_errors/event-not-found-error'
-import { NotEligibleForEventError } from '../../_errors/not-eligible-for-event-error'
-import { canParticipateInEvent } from '../../authorization/can-participate-in-event'
 import type { EventsRepository } from '../../repositories/events-repository'
 import type { ThemesRepository } from '../../repositories/themes-repository'
 
 interface GetCurrentThemeSelectionUseCaseRequest {
   eventId: string
-  userId: string
+  userId?: string
 }
 
-type GetCurrentThemeSelectionUseCaseResponse = Either<
-  EventNotFoundError | NotEligibleForEventError,
-  { event: Event; themes: Theme[] }
->
+type GetCurrentThemeSelectionUseCaseResponse = Either<EventNotFoundError, { event: Event; themes: Theme[] }>
 
 export class GetCurrentThemeSelectionUseCase {
   constructor(
@@ -36,25 +31,13 @@ export class GetCurrentThemeSelectionUseCase {
       return left(new EventNotFoundError())
     }
 
-    const canManage = await canManageInstitution(
-      this.institutionMembersRepository,
-      event.institutionId.toString(),
-      userId,
-    )
+    const canManage = userId
+      ? await canManageInstitution(this.institutionMembersRepository, event.institutionId.toString(), userId)
+      : false
 
-    if (!canManage) {
-      const eligible = await canParticipateInEvent(this.institutionMembersRepository, event, userId)
-
-      if (!eligible) {
-        return left(new NotEligibleForEventError())
-      }
-
-      if (event.isPubliclyListed()) {
-        return left(new EventNotFoundError())
-      }
-    }
-
-    const themes = await this.themesRepository.findManyByEventId(event.id.toString())
+    const themes = canManage
+      ? await this.themesRepository.findManyByEventId(event.id.toString())
+      : await this.themesRepository.findManyByEventId(event.id.toString(), ThemeStatus.APPROVED)
 
     return right({ event, themes })
   }
