@@ -1,6 +1,6 @@
 import { type Either, left, right } from '@/core/either'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
 import type { Institution } from '../../../enterprise/entities/institutions'
 import { InstitutionNotFoundError } from '../../_errors/institution-not-found-error'
 import { NotAllowedToManageInstitutionError } from '../../_errors/not-allowed-to-manage-institution-error'
@@ -18,12 +18,14 @@ interface EditInstitutionUseCaseRequest {
   domain?: string
 }
 
-type LogParams = {
+type UpdateInstitutionInput = {
+  institution: Institution
   actorId: string
-  resourceId: string
-  text: string
-  status: AuditLogStatus
-  diff?: Record<string, { old: unknown; new: unknown }> | null
+  name: string
+  description: string
+  shouldProof?: boolean
+  shouldVerify?: boolean
+  domain?: string
 }
 
 type EditInstitutionUseCaseResponse = Either<
@@ -38,10 +40,40 @@ export class EditInstitutionUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
-  private async log({ actorId, resourceId, text, status, diff }: LogParams) {
+  async execute(params: EditInstitutionUseCaseRequest): Promise<EditInstitutionUseCaseResponse> {
+    const institutionResult = await this.findInstitutionOrFail(params.institutionId, params.actorId)
+
+    if (institutionResult.isLeft()) {
+      return left(institutionResult.value)
+    }
+
+    const institution = institutionResult.value
+
+    const manageResult = await this.canManageInstitution(params.institutionId, params.actorId)
+
+    if (manageResult.isLeft()) {
+      return left(manageResult.value)
+    }
+
+    const { institution: updatedInstitution } = await this.updateInstitution({
+      name: params.name,
+      description: params.description,
+      shouldProof: params.shouldProof ?? false,
+      shouldVerify: params.shouldVerify ?? false,
+      domain: params.domain,
+      actorId: params.actorId,
+      institution,
+    })
+
+    return right({
+      institution: updatedInstitution,
+    })
+  }
+
+  private async log({ actorId, resourceId, text, status, diff, sessionId }: LogParams) {
     await this.registerLog.execute({
       actorId,
-      sessionId: null,
+      sessionId: sessionId ?? null,
       action: AuditLogAction.UPDATE,
       resource: 'institution',
       resourceId,
@@ -51,15 +83,10 @@ export class EditInstitutionUseCase {
     })
   }
 
-  async execute({
-    institutionId,
-    actorId,
-    name,
-    description,
-    shouldProof,
-    shouldVerify,
-    domain,
-  }: EditInstitutionUseCaseRequest): Promise<EditInstitutionUseCaseResponse> {
+  private async findInstitutionOrFail(
+    institutionId: string,
+    actorId: string,
+  ): Promise<Either<InstitutionNotFoundError, Institution>> {
     const institution = await this.institutionsRepository.findById(institutionId)
 
     if (!institution) {
@@ -69,9 +96,17 @@ export class EditInstitutionUseCase {
         text: `Instituição ${institutionId} não encontrada.`,
         status: AuditLogStatus.FAILURE,
       })
+
       return left(new InstitutionNotFoundError())
     }
 
+    return right(institution)
+  }
+
+  private async canManageInstitution(
+    institutionId: string,
+    actorId: string,
+  ): Promise<Either<NotAllowedToManageInstitutionError, true>> {
     const isAllowedToManage = await canManageInstitution(this.institutionMembersRepository, institutionId, actorId)
 
     if (!isAllowedToManage) {
@@ -81,42 +116,47 @@ export class EditInstitutionUseCase {
         text: `Usuário ${actorId} não tem permissão para gerenciar a instituição ${institutionId}.`,
         status: AuditLogStatus.FAILURE,
       })
+
       return left(new NotAllowedToManageInstitutionError())
     }
 
+    return right(true)
+  }
+
+  private async updateInstitution({ institution, actorId, ...input }: UpdateInstitutionInput) {
     const diff: Record<string, { old: unknown; new: unknown }> = {
-      name: { old: institution.name, new: name },
-      description: { old: institution.description, new: description },
+      name: { old: institution.name, new: input.name },
+      description: { old: institution.description, new: input.description },
     }
 
-    institution.name = name
-    institution.description = description
+    institution.name = input.name
+    institution.description = input.description
 
-    if (shouldProof !== undefined) {
-      diff.shouldProof = { old: institution.shouldProof, new: shouldProof }
-      institution.shouldProof = shouldProof
+    if (input.shouldProof !== undefined) {
+      diff.shouldProof = { old: institution.shouldProof, new: input.shouldProof }
+      institution.shouldProof = input.shouldProof
     }
 
-    if (shouldVerify !== undefined) {
-      diff.shouldVerify = { old: institution.shouldVerify, new: shouldVerify }
-      institution.shouldVerify = shouldVerify
+    if (input.shouldVerify !== undefined) {
+      diff.shouldVerify = { old: institution.shouldVerify, new: input.shouldVerify }
+      institution.shouldVerify = input.shouldVerify
     }
 
-    if (domain !== undefined) {
-      diff.domain = { old: institution.domain, new: domain }
-      institution.domain = domain
+    if (input.domain !== undefined) {
+      diff.domain = { old: institution.domain, new: input.domain }
+      institution.domain = input.domain
     }
 
     await this.institutionsRepository.save(institution)
 
     await this.log({
-      actorId,
-      resourceId: institutionId,
-      text: `Instituição ${institutionId} atualizada com sucesso.`,
+      resourceId: institution.id.toString(),
+      text: `Instituição ${institution.id.toString()} atualizada com sucesso.`,
       status: AuditLogStatus.SUCCESS,
+      actorId,
       diff,
     })
 
-    return right({ institution })
+    return { institution }
   }
 }
