@@ -28,6 +28,15 @@ export interface AuditLogProps {
   status: AuditLogStatus
 }
 
+export type LogParams = {
+  actorId: string
+  resourceId: string
+  sessionId?: string | null
+  text: string
+  status: AuditLogStatus
+  diff?: Record<string, { old: unknown; new: unknown }> | null
+}
+
 export class AuditLog extends Entity<AuditLogProps> {
   get actorId() {
     return this.props.actorId

@@ -1,7 +1,7 @@
 import { type Either, left, right } from '@/core/either'
 import type { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
 import { Account } from '@/domain/identity/enterprise/entities/account'
 import { User } from '@/domain/identity/enterprise/entities/user'
 import { UserAlreadyExistsError } from '../../_errors/user-already-exists-error'
@@ -23,23 +23,51 @@ export class RegisterUserUseCase {
   ) {}
 
   async execute({ name, email }: RegisterUserUseCaseRequest): Promise<RegisterUserUseCaseResponse> {
+    const emailAvailable = await this.isEmailAvailable(email)
+
+    if (emailAvailable.isLeft()) {
+      return left(emailAvailable.value)
+    }
+
+    const { user, accountId } = await this.createUserAccount(name, email)
+
+    return right({
+      accountId,
+      user,
+    })
+  }
+
+  private async log({ actorId, resourceId, text, status, diff, sessionId }: LogParams) {
+    await this.registerLog.execute({
+      actorId,
+      sessionId: sessionId ?? null,
+      action: AuditLogAction.CREATE,
+      resource: 'identity.user',
+      resourceId,
+      text,
+      status,
+      diff: diff ?? null,
+    })
+  }
+
+  private async isEmailAvailable(email: string): Promise<Either<UserAlreadyExistsError, true>> {
     const userWithSameEmail = await this.usersRepository.findByEmail(email)
 
     if (userWithSameEmail) {
-      await this.registerLog.execute({
+      await this.log({
         actorId: userWithSameEmail.id.toString(),
-        sessionId: null,
-        action: AuditLogAction.CREATE,
-        resource: 'identity.user',
         resourceId: userWithSameEmail.id.toString(),
         text: `Usuário com email ${email} já existe.`,
         status: AuditLogStatus.FAILURE,
-        diff: null,
       })
 
       return left(new UserAlreadyExistsError(email))
     }
 
+    return right(true)
+  }
+
+  private async createUserAccount(name: string, email: string) {
     const user = User.create({ name, email })
 
     const account = Account.create({
@@ -49,19 +77,16 @@ export class RegisterUserUseCase {
     })
 
     await this.usersRepository.create(user)
+
     await this.accountsRepository.create(account)
 
-    await this.registerLog.execute({
+    await this.log({
       actorId: user.id.toString(),
-      sessionId: null,
-      action: AuditLogAction.CREATE,
-      resource: 'identity.user',
       resourceId: user.id.toString(),
       text: `Usuário criado com sucesso.`,
       status: AuditLogStatus.SUCCESS,
-      diff: null,
     })
 
-    return right({ user, accountId: account.id })
+    return { user, accountId: account.id }
   }
 }

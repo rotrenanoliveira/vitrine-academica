@@ -1,9 +1,15 @@
 import { type Either, left, right } from '@/core/either'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
+import type { Account } from '@/domain/identity/enterprise/entities/account'
+import type { Session } from '@/domain/identity/enterprise/entities/session'
+import type { User } from '@/domain/identity/enterprise/entities/user'
 import type { InstitutionMembersRepository } from '@/domain/institution/application/repositories/institution-members-repository'
+import type { InstitutionMember } from '@/domain/institution/enterprise/entities/institution-member'
 import type { PointTransactionsRepository } from '@/domain/points/application/repositories/point-transactions-repository'
+import type { PointTransaction } from '@/domain/points/enterprise/entities/point-transaction'
 import type { PreferenceTagsRepository } from '@/domain/tag/application/repositories/preference-tags-repository'
+import type { PreferenceTag } from '@/domain/tag/enterprise/entities/preference-tag'
 import { UserNotFoundError } from '../../_errors/user-not-found-error'
 import type { AccountsRepository } from '../../repositories/accounts-repository'
 import type { SessionsRepository } from '../../repositories/sessions-repository'
@@ -57,6 +63,16 @@ export interface UserDataReport extends UserExportedRecords {
 
 type ExportUserDataUseCaseResponse = Either<UserNotFoundError, { userData: UserDataReport }>
 
+type ExportSources = {
+  account: Account | null
+  sessions: Session[]
+  memberships: InstitutionMember[]
+  preferences: PreferenceTag[]
+  pointsBalance: number
+  pointTransactions: PointTransaction[]
+  records: UserExportedRecords
+}
+
 export class ExportUserDataUseCase {
   constructor(
     private readonly usersRepository: UsersRepository,
@@ -76,6 +92,33 @@ export class ExportUserDataUseCase {
       return left(new UserNotFoundError())
     }
 
+    const sources = await this.fetchUserData(userId)
+    const userData = this.buildUserDataReport(user, sources)
+
+    await this.log({
+      actorId: userId,
+      resourceId: userId,
+      text: `Dados do usuário ${userId} exportados.`,
+      status: AuditLogStatus.SUCCESS,
+    })
+
+    return right({ userData })
+  }
+
+  private async log({ actorId, resourceId, text, status, diff, sessionId }: LogParams) {
+    await this.registerLog.execute({
+      actorId,
+      sessionId: sessionId ?? null,
+      action: AuditLogAction.EXPORT,
+      resource: 'identity.user',
+      resourceId,
+      diff: diff ?? null,
+      text,
+      status,
+    })
+  }
+
+  private async fetchUserData(userId: string): Promise<ExportSources> {
     const [account, sessions, memberships, preferences, pointsBalance, pointTransactions, records] = await Promise.all([
       this.accountsRepository.findByUserId(userId),
       this.sessionsRepository.findManyByUserId(userId),
@@ -86,7 +129,21 @@ export class ExportUserDataUseCase {
       this.userDataExportRepository.findRecordsByUserId(userId),
     ])
 
-    const userData: UserDataReport = {
+    return {
+      account,
+      sessions,
+      memberships,
+      preferences,
+      pointsBalance,
+      pointTransactions,
+      records,
+    }
+  }
+
+  private buildUserDataReport(user: User, sources: ExportSources): UserDataReport {
+    const { account, sessions, memberships, preferences, pointsBalance, pointTransactions, records } = sources
+
+    return {
       user: {
         id: user.id.toString(),
         name: user.name,
@@ -129,18 +186,5 @@ export class ExportUserDataUseCase {
       },
       ...records,
     }
-
-    await this.registerLog.execute({
-      actorId: userId,
-      sessionId: null,
-      action: AuditLogAction.EXPORT,
-      resource: 'identity.user',
-      resourceId: userId,
-      diff: null,
-      text: `Dados do usuário ${userId} exportados.`,
-      status: AuditLogStatus.SUCCESS,
-    })
-
-    return right({ userData })
   }
 }
