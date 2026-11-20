@@ -3,8 +3,20 @@
 import { Loading03Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import {
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  useComboboxAnchor,
+} from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
 import { useFormState } from '@/hook/use-form-state'
 import { actionRegisterProjectTags } from '@/server/actions/register-project-tags'
@@ -17,7 +29,9 @@ type FormRelateProjectTagsProps = {
 
 export function FormRelateProjectTags({ project, tags }: FormRelateProjectTagsProps) {
   const router = useRouter()
-  const linkedSet = new Set(project.tags)
+  const chipsAnchor = useComboboxAnchor()
+  const initialSelected = tags.filter((tag) => project.tags.includes(tag.id))
+  const [selectedTags, setSelectedTags] = useState<Tag[]>(initialSelected)
 
   const [_, handleSubmit, isPending] = useFormState(actionRegisterProjectTags, {
     onSuccess: (message) => {
@@ -36,25 +50,41 @@ export function FormRelateProjectTags({ project, tags }: FormRelateProjectTagsPr
   return (
     <form key={[...project.tags].sort().join(',')} className="space-y-4" onSubmit={handleSubmit}>
       <h2 className="font-heading text-xl font-semibold">Tags do projeto</h2>
-      <p className="text-sm text-muted-foreground">Marque ou desmarque as tags relacionadas ao projeto.</p>
       <input type="hidden" name="project-id" value={project.id} />
       <input type="hidden" name="project-slug" value={project.slug} />
 
-      <ul className="space-y-2">
-        {tags.map((tag) => (
-          <li key={tag.id} className="flex items-center gap-2">
-            <input
-              id={`project-tag-${tag.id}`}
-              type="checkbox"
-              name="tag-id"
-              value={tag.id}
-              defaultChecked={linkedSet.has(tag.id)}
-              className="size-4 border border-input accent-primary"
-            />
-            <Label htmlFor={`project-tag-${tag.id}`}>{tag.name}</Label>
-          </li>
+      <div className="space-y-2">
+        <Label>Tags</Label>
+        <p className="text-sm text-muted-foreground">Busque e selecione as tags do projeto.</p>
+        {selectedTags.map((tag) => (
+          <input key={tag.id} type="hidden" name="tag-id" value={tag.id} />
         ))}
-      </ul>
+        <Combobox
+          multiple
+          items={tags}
+          value={selectedTags}
+          onValueChange={(value) => setSelectedTags(value)}
+          itemToStringLabel={(tag) => tag.name}
+          isItemEqualToValue={(a, b) => a.id === b.id}
+        >
+          <ComboboxChips ref={chipsAnchor} className="w-full">
+            {selectedTags.map((tag) => (
+              <ComboboxChip key={tag.id}>{tag.name}</ComboboxChip>
+            ))}
+            <ComboboxChipsInput placeholder="Buscar tags..." />
+          </ComboboxChips>
+          <ComboboxContent anchor={chipsAnchor}>
+            <ComboboxEmpty>Nenhuma tag encontrada.</ComboboxEmpty>
+            <ComboboxList>
+              {(tag: Tag) => (
+                <ComboboxItem key={tag.id} value={tag}>
+                  {tag.name}
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+      </div>
 
       <div className="flex w-full items-end justify-end">
         <Button type="submit" disabled={isPending}>
