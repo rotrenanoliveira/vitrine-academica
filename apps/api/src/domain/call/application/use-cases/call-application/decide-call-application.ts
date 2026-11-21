@@ -1,6 +1,6 @@
 import { type Either, left, right } from '@/core/either'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
 import type { UsersRepository } from '@/domain/identity/application/repositories/users-repository'
 import { UserStatus } from '@/domain/identity/enterprise/entities/user'
 import type { Mail } from '@/domain/mail/application/mail/mail'
@@ -26,14 +26,6 @@ interface DecideCallApplicationUseCaseRequest {
   date?: Date
 }
 
-type LogParams = {
-  actorId: string
-  resourceId: string
-  text: string
-  status: AuditLogStatus
-  diff?: Record<string, { old: unknown; new: unknown }> | null
-}
-
 type DecideCallApplicationUseCaseResponse = Either<
   CallNotFoundError | NotCallOwnerError | CallApplicationNotFoundError | InvalidCallApplicationStatusError,
   { application: CallApplication; notified: boolean }
@@ -48,10 +40,49 @@ export class DecideCallApplicationUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
-  private async log({ actorId, resourceId, text, status, diff }: LogParams) {
+  async execute({
+    callId,
+    applicationId,
+    authorId,
+    decision,
+    date = new Date(),
+  }: DecideCallApplicationUseCaseRequest): Promise<DecideCallApplicationUseCaseResponse> {
+    const callResult = await this.findOwnedCall(callId, applicationId, authorId)
+
+    if (callResult.isLeft()) {
+      return left(callResult.value)
+    }
+
+    const call = callResult.value
+
+    const applicationResult = await this.findPendingApplication(callId, applicationId, authorId)
+
+    if (applicationResult.isLeft()) {
+      return left(applicationResult.value)
+    }
+
+    const application = applicationResult.value
+    const previousStatus = application.status
+
+    await this.applyDecision(application, decision, date)
+
+    await this.log({
+      actorId: authorId,
+      resourceId: applicationId,
+      text: `Candidatura ${applicationId} atualizada para ${application.status}.`,
+      status: AuditLogStatus.SUCCESS,
+      diff: { status: { old: previousStatus, new: application.status } },
+    })
+
+    const notified = await this.notifyApplicant(authorId, application, call, decision)
+
+    return right({ application, notified })
+  }
+
+  private async log({ actorId, resourceId, sessionId, text, status, diff }: LogParams) {
     await this.registerLog.execute({
       actorId,
-      sessionId: null,
+      sessionId: sessionId ?? null,
       action: AuditLogAction.UPDATE,
       resource: 'call.application',
       resourceId,
@@ -59,6 +90,80 @@ export class DecideCallApplicationUseCase {
       status,
       text,
     })
+  }
+
+  private async findOwnedCall(
+    callId: string,
+    applicationId: string,
+    authorId: string,
+  ): Promise<Either<CallNotFoundError | NotCallOwnerError, Call>> {
+    const call = await this.callsRepository.findById(callId)
+
+    if (!call) {
+      await this.log({
+        actorId: authorId,
+        resourceId: callId,
+        text: `Chamado ${callId} não encontrado.`,
+        status: AuditLogStatus.FAILURE,
+      })
+
+      return left(new CallNotFoundError())
+    }
+
+    if (call.authorId.toString() !== authorId) {
+      await this.log({
+        actorId: authorId,
+        resourceId: applicationId,
+        text: `Usuário ${authorId} não tem permissão para decidir candidaturas do chamado ${callId}.`,
+        status: AuditLogStatus.FAILURE,
+      })
+
+      return left(new NotCallOwnerError())
+    }
+
+    return right(call)
+  }
+
+  private async findPendingApplication(
+    callId: string,
+    applicationId: string,
+    authorId: string,
+  ): Promise<Either<CallApplicationNotFoundError | InvalidCallApplicationStatusError, CallApplication>> {
+    const application = await this.callApplicationsRepository.findById(applicationId)
+
+    if (!application || application.callId.toString() !== callId) {
+      await this.log({
+        actorId: authorId,
+        resourceId: applicationId,
+        text: `Candidatura ${applicationId} não encontrada no chamado ${callId}.`,
+        status: AuditLogStatus.FAILURE,
+      })
+
+      return left(new CallApplicationNotFoundError())
+    }
+
+    if (!application.isPending()) {
+      await this.log({
+        actorId: authorId,
+        resourceId: applicationId,
+        text: `Candidatura ${applicationId} já foi decidida (${application.status}).`,
+        status: AuditLogStatus.FAILURE,
+      })
+
+      return left(new InvalidCallApplicationStatusError('A candidatura já foi decidida'))
+    }
+
+    return right(application)
+  }
+
+  private async applyDecision(application: CallApplication, decision: CallApplicationDecision, date: Date) {
+    if (decision === CallApplicationStatus.APPROVED) {
+      application.approve(date)
+    } else {
+      application.reject(date)
+    }
+
+    await this.callApplicationsRepository.save(application)
   }
 
   private async notifyApplicant(
@@ -94,83 +199,5 @@ export class DecideCallApplicationUseCase {
 
       return false
     }
-  }
-
-  async execute({
-    callId,
-    applicationId,
-    authorId,
-    decision,
-    date = new Date(),
-  }: DecideCallApplicationUseCaseRequest): Promise<DecideCallApplicationUseCaseResponse> {
-    const call = await this.callsRepository.findById(callId)
-
-    if (!call) {
-      await this.log({
-        actorId: authorId,
-        resourceId: callId,
-        text: `Chamado ${callId} não encontrado.`,
-        status: AuditLogStatus.FAILURE,
-      })
-
-      return left(new CallNotFoundError())
-    }
-
-    if (call.authorId.toString() !== authorId) {
-      await this.log({
-        actorId: authorId,
-        resourceId: applicationId,
-        text: `Usuário ${authorId} não tem permissão para decidir candidaturas do chamado ${callId}.`,
-        status: AuditLogStatus.FAILURE,
-      })
-
-      return left(new NotCallOwnerError())
-    }
-
-    const application = await this.callApplicationsRepository.findById(applicationId)
-
-    if (!application || application.callId.toString() !== callId) {
-      await this.log({
-        actorId: authorId,
-        resourceId: applicationId,
-        text: `Candidatura ${applicationId} não encontrada no chamado ${callId}.`,
-        status: AuditLogStatus.FAILURE,
-      })
-
-      return left(new CallApplicationNotFoundError())
-    }
-
-    if (!application.isPending()) {
-      await this.log({
-        actorId: authorId,
-        resourceId: applicationId,
-        text: `Candidatura ${applicationId} já foi decidida (${application.status}).`,
-        status: AuditLogStatus.FAILURE,
-      })
-
-      return left(new InvalidCallApplicationStatusError('A candidatura já foi decidida'))
-    }
-
-    const previousStatus = application.status
-
-    if (decision === CallApplicationStatus.APPROVED) {
-      application.approve(date)
-    } else {
-      application.reject(date)
-    }
-
-    await this.callApplicationsRepository.save(application)
-
-    await this.log({
-      actorId: authorId,
-      resourceId: applicationId,
-      text: `Candidatura ${applicationId} atualizada para ${application.status}.`,
-      status: AuditLogStatus.SUCCESS,
-      diff: { status: { old: previousStatus, new: application.status } },
-    })
-
-    const notified = await this.notifyApplicant(authorId, application, call, decision)
-
-    return right({ application, notified })
   }
 }

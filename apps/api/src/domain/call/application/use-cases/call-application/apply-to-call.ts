@@ -1,7 +1,8 @@
 import { type Either, left, right } from '@/core/either'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
+import type { Call } from '../../../enterprise/entities/call'
 import { CallApplication } from '../../../enterprise/entities/call-application'
 import { AlreadyAppliedToCallError } from '../../_errors/already-applied-to-call-error'
 import { CallNotAcceptingApplicationsError } from '../../_errors/call-not-accepting-applications-error'
@@ -17,14 +18,6 @@ interface ApplyToCallUseCaseRequest {
   date?: Date
 }
 
-type LogParams = {
-  actorId: string
-  resourceId: string
-  text: string
-  status: AuditLogStatus
-  diff?: Record<string, { old: unknown; new: unknown }> | null
-}
-
 type ApplyToCallUseCaseResponse = Either<
   CallNotFoundError | CannotApplyToOwnCallError | CallNotAcceptingApplicationsError | AlreadyAppliedToCallError,
   { application: CallApplication }
@@ -37,10 +30,52 @@ export class ApplyToCallUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
-  private async log({ actorId, resourceId, text, status, diff }: LogParams) {
+  async execute({
+    callId,
+    applicantId,
+    message,
+    date = new Date(),
+  }: ApplyToCallUseCaseRequest): Promise<ApplyToCallUseCaseResponse> {
+    const callResult = await this.findCallOpenForApplicant(callId, applicantId, date)
+
+    if (callResult.isLeft()) {
+      return left(callResult.value)
+    }
+
+    const duplicateCheck = await this.ensureNotAlreadyApplied(callId, applicantId)
+
+    if (duplicateCheck.isLeft()) {
+      return left(duplicateCheck.value)
+    }
+
+    const normalizedMessage = this.normalizeMessage(message)
+
+    const application = CallApplication.create({
+      callId: new UniqueEntityId(callId),
+      applicantId: new UniqueEntityId(applicantId),
+      message: normalizedMessage,
+    })
+
+    await this.callApplicationsRepository.create(application)
+
+    await this.log({
+      actorId: applicantId,
+      resourceId: application.id.toString(),
+      text: `Usuário ${applicantId} se candidatou ao chamado ${callId}.`,
+      status: AuditLogStatus.SUCCESS,
+      diff: {
+        callId: { old: null, new: callId },
+        message: { old: null, new: normalizedMessage },
+      },
+    })
+
+    return right({ application })
+  }
+
+  private async log({ actorId, resourceId, sessionId, text, status, diff }: LogParams) {
     await this.registerLog.execute({
       actorId,
-      sessionId: null,
+      sessionId: sessionId ?? null,
       action: AuditLogAction.CREATE,
       resource: 'call.application',
       resourceId,
@@ -50,12 +85,11 @@ export class ApplyToCallUseCase {
     })
   }
 
-  async execute({
-    callId,
-    applicantId,
-    message,
-    date = new Date(),
-  }: ApplyToCallUseCaseRequest): Promise<ApplyToCallUseCaseResponse> {
+  private async findCallOpenForApplicant(
+    callId: string,
+    applicantId: string,
+    date: Date,
+  ): Promise<Either<CallNotFoundError | CannotApplyToOwnCallError | CallNotAcceptingApplicationsError, Call>> {
     const call = await this.callsRepository.findById(callId)
 
     if (!call) {
@@ -91,6 +125,13 @@ export class ApplyToCallUseCase {
       return left(new CallNotAcceptingApplicationsError())
     }
 
+    return right(call)
+  }
+
+  private async ensureNotAlreadyApplied(
+    callId: string,
+    applicantId: string,
+  ): Promise<Either<AlreadyAppliedToCallError, null>> {
     const existingApplication = await this.callApplicationsRepository.findByCallIdAndApplicantId(callId, applicantId)
 
     if (existingApplication) {
@@ -104,27 +145,10 @@ export class ApplyToCallUseCase {
       return left(new AlreadyAppliedToCallError())
     }
 
-    const normalizedMessage = message?.trim() ? message.trim() : null
+    return right(null)
+  }
 
-    const application = CallApplication.create({
-      callId: new UniqueEntityId(callId),
-      applicantId: new UniqueEntityId(applicantId),
-      message: normalizedMessage,
-    })
-
-    await this.callApplicationsRepository.create(application)
-
-    await this.log({
-      actorId: applicantId,
-      resourceId: application.id.toString(),
-      text: `Usuário ${applicantId} se candidatou ao chamado ${callId}.`,
-      status: AuditLogStatus.SUCCESS,
-      diff: {
-        callId: { old: null, new: callId },
-        message: { old: null, new: normalizedMessage },
-      },
-    })
-
-    return right({ application })
+  private normalizeMessage(message?: string | null): string | null {
+    return message?.trim() ? message.trim() : null
   }
 }

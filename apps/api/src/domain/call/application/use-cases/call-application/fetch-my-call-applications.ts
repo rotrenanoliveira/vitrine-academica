@@ -1,4 +1,5 @@
 import { type Either, right } from '@/core/either'
+import type { CallApplication } from '../../../enterprise/entities/call-application'
 import type { CallApplicationWithCall } from '../../dtos/call-application-with-call'
 import type { CallApplicationsRepository } from '../../repositories/call-applications-repository'
 import type { CallsRepository } from '../../repositories/calls-repository'
@@ -24,11 +25,17 @@ export class FetchMyCallApplicationsUseCase {
       return right({ applications: [] })
     }
 
+    const applicationsWithCall = await this.attachCalls(applications)
+
+    return right({ applications: applicationsWithCall })
+  }
+
+  private async attachCalls(applications: CallApplication[]): Promise<CallApplicationWithCall[]> {
     const callIds = [...new Set(applications.map((application) => application.callId.toString()))]
     const calls = await this.callsRepository.findManyByIds(callIds)
     const callsById = new Map(calls.map((call) => [call.id.toString(), call]))
 
-    const applicationsWithCall = applications.flatMap((application) => {
+    return applications.flatMap((application) => {
       const call = callsById.get(application.callId.toString())
 
       if (!call) {
@@ -37,7 +44,5 @@ export class FetchMyCallApplicationsUseCase {
 
       return [{ application, call }]
     })
-
-    return right({ applications: applicationsWithCall })
   }
 }

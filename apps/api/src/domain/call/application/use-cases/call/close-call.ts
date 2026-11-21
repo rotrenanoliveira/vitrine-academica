@@ -1,6 +1,6 @@
 import { type Either, left, right } from '@/core/either'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
 import type { Call } from '../../../enterprise/entities/call'
 import { CallNotFoundError } from '../../_errors/call-not-found-error'
 import { InvalidCallStatusError } from '../../_errors/invalid-call-status-error'
@@ -13,14 +13,6 @@ interface CloseCallUseCaseRequest {
   authorId: string
 }
 
-type LogParams = {
-  actorId: string
-  resourceId: string
-  text: string
-  status: AuditLogStatus
-  diff?: Record<string, { old: unknown; new: unknown }> | null
-}
-
 type CloseCallUseCaseResponse = Either<CallNotFoundError | NotCallOwnerError | InvalidCallStatusError, { call: Call }>
 
 export class CloseCallUseCase {
@@ -30,10 +22,37 @@ export class CloseCallUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
-  private async log({ actorId, resourceId, text, status, diff }: LogParams) {
+  async execute({ callId, authorId }: CloseCallUseCaseRequest): Promise<CloseCallUseCaseResponse> {
+    const callResult = await this.findCloseableCall(callId, authorId)
+
+    if (callResult.isLeft()) {
+      return left(callResult.value)
+    }
+
+    const call = callResult.value
+    const previousStatus = call.status
+    const previousProjectId = call.projectId?.toString() ?? null
+
+    await this.closeAndGenerateProject(call, authorId)
+
+    await this.log({
+      actorId: authorId,
+      resourceId: callId,
+      text: `Chamado ${callId} encerrado com sucesso.`,
+      status: AuditLogStatus.SUCCESS,
+      diff: {
+        status: { old: previousStatus, new: call.status },
+        projectId: { old: previousProjectId, new: call.projectId?.toString() ?? null },
+      },
+    })
+
+    return right({ call })
+  }
+
+  private async log({ actorId, resourceId, sessionId, text, status, diff }: LogParams) {
     await this.registerLog.execute({
       actorId,
-      sessionId: null,
+      sessionId: sessionId ?? null,
       action: AuditLogAction.UPDATE,
       resource: 'call',
       resourceId,
@@ -43,7 +62,10 @@ export class CloseCallUseCase {
     })
   }
 
-  async execute({ callId, authorId }: CloseCallUseCaseRequest): Promise<CloseCallUseCaseResponse> {
+  private async findCloseableCall(
+    callId: string,
+    authorId: string,
+  ): Promise<Either<CallNotFoundError | NotCallOwnerError | InvalidCallStatusError, Call>> {
     const call = await this.callsRepository.findById(callId)
 
     if (!call) {
@@ -79,25 +101,13 @@ export class CloseCallUseCase {
       return left(new InvalidCallStatusError('O chamado já está encerrado'))
     }
 
-    const previousStatus = call.status
-    const previousProjectId = call.projectId?.toString() ?? null
+    return right(call)
+  }
 
+  private async closeAndGenerateProject(call: Call, authorId: string) {
     await this.createProjectFromCall.execute({ call, actorId: authorId })
 
     call.close()
     await this.callsRepository.save(call)
-
-    await this.log({
-      actorId: authorId,
-      resourceId: callId,
-      text: `Chamado ${callId} encerrado com sucesso.`,
-      status: AuditLogStatus.SUCCESS,
-      diff: {
-        status: { old: previousStatus, new: call.status },
-        projectId: { old: previousProjectId, new: call.projectId?.toString() ?? null },
-      },
-    })
-
-    return right({ call })
   }
 }
