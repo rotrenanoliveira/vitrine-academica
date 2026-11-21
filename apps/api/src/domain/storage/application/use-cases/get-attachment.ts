@@ -15,14 +15,29 @@ export class GetAttachmentUseCase {
   constructor(private readonly attachmentsRepository: AttachmentsRepository) {}
 
   async execute({ attachmentId }: GetAttachmentUseCaseRequest): Promise<GetAttachmentUseCaseResponse> {
+    const attachmentResult = await this.findAttachment(attachmentId)
+
+    if (attachmentResult.isLeft()) {
+      return left(attachmentResult.value)
+    }
+
+    const attachment = attachmentResult.value
+    const attachmentUrl = this.buildAttachmentUrl(attachment)
+
+    return right({ attachment, attachmentUrl })
+  }
+
+  private async findAttachment(attachmentId: string): Promise<Either<AttachmentNotFoundError, Attachment>> {
     const attachment = await this.attachmentsRepository.findById(attachmentId)
 
     if (!attachment) {
       return left(new AttachmentNotFoundError())
     }
 
-    const attachmentUrl = `${env.CLOUDFLARE_R2_ASSETS_URL}/${attachment.storageKey}`
+    return right(attachment)
+  }
 
-    return right({ attachment, attachmentUrl })
+  private buildAttachmentUrl(attachment: Attachment): string {
+    return `${env.CLOUDFLARE_R2_ASSETS_URL}/${attachment.storageKey}`
   }
 }
