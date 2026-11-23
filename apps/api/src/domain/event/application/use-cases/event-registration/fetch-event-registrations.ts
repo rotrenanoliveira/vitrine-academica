@@ -3,6 +3,7 @@ import { canManageInstitution } from '@/domain/institution/application/authoriza
 import type { InstitutionMembersRepository } from '@/domain/institution/application/repositories/institution-members-repository'
 import type { ProjectsRepository } from '@/domain/project/application/repositories/projects-repositories'
 import type { Project } from '@/domain/project/enterprise/entities/project'
+import type { Event } from '../../../enterprise/entities/event'
 import { type EventRegistration, EventRegistrationStatus } from '../../../enterprise/entities/event-registration'
 import { EventNotFoundError } from '../../_errors/event-not-found-error'
 import { NotAllowedToManageEventError } from '../../_errors/not-allowed-to-manage-event-error'
@@ -33,6 +34,21 @@ export class FetchEventRegistrationsUseCase {
     actorId,
     status = EventRegistrationStatus.PENDING,
   }: FetchEventRegistrationsUseCaseRequest): Promise<FetchEventRegistrationsUseCaseResponse> {
+    const access = await this.fetchEventAccess(eventId, actorId)
+
+    if (access.isLeft()) {
+      return left(access.value)
+    }
+
+    const { registrations, projects } = await this.fetchRegistrationsWithProjects(eventId, status)
+
+    return right({ registrations, projects })
+  }
+
+  private async fetchEventAccess(
+    eventId: string,
+    actorId: string,
+  ): Promise<Either<EventNotFoundError | NotAllowedToManageEventError, Event>> {
     const event = await this.eventsRepository.findById(eventId)
 
     if (!event) {
@@ -49,10 +65,14 @@ export class FetchEventRegistrationsUseCase {
       return left(new NotAllowedToManageEventError())
     }
 
+    return right(event)
+  }
+
+  private async fetchRegistrationsWithProjects(eventId: string, status: EventRegistrationStatus) {
     const registrations = await this.eventRegistrationsRepository.findManyByEventId(eventId, status)
     const projectIds = registrations.map((registration) => registration.projectId.toString())
     const projects = await this.projectsRepository.findManyByIds(projectIds)
 
-    return right({ registrations, projects })
+    return { registrations, projects }
   }
 }

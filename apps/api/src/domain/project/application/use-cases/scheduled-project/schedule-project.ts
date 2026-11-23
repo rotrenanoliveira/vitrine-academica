@@ -1,8 +1,8 @@
 import { type Either, left, right } from '@/core/either'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
-import { ProjectStatus } from '../../../enterprise/entities/project'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
+import { type Project, ProjectStatus } from '../../../enterprise/entities/project'
 import { ProjectScheduled } from '../../../enterprise/entities/project-scheduled'
 import { InvalidProjectStatusError } from '../../_errors/invalid-project-status-error'
 import { InvalidScheduleDateError } from '../../_errors/invalid-schedule-date-error'
@@ -17,15 +17,6 @@ interface ScheduleProjectUseCaseRequest {
   authorId: string
   publishedIn: Date
   now?: Date
-}
-
-type LogParams = {
-  actorId: string
-  resourceId: string
-  text: string
-  status: AuditLogStatus
-  action?: AuditLogAction
-  diff?: Record<string, { old: unknown; new: unknown }> | null
 }
 
 type ScheduleProjectUseCaseResponse = Either<
@@ -44,10 +35,61 @@ export class ScheduleProjectUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
-  private async log({ actorId, resourceId, text, status, diff, action = AuditLogAction.CREATE }: LogParams) {
+  async execute({
+    projectId,
+    authorId,
+    publishedIn,
+    now = new Date(),
+  }: ScheduleProjectUseCaseRequest): Promise<ScheduleProjectUseCaseResponse> {
+    const projectResult = await this.findProjectOrFail(projectId, authorId)
+
+    if (projectResult.isLeft()) {
+      return left(projectResult.value)
+    }
+
+    const project = projectResult.value
+
+    const ownerResult = await this.isProjectOwner(project, authorId)
+
+    if (ownerResult.isLeft()) {
+      return left(ownerResult.value)
+    }
+
+    const statusResult = await this.validateProjectStatus(project, authorId)
+
+    if (statusResult.isLeft()) {
+      return left(statusResult.value)
+    }
+
+    const existingSchedule = await this.projectScheduledRepository.findById(projectId)
+
+    const scheduleAllowedResult = await this.canScheduleProject(existingSchedule, publishedIn, now, projectId, authorId)
+
+    if (scheduleAllowedResult.isLeft()) {
+      return left(scheduleAllowedResult.value)
+    }
+
+    const scheduleResult = await this.scheduleProject(project, existingSchedule, publishedIn, authorId)
+
+    if (scheduleResult.isLeft()) {
+      return left(scheduleResult.value)
+    }
+
+    return right(scheduleResult.value)
+  }
+
+  private async log({
+    actorId,
+    resourceId,
+    text,
+    status,
+    diff,
+    sessionId,
+    action = AuditLogAction.CREATE,
+  }: LogParams & { action?: AuditLogAction }) {
     await this.registerLog.execute({
       actorId,
-      sessionId: null,
+      sessionId: sessionId ?? null,
       action,
       resource: 'project.scheduled',
       resourceId,
@@ -57,12 +99,7 @@ export class ScheduleProjectUseCase {
     })
   }
 
-  async execute({
-    projectId,
-    authorId,
-    publishedIn,
-    now = new Date(),
-  }: ScheduleProjectUseCaseRequest): Promise<ScheduleProjectUseCaseResponse> {
+  private async findProjectOrFail(projectId: string, authorId: string): Promise<Either<ProjectNotFoundError, Project>> {
     const project = await this.projectsRepository.findById(projectId)
 
     if (!project) {
@@ -76,30 +113,49 @@ export class ScheduleProjectUseCase {
       return left(new ProjectNotFoundError())
     }
 
+    return right(project)
+  }
+
+  private async isProjectOwner(project: Project, authorId: string): Promise<Either<NotProjectOwnerError, null>> {
     if (project.author.toString() !== authorId) {
       await this.log({
         actorId: authorId,
-        resourceId: projectId,
-        text: `Usuário ${authorId} não é dono do projeto ${projectId}.`,
+        resourceId: project.id.toString(),
+        text: `Usuário ${authorId} não é dono do projeto ${project.id.toString()}.`,
         status: AuditLogStatus.FAILURE,
       })
 
       return left(new NotProjectOwnerError())
     }
 
+    return right(null)
+  }
+
+  private async validateProjectStatus(
+    project: Project,
+    authorId: string,
+  ): Promise<Either<InvalidProjectStatusError, null>> {
     if (project.status !== ProjectStatus.SKETCH) {
       await this.log({
         actorId: authorId,
-        resourceId: projectId,
-        text: `Projeto ${projectId} não está em rascunho.`,
+        resourceId: project.id.toString(),
+        text: `Projeto ${project.id.toString()} não está em rascunho.`,
         status: AuditLogStatus.FAILURE,
       })
 
       return left(new InvalidProjectStatusError('Somente projetos em rascunho podem ser agendados'))
     }
 
-    const existingSchedule = await this.projectScheduledRepository.findById(projectId)
+    return right(null)
+  }
 
+  private async canScheduleProject(
+    existingSchedule: ProjectScheduled | null,
+    publishedIn: Date,
+    now: Date,
+    projectId: string,
+    authorId: string,
+  ): Promise<Either<ProjectAlreadyScheduledError | InvalidScheduleDateError, true>> {
     if (existingSchedule && existingSchedule.publishedIn.getTime() > now.getTime()) {
       await this.log({
         actorId: authorId,
@@ -122,6 +178,16 @@ export class ScheduleProjectUseCase {
       return left(new InvalidScheduleDateError())
     }
 
+    return right(true)
+  }
+
+  private async scheduleProject(
+    project: Project,
+    existingSchedule: ProjectScheduled | null,
+    publishedIn: Date,
+    authorId: string,
+  ): Promise<ScheduleProjectUseCaseResponse> {
+    const projectId = project.id.toString()
     project.status = ProjectStatus.SCHEDULED
 
     if (existingSchedule) {

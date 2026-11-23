@@ -1,6 +1,6 @@
 import { type Either, left, right } from '@/core/either'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
 import type { Institution, InstitutionStatus } from '../../../enterprise/entities/institutions'
 import { InstitutionNotFoundError } from '../../_errors/institution-not-found-error'
 import { NotAllowedToManageInstitutionError } from '../../_errors/not-allowed-to-manage-institution-error'
@@ -12,14 +12,6 @@ interface UpdateInstitutionStatusUseCaseRequest {
   institutionId: string
   actorId: string
   status: InstitutionStatus
-}
-
-type LogParams = {
-  actorId: string
-  resourceId: string
-  text: string
-  status: AuditLogStatus
-  diff?: Record<string, { old: unknown; new: unknown }> | null
 }
 
 type UpdateInstitutionStatusUseCaseResponse = Either<
@@ -34,10 +26,36 @@ export class UpdateInstitutionStatusUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
-  private async log({ actorId, resourceId, text, status, diff }: LogParams) {
+  async execute({
+    institutionId,
+    actorId,
+    status,
+  }: UpdateInstitutionStatusUseCaseRequest): Promise<UpdateInstitutionStatusUseCaseResponse> {
+    const institutionResult = await this.findInstitutionOrFail(institutionId, actorId)
+
+    if (institutionResult.isLeft()) {
+      return left(institutionResult.value)
+    }
+
+    const institution = institutionResult.value
+
+    const manageResult = await this.canManageInstitution(institutionId, actorId)
+
+    if (manageResult.isLeft()) {
+      return left(manageResult.value)
+    }
+
+    const { institution: updatedInstitution } = await this.updateInstitutionStatus(institution, status, actorId)
+
+    return right({
+      institution: updatedInstitution,
+    })
+  }
+
+  private async log({ actorId, resourceId, text, status, diff, sessionId }: LogParams) {
     await this.registerLog.execute({
       actorId,
-      sessionId: null,
+      sessionId: sessionId ?? null,
       action: AuditLogAction.UPDATE,
       resource: 'institution',
       resourceId,
@@ -47,11 +65,10 @@ export class UpdateInstitutionStatusUseCase {
     })
   }
 
-  async execute({
-    institutionId,
-    actorId,
-    status,
-  }: UpdateInstitutionStatusUseCaseRequest): Promise<UpdateInstitutionStatusUseCaseResponse> {
+  private async findInstitutionOrFail(
+    institutionId: string,
+    actorId: string,
+  ): Promise<Either<InstitutionNotFoundError, Institution>> {
     const institution = await this.institutionsRepository.findById(institutionId)
 
     if (!institution) {
@@ -61,9 +78,17 @@ export class UpdateInstitutionStatusUseCase {
         text: `Instituição ${institutionId} não encontrada.`,
         status: AuditLogStatus.FAILURE,
       })
+
       return left(new InstitutionNotFoundError())
     }
 
+    return right(institution)
+  }
+
+  private async canManageInstitution(
+    institutionId: string,
+    actorId: string,
+  ): Promise<Either<NotAllowedToManageInstitutionError, true>> {
     const isAllowedToManage = await canManageInstitution(this.institutionMembersRepository, institutionId, actorId)
 
     if (!isAllowedToManage) {
@@ -73,22 +98,27 @@ export class UpdateInstitutionStatusUseCase {
         text: `Usuário ${actorId} não tem permissão para gerenciar a instituição ${institutionId}.`,
         status: AuditLogStatus.FAILURE,
       })
+
       return left(new NotAllowedToManageInstitutionError())
     }
 
+    return right(true)
+  }
+
+  private async updateInstitutionStatus(institution: Institution, status: InstitutionStatus, actorId: string) {
     const oldStatus = institution.status
     institution.status = status
 
     await this.institutionsRepository.save(institution)
 
     await this.log({
-      actorId,
-      resourceId: institutionId,
+      resourceId: institution.id.toString(),
       status: AuditLogStatus.SUCCESS,
-      text: `Instituição ${institutionId} atualizada com sucesso.`,
+      text: `Instituição ${institution.id.toString()} atualizada com sucesso.`,
       diff: { status: { old: oldStatus, new: status } },
+      actorId,
     })
 
-    return right({ institution })
+    return { institution }
   }
 }

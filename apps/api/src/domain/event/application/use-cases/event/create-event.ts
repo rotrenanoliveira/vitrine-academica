@@ -2,11 +2,12 @@ import { type Either, left, right } from '@/core/either'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { Slug } from '@/core/entities/value-objects/slug'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
 import { InstitutionNotFoundError } from '@/domain/institution/application/_errors/institution-not-found-error'
 import { canManageInstitution } from '@/domain/institution/application/authorization/can-manage-institution'
 import type { InstitutionMembersRepository } from '@/domain/institution/application/repositories/institution-members-repository'
 import type { InstitutionsRepository } from '@/domain/institution/application/repositories/institutions-repository'
+import type { Institution } from '@/domain/institution/enterprise/entities/institutions'
 import { Event, type ParticipationScope } from '../../../enterprise/entities/event'
 import { NotAllowedToManageEventError } from '../../_errors/not-allowed-to-manage-event-error'
 import type { EventsRepository } from '../../repositories/events-repository'
@@ -19,13 +20,12 @@ interface CreateEventUseCaseRequest {
   startsAt?: Date
 }
 
-type LogParams = {
-  actorId: string
-  sessionId: string | null
-  resourceId: string
-  text: string
-  status: AuditLogStatus
-  diff?: Record<string, { old: unknown; new: unknown }> | null
+type CreateEventInput = {
+  institutionId: string
+  institution: Institution
+  participationScope: ParticipationScope
+  name: string | null
+  startsAt: Date
 }
 
 type CreateEventUseCaseResponse = Either<InstitutionNotFoundError | NotAllowedToManageEventError, { event: Event }>
@@ -38,10 +38,43 @@ export class CreateEventUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
+  async execute({
+    participationScope,
+    institutionId,
+    actorId,
+    name = null,
+    startsAt = new Date(),
+  }: CreateEventUseCaseRequest): Promise<CreateEventUseCaseResponse> {
+    const institutionResult = await this.findInstitutionOrFail(institutionId, actorId)
+
+    if (institutionResult.isLeft()) {
+      return left(institutionResult.value)
+    }
+
+    const canManage = await this.canManageInstitution(institutionId, actorId)
+
+    if (canManage.isLeft()) {
+      return left(canManage.value)
+    }
+
+    const event = await this.createEvent(
+      {
+        institution: institutionResult.value,
+        participationScope,
+        institutionId,
+        startsAt,
+        name,
+      },
+      actorId,
+    )
+
+    return right({ event })
+  }
+
   private async log({ actorId, sessionId, resourceId, text, status, diff }: LogParams) {
     await this.registerLog.execute({
       actorId,
-      sessionId,
+      sessionId: sessionId ?? null,
       action: AuditLogAction.CREATE,
       resource: 'event',
       resourceId,
@@ -51,13 +84,10 @@ export class CreateEventUseCase {
     })
   }
 
-  async execute({
-    institutionId,
-    actorId,
-    participationScope,
-    name = null,
-    startsAt = new Date(),
-  }: CreateEventUseCaseRequest): Promise<CreateEventUseCaseResponse> {
+  private async findInstitutionOrFail(
+    institutionId: string,
+    actorId: string,
+  ): Promise<Either<InstitutionNotFoundError, Institution>> {
     const institution = await this.institutionsRepository.findById(institutionId)
 
     if (!institution) {
@@ -72,6 +102,13 @@ export class CreateEventUseCase {
       return left(new InstitutionNotFoundError())
     }
 
+    return right(institution)
+  }
+
+  private async canManageInstitution(
+    institutionId: string,
+    actorId: string,
+  ): Promise<Either<NotAllowedToManageEventError, boolean>> {
     const canManage = await canManageInstitution(this.institutionMembersRepository, institutionId, actorId)
 
     if (!canManage) {
@@ -86,6 +123,10 @@ export class CreateEventUseCase {
       return left(new NotAllowedToManageEventError())
     }
 
+    return right(true)
+  }
+
+  private async resolveUniqueEventSlug(name: string | null, institution: Institution, startsAt: Date) {
     const datePart = startsAt.toISOString().slice(0, 10)
     const baseSlug = Slug.createFromText(name?.trim() ? name : `evento-${institution.slug.value}-${datePart}`).value
 
@@ -96,12 +137,18 @@ export class CreateEventUseCase {
       suffix += 1
     }
 
+    return slug
+  }
+
+  private async createEvent(params: CreateEventInput, actorId: string) {
+    const slug = await this.resolveUniqueEventSlug(params.name, params.institution, params.startsAt)
+
     const event = Event.create({
-      institutionId: new UniqueEntityId(institutionId),
+      institutionId: new UniqueEntityId(params.institutionId),
       slug,
-      name: name ?? null,
-      participationScope,
-      startsAt,
+      name: params.name ?? null,
+      participationScope: params.participationScope,
+      startsAt: params.startsAt,
     })
 
     await this.eventsRepository.create(event)
@@ -114,6 +161,6 @@ export class CreateEventUseCase {
       text: `Evento ${event.id.toString()} criado com sucesso.`,
     })
 
-    return right({ event })
+    return event
   }
 }

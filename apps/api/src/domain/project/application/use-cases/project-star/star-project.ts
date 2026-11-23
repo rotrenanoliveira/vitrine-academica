@@ -1,12 +1,12 @@
 import { type Either, left, right } from '@/core/either'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
 import type { UsersRepository } from '@/domain/identity/application/repositories/users-repository'
 import { UserStatus } from '@/domain/identity/enterprise/entities/user'
 import type { InstitutionMembersRepository } from '@/domain/institution/application/repositories/institution-members-repository'
 import type { GrantStarPointsUseCase } from '@/domain/points/application/use-cases/point-transaction/grant-star-points'
-import { ProjectStatus } from '../../../enterprise/entities/project'
+import { type Project, ProjectStatus } from '../../../enterprise/entities/project'
 import { ProjectStar } from '../../../enterprise/entities/project-star'
 import { CannotRateOwnProjectError } from '../../_errors/cannot-rate-own-project-error'
 import { ProjectNotEligibleForRatingError } from '../../_errors/project-not-eligible-for-rating-error'
@@ -20,15 +20,6 @@ interface StarProjectUseCaseRequest {
   projectId: string
   userId: string
   sessionId: string
-}
-
-type LogParams = {
-  actorId: string
-  sessionId: string
-  resourceId: string
-  text: string
-  status: AuditLogStatus
-  diff?: Record<string, { old: unknown; new: unknown }> | null
 }
 
 type StarProjectUseCaseResponse = Either<
@@ -46,10 +37,48 @@ export class StarProjectUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
+  async execute({ projectId, userId, sessionId }: StarProjectUseCaseRequest): Promise<StarProjectUseCaseResponse> {
+    const userValidationResult = await this.validateUser(userId, sessionId, projectId)
+
+    if (userValidationResult.isLeft()) {
+      return left(userValidationResult.value)
+    }
+
+    const projectResult = await this.findProjectOrFail(projectId, userId, sessionId)
+
+    if (projectResult.isLeft()) {
+      return left(projectResult.value)
+    }
+
+    const project = projectResult.value
+
+    const statusResult = await this.validateProjectStatus(project, userId, sessionId)
+
+    if (statusResult.isLeft()) {
+      return left(statusResult.value)
+    }
+
+    const notAuthorResult = await this.validateUserNotAuthor(project, userId, sessionId)
+
+    if (notAuthorResult.isLeft()) {
+      return left(notAuthorResult.value)
+    }
+
+    const weight = await resolveStarWeight(this.institutionMembersRepository, userId)
+
+    const starProjectResult = await this.starProject(project, userId, weight, sessionId)
+
+    if (starProjectResult.isLeft()) {
+      return left(starProjectResult.value)
+    }
+
+    return right(starProjectResult.value)
+  }
+
   private async log({ actorId, sessionId, resourceId, text, status, diff }: LogParams) {
     await this.registerLog.execute({
       actorId,
-      sessionId,
+      sessionId: sessionId ?? null,
       action: AuditLogAction.CREATE,
       resource: 'project.project_star',
       resourceId,
@@ -59,7 +88,11 @@ export class StarProjectUseCase {
     })
   }
 
-  async execute({ projectId, userId, sessionId }: StarProjectUseCaseRequest): Promise<StarProjectUseCaseResponse> {
+  private async validateUser(
+    userId: string,
+    sessionId: string,
+    projectId: string,
+  ): Promise<Either<UserNotActiveError, null>> {
     const user = await this.usersRepository.findById(userId)
 
     if (!user || user.status !== UserStatus.ACTIVE) {
@@ -74,6 +107,14 @@ export class StarProjectUseCase {
       return left(new UserNotActiveError())
     }
 
+    return right(null)
+  }
+
+  private async findProjectOrFail(
+    projectId: string,
+    userId: string,
+    sessionId: string,
+  ): Promise<Either<ProjectNotFoundError, Project>> {
     const project = await this.projectsRepository.findById(projectId)
 
     if (!project) {
@@ -88,31 +129,56 @@ export class StarProjectUseCase {
       return left(new ProjectNotFoundError())
     }
 
+    return right(project)
+  }
+
+  private async validateProjectStatus(
+    project: Project,
+    userId: string,
+    sessionId: string,
+  ): Promise<Either<ProjectNotEligibleForRatingError, null>> {
     if (project.status !== ProjectStatus.PUBLISHED) {
       await this.log({
         actorId: userId,
         sessionId,
-        resourceId: projectId,
-        text: `Projeto ${projectId} não está publicado (status=${project.status}).`,
+        resourceId: project.id.toString(),
+        text: `Projeto ${project.id.toString()} não está publicado (status=${project.status}).`,
         status: AuditLogStatus.FAILURE,
       })
 
       return left(new ProjectNotEligibleForRatingError())
     }
 
+    return right(null)
+  }
+
+  private async validateUserNotAuthor(
+    project: Project,
+    userId: string,
+    sessionId: string,
+  ): Promise<Either<CannotRateOwnProjectError, null>> {
     if (project.author.toString() === userId) {
       await this.log({
         actorId: userId,
         sessionId,
-        resourceId: projectId,
-        text: `Usuário ${userId} tentou estrelar o próprio projeto ${projectId}.`,
+        resourceId: project.id.toString(),
+        text: `Usuário ${userId} tentou estrelar o próprio projeto ${project.id.toString()}.`,
         status: AuditLogStatus.FAILURE,
       })
 
       return left(new CannotRateOwnProjectError())
     }
 
-    const weight = await resolveStarWeight(this.institutionMembersRepository, userId)
+    return right(null)
+  }
+
+  private async starProject(
+    project: Project,
+    userId: string,
+    weight: number,
+    sessionId: string,
+  ): Promise<StarProjectUseCaseResponse> {
+    const projectId = project.id.toString()
     const existingStar = await this.projectStarsRepository.findByProjectAndUser(projectId, userId)
 
     if (existingStar) {

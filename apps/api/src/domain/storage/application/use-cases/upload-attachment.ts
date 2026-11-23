@@ -31,6 +31,29 @@ export class UploadAttachmentUseCase {
     size,
     attachmentFolder,
   }: UploadAttachmentUseCaseRequest): Promise<UploadAttachmentUseCaseResponse> {
+    const validation = this.validateAttachment(mimeType, size)
+
+    if (validation.isLeft()) {
+      return left(validation.value)
+    }
+
+    const attachment = await this.buildAttachment(name, mimeType, size, attachmentFolder)
+
+    const itemStorage = await this.storage.createSignedUrl({
+      key: attachment.storageKey,
+      mimeType,
+      size,
+    })
+
+    await this.attachmentsRepository.create(attachment)
+
+    return right({
+      attachment,
+      itemStorage,
+    })
+  }
+
+  private validateAttachment(mimeType: string, size: number): Either<InvalidAttachmentError, null> {
     if (size <= 0) {
       return left(new InvalidAttachmentError(`Arquivo inválido.`))
     }
@@ -47,26 +70,22 @@ export class UploadAttachmentUseCase {
       return left(new InvalidAttachmentError(`Tipo de arquivo não permitido: ${mimeType}.`))
     }
 
+    return right(null)
+  }
+
+  private async buildAttachment(
+    name: string,
+    mimeType: string,
+    size: number,
+    attachmentFolder: string,
+  ): Promise<Attachment> {
     const itemStorageKey = Attachment.generateStorageKey(name, attachmentFolder)
 
-    const attachment = await Attachment.create({
+    return Attachment.create({
       storageKey: itemStorageKey,
       mimeType,
       name,
       size,
-    })
-
-    const itemStorage = await this.storage.createSignedUrl({
-      key: attachment.storageKey,
-      mimeType,
-      size,
-    })
-
-    await this.attachmentsRepository.create(attachment)
-
-    return right({
-      attachment,
-      itemStorage,
     })
   }
 }

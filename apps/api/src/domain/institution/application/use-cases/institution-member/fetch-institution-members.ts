@@ -2,6 +2,7 @@ import { type Either, left, right } from '@/core/either'
 import type { UsersRepository } from '@/domain/identity/application/repositories/users-repository'
 import type { User } from '@/domain/identity/enterprise/entities/user'
 import type { InstitutionMember } from '../../../enterprise/entities/institution-member'
+import type { Institution } from '../../../enterprise/entities/institutions'
 import { InstitutionNotFoundError } from '../../_errors/institution-not-found-error'
 import { NotAllowedToManageInstitutionError } from '../../_errors/not-allowed-to-manage-institution-error'
 import { canManageInstitution } from '../../authorization/can-manage-institution'
@@ -34,16 +35,16 @@ export class FetchInstitutionMembersUseCase {
     institutionId,
     actorId,
   }: FetchInstitutionMembersUseCaseRequest): Promise<FetchInstitutionMembersUseCaseResponse> {
-    const institution = await this.institutionsRepository.findById(institutionId)
+    const institutionResult = await this.findInstitutionOrFail(institutionId)
 
-    if (!institution) {
-      return left(new InstitutionNotFoundError())
+    if (institutionResult.isLeft()) {
+      return left(institutionResult.value)
     }
 
-    const isAllowedToManage = await canManageInstitution(this.institutionMembersRepository, institutionId, actorId)
+    const manageResult = await this.canManageInstitution(institutionId, actorId)
 
-    if (!isAllowedToManage) {
-      return left(new NotAllowedToManageInstitutionError())
+    if (manageResult.isLeft()) {
+      return left(manageResult.value)
     }
 
     const institutionMembers = await this.institutionMembersRepository.findManyByInstitutionId(institutionId)
@@ -53,13 +54,34 @@ export class FetchInstitutionMembersUseCase {
     const members = institutionMembers.flatMap((member, index) => {
       const user = users[index]
 
-      if (!user) {
-        return []
-      }
+      if (!user) return []
 
       return [{ member, user }]
     })
 
     return right({ members })
+  }
+
+  private async findInstitutionOrFail(institutionId: string): Promise<Either<InstitutionNotFoundError, Institution>> {
+    const institution = await this.institutionsRepository.findById(institutionId)
+
+    if (!institution) {
+      return left(new InstitutionNotFoundError())
+    }
+
+    return right(institution)
+  }
+
+  private async canManageInstitution(
+    institutionId: string,
+    actorId: string,
+  ): Promise<Either<NotAllowedToManageInstitutionError, true>> {
+    const isAllowedToManage = await canManageInstitution(this.institutionMembersRepository, institutionId, actorId)
+
+    if (!isAllowedToManage) {
+      return left(new NotAllowedToManageInstitutionError())
+    }
+
+    return right(true)
   }
 }

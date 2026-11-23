@@ -21,32 +21,46 @@ export class FetchCallsUseCase {
   ) {}
 
   async execute({ tagIds, date = new Date() }: FetchCallsUseCaseRequest = {}): Promise<FetchCallsUseCaseResponse> {
-    let calls: Call[]
+    const callsResult = await this.findCalls(tagIds, date)
 
-    if (tagIds && tagIds.length > 0) {
-      const uniqueTagIds = [...new Set(tagIds)]
-      const tags = await this.tagsRepository.findManyByIds(uniqueTagIds)
-
-      if (tags.length !== uniqueTagIds.length) {
-        return left(new TagNotFoundError())
-      }
-
-      const taggedSkills = await this.callSkillsRepository.findManyByTagIds(uniqueTagIds)
-      const callIds = [...new Set(taggedSkills.map((skill) => skill.callId.toString()))]
-      const taggedCalls = await this.callsRepository.findManyByIds(callIds)
-
-      calls = taggedCalls.filter((call) => call.isAcceptingApplications(date))
-    } else {
-      calls = await this.callsRepository.findManyOpen(date)
+    if (callsResult.isLeft()) {
+      return left(callsResult.value)
     }
 
+    const callsWithSkills = await this.attachSkills(callsResult.value)
+
+    return right({ calls: callsWithSkills })
+  }
+
+  private async findCalls(tagIds: string[] | undefined, date: Date): Promise<Either<TagNotFoundError, Call[]>> {
+    if (tagIds && tagIds.length > 0) {
+      return this.findCallsByTags(tagIds, date)
+    }
+
+    return right(await this.callsRepository.findManyOpen(date))
+  }
+
+  private async findCallsByTags(tagIds: string[], date: Date): Promise<Either<TagNotFoundError, Call[]>> {
+    const uniqueTagIds = [...new Set(tagIds)]
+    const tags = await this.tagsRepository.findManyByIds(uniqueTagIds)
+
+    if (tags.length !== uniqueTagIds.length) {
+      return left(new TagNotFoundError())
+    }
+
+    const taggedSkills = await this.callSkillsRepository.findManyByTagIds(uniqueTagIds)
+    const callIds = [...new Set(taggedSkills.map((skill) => skill.callId.toString()))]
+    const taggedCalls = await this.callsRepository.findManyByIds(callIds)
+
+    return right(taggedCalls.filter((call) => call.isAcceptingApplications(date)))
+  }
+
+  private async attachSkills(calls: Call[]): Promise<CallWithSkills[]> {
     const skills = await this.callSkillsRepository.findManyByCallIds(calls.map((call) => call.id.toString()))
 
-    const callsWithSkills = calls.map((call) => ({
+    return calls.map((call) => ({
       call,
       skills: skills.filter((skill) => skill.callId.toString() === call.id.toString()),
     }))
-
-    return right({ calls: callsWithSkills })
   }
 }

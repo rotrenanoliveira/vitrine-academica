@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { faker } from '@faker-js/faker/locale/pt_BR'
@@ -50,6 +51,7 @@ import { Attachment } from '@/domain/storage/enterprise/entities/attachment'
 import type { Tag } from '@/domain/tag/enterprise/entities/tag'
 import { UserRole, UserStatus } from '../../../domain/identity/enterprise/entities/user'
 import { db } from '../drizzle/client'
+import { accounts } from '../drizzle/schemas'
 
 const INSTITUTION_COUNT = 20
 const UNLINKED_USER_COUNT = 25
@@ -198,6 +200,7 @@ async function seedUser(override: Parameters<typeof makeUserOnDatabase>[0] = {})
   const { user } = await makeUserOnDatabase({
     name: faker.person.fullName(),
     email: faker.internet.email({ provider: 'vitrineacademica.com' }).toLowerCase(),
+    status: UserStatus.ACTIVE,
     ...override,
   })
 
@@ -1299,6 +1302,13 @@ async function seed() {
     email: 'rotrenanoliveira@gmail.com',
     status: UserStatus.ACTIVE,
     role: UserRole.ADMIN,
+  })
+
+  await db.insert(accounts).values({
+    id: randomUUID(),
+    userId: registerBy.id.toString(),
+    consentedAt: new Date(),
+    confirmationAt: new Date(),
   })
 
   const institutions = await seedInstitutions(registerBy.id)

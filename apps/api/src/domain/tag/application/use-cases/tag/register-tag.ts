@@ -15,12 +15,29 @@ export class RegisterTagUseCase {
 
   async execute({ name }: RegisterTagUseCaseRequest): Promise<RegisterTagUseCaseResponse> {
     const slug = Slug.createFromText(name)
+
+    const slugAvailable = await this.isSlugAvailable(slug)
+
+    if (slugAvailable.isLeft()) {
+      return left(slugAvailable.value)
+    }
+
+    const tag = await this.createTag(name, slug)
+
+    return right({ tag })
+  }
+
+  private async isSlugAvailable(slug: Slug): Promise<Either<TagAlreadyExistsError, true>> {
     const tagWithSameSlug = await this.tagsRepository.findBySlug(slug.value)
 
     if (tagWithSameSlug) {
       return left(new TagAlreadyExistsError())
     }
 
+    return right(true)
+  }
+
+  private async createTag(name: string, slug: Slug): Promise<Tag> {
     const tag = Tag.create({
       name,
       slug,
@@ -28,6 +45,6 @@ export class RegisterTagUseCase {
 
     await this.tagsRepository.create(tag)
 
-    return right({ tag })
+    return tag
   }
 }

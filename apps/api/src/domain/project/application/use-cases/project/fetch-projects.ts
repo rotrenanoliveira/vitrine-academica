@@ -34,22 +34,17 @@ export class FetchProjectsUseCase {
     page = 1,
     limit = 25,
   }: FetchProjectsUseCaseRequest): Promise<FetchProjectsUseCaseResponse> {
-    let ids: string[] | undefined
+    const tagProjectIds = await this.resolveProjectIdsByTags(tagIds)
 
-    if (tagIds) {
-      const projectTags = await this.projectTagsRepository.findByTagIds(tagIds)
-      ids = [...new Set(projectTags.map((projectTag) => projectTag.projectId.toString()))]
-
-      if (ids.length === 0) {
-        return right({ projects: [], total: 0, page, limit })
-      }
+    if (tagProjectIds !== undefined && tagProjectIds.length === 0) {
+      return right({ projects: [], total: 0, page, limit })
     }
 
     const normalizedTitle = title?.trim()
     const filters = {
       status,
       title: normalizedTitle ? normalizedTitle : undefined,
-      ids,
+      ids: tagProjectIds,
     }
 
     const [total, projects] = await Promise.all([
@@ -62,5 +57,15 @@ export class FetchProjectsUseCase {
     ])
 
     return right({ projects, total, page, limit })
+  }
+
+  private async resolveProjectIdsByTags(tagIds?: string[]): Promise<string[] | undefined> {
+    if (!tagIds) {
+      return undefined
+    }
+
+    const projectTags = await this.projectTagsRepository.findByTagIds(tagIds)
+
+    return [...new Set(projectTags.map((projectTag) => projectTag.projectId.toString()))]
   }
 }

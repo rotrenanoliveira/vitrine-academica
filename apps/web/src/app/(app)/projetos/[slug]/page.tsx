@@ -151,7 +151,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               </div>
               {rating.teacherAverage !== null && (
                 <p className="text-sm text-muted-foreground">
-                  Overall docente{' '}
+                  Notas professores{' '}
                   <span className="font-semibold tabular-nums text-foreground">{rating.teacherAverage.toFixed(2)}</span>
                 </p>
               )}

@@ -27,22 +27,31 @@ export class GetProjectBySlugUseCase {
       return left(new ProjectNotFoundError())
     }
 
-    const projectId = project.id.toString()
-    const isOwner = Boolean(requesterId) && project.author.toString() === requesterId
-    const isPublished = project.status === ProjectStatus.PUBLISHED
-
-    // Visitante só vê publicado. Dono vê qualquer status. Coautor aceito e convite pendente também leem.
-    if (!isOwner && !isPublished && !(requesterId && (await this.canReadUnpublished(projectId, requesterId)))) {
+    if (!(await this.canAccessProject(project, requesterId))) {
       return left(new ProjectNotFoundError())
     }
 
-    const schedule = await this.projectScheduledRepository.findById(projectId)
+    const schedule = await this.projectScheduledRepository.findById(project.id.toString())
 
     return right({ project, publishedIn: schedule?.publishedIn ?? null })
   }
 
-  // Convite recusado não conta: só aceito ou pendente leem o projeto ainda não publicado
-  private async canReadUnpublished(projectId: string, userId: string): Promise<boolean> {
+  private async canAccessProject(project: Project, requesterId?: string): Promise<boolean> {
+    const isOwner = Boolean(requesterId) && project.author.toString() === requesterId
+    const isPublished = project.status === ProjectStatus.PUBLISHED
+
+    if (isOwner || isPublished) {
+      return true
+    }
+
+    if (!requesterId) {
+      return false
+    }
+
+    return this.isProjectMember(project.id.toString(), requesterId)
+  }
+
+  private async isProjectMember(projectId: string, userId: string): Promise<boolean> {
     const projectMember = await this.projectMembersRepository.findByProjectAndUser(projectId, userId)
 
     return (
