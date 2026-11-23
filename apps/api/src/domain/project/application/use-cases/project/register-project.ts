@@ -2,7 +2,7 @@ import { type Either, left, right } from '@/core/either'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { Slug } from '@/core/entities/value-objects/slug'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
 import { TagNotFoundError } from '@/domain/tag/application/_errors/tag-not-found-error'
 import type { TagsRepository } from '@/domain/tag/application/repositories/tags-repository'
 import { Project } from '../../../enterprise/entities/project'
@@ -43,40 +43,17 @@ export class RegisterProjectUseCase {
     attachments,
   }: RegisterProjectUseCaseRequest): Promise<RegisterProjectUseCaseResponse> {
     const normalizedSlug = Slug.createFromText(slug).value
-    const projectWithSameSlug = await this.projectsRepository.findBySlug(normalizedSlug)
 
-    if (projectWithSameSlug) {
-      await this.registerLog.execute({
-        actorId: authorId,
-        sessionId,
-        action: AuditLogAction.CREATE,
-        resource: 'project',
-        resourceId: projectWithSameSlug.id.toString(),
-        diff: null,
-        status: AuditLogStatus.FAILURE,
-        text: `Slug de projeto já existe: ${normalizedSlug}`,
-      })
+    const slugAlreadyExists = await this.isSlugAlreadyExists(normalizedSlug, authorId, sessionId)
 
+    if (slugAlreadyExists) {
       return left(new ProjectSlugAlreadyExistsError())
     }
 
-    for (const tagId of tags) {
-      const tag = await this.tagsRepository.findById(tagId)
+    const tagsValidation = await this.validateProjectTags(tags, authorId, sessionId)
 
-      if (!tag) {
-        await this.registerLog.execute({
-          actorId: authorId,
-          sessionId,
-          action: AuditLogAction.CREATE,
-          resource: 'project',
-          resourceId: tagId,
-          diff: null,
-          status: AuditLogStatus.FAILURE,
-          text: `Tag ${tagId} não encontrada ao criar projeto.`,
-        })
-
-        return left(new TagNotFoundError())
-      }
+    if (tagsValidation.isLeft()) {
+      return left(tagsValidation.value)
     }
 
     const project = Project.create({
@@ -91,20 +68,11 @@ export class RegisterProjectUseCase {
 
     await this.projectsRepository.create(project)
 
-    for (const tagId of tags) {
-      const projectTag = ProjectTag.create({
-        projectId: project.id,
-        tagId: new UniqueEntityId(tagId),
-      })
+    await this.createProjectTags(project.id, tags)
 
-      await this.projectTagsRepository.create(projectTag)
-    }
-
-    await this.registerLog.execute({
+    await this.log({
       actorId: authorId,
       sessionId,
-      action: AuditLogAction.CREATE,
-      resource: 'project',
       resourceId: project.id.toString(),
       diff: {
         title: { old: null, new: title },
@@ -116,8 +84,75 @@ export class RegisterProjectUseCase {
         tags: { old: null, new: tags },
       },
       status: AuditLogStatus.SUCCESS,
+      text: `Projeto ${project.id.toString()} criado com sucesso`,
     })
 
     return right({ project })
+  }
+
+  private async log({ actorId, resourceId, text, status, diff, sessionId }: LogParams) {
+    await this.registerLog.execute({
+      actorId,
+      sessionId: sessionId ?? null,
+      action: AuditLogAction.CREATE,
+      resource: 'project',
+      resourceId,
+      diff: diff ?? null,
+      status,
+      text,
+    })
+  }
+
+  private async isSlugAlreadyExists(slug: string, authorId: string, sessionId: string) {
+    const projectWithSameSlug = await this.projectsRepository.findBySlug(slug)
+
+    if (projectWithSameSlug) {
+      await this.log({
+        actorId: authorId,
+        sessionId,
+        resourceId: slug,
+        text: `Slug de projeto já existe: ${slug}`,
+        status: AuditLogStatus.FAILURE,
+      })
+
+      return true
+    }
+
+    return false
+  }
+
+  private async validateProjectTags(
+    tags: string[],
+    authorId: string,
+    sessionId: string,
+  ): Promise<Either<TagNotFoundError, null>> {
+    for (const tagId of tags) {
+      const tag = await this.tagsRepository.findById(tagId)
+
+      if (!tag) {
+        await this.log({
+          actorId: authorId,
+          sessionId,
+          resourceId: tagId,
+          text: `Tag ${tagId} não encontrada ao criar projeto.`,
+          status: AuditLogStatus.FAILURE,
+        })
+
+        return left(new TagNotFoundError())
+      }
+    }
+
+    return right(null)
+  }
+
+  private async createProjectTags(projectId: UniqueEntityId, tags: string[]) {
+    for (const tagId of tags) {
+      const projectTag = ProjectTag.create({
+        projectId,
+        tagId: new UniqueEntityId(tagId),
+      })
+
+      await this.projectTagsRepository.create(projectTag)
+    }
   }
 }

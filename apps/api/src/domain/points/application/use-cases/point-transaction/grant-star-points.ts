@@ -1,7 +1,7 @@
 import { type Either, right } from '@/core/either'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
 import type { ProjectMembersRepository } from '@/domain/project/application/repositories/project-members-repository'
 import { ProjectMemberStatus } from '@/domain/project/enterprise/entities/project-member'
 import type { ProjectStar } from '@/domain/project/enterprise/entities/project-star'
@@ -32,6 +32,31 @@ export class GrantStarPointsUseCase {
     authorId,
     sessionId,
   }: GrantStarPointsUseCaseRequest): Promise<GrantStarPointsUseCaseResponse> {
+    const beneficiaryIds = await this.findBeneficiaryIds(projectStar, authorId)
+
+    const transactions = this.buildCreditTransactions(projectStar, beneficiaryIds)
+
+    await this.saveStarWithCredits(projectStar, transactions, sessionId)
+
+    await this.logCredits(projectStar, transactions, sessionId)
+
+    return right({ transactions })
+  }
+
+  private async log({ actorId, sessionId, resourceId, text, status, diff }: LogParams) {
+    await this.registerLog.execute({
+      actorId,
+      sessionId: sessionId ?? null,
+      action: AuditLogAction.CREATE,
+      resource: 'points.point_transaction',
+      resourceId,
+      diff: diff ?? null,
+      status,
+      text,
+    })
+  }
+
+  private async findBeneficiaryIds(projectStar: ProjectStar, authorId: string): Promise<string[]> {
     const projectId = projectStar.projectId.toString()
     const starrerId = projectStar.userId.toString()
 
@@ -47,7 +72,11 @@ export class GrantStarPointsUseCase {
 
     beneficiaryIds.delete(starrerId)
 
-    const transactions = [...beneficiaryIds].map((beneficiaryId) =>
+    return [...beneficiaryIds]
+  }
+
+  private buildCreditTransactions(projectStar: ProjectStar, beneficiaryIds: string[]): PointTransaction[] {
+    return beneficiaryIds.map((beneficiaryId) =>
       PointTransaction.create({
         userId: new UniqueEntityId(beneficiaryId),
         type: PointTransactionType.CREDIT,
@@ -56,30 +85,29 @@ export class GrantStarPointsUseCase {
         referenceId: projectStar.id,
       }),
     )
+  }
 
+  private async saveStarWithCredits(projectStar: ProjectStar, transactions: PointTransaction[], sessionId: string) {
     try {
       await this.projectStarCreditsRepository.createStarWithCredits(projectStar, transactions)
     } catch (error) {
-      await this.registerLog.execute({
-        actorId: starrerId,
+      await this.log({
+        actorId: projectStar.userId.toString(),
         sessionId,
-        action: AuditLogAction.CREATE,
-        resource: 'points.point_transaction',
         resourceId: projectStar.id.toString(),
-        diff: null,
-        text: `Falha ao registrar a estrela ${projectStar.id.toString()} e os pontos dos beneficiários do projeto ${projectId}.`,
+        text: `Falha ao registrar a estrela ${projectStar.id.toString()} e os pontos dos beneficiários do projeto ${projectStar.projectId.toString()}.`,
         status: AuditLogStatus.FAILURE,
       })
 
       throw error
     }
+  }
 
+  private async logCredits(projectStar: ProjectStar, transactions: PointTransaction[], sessionId: string) {
     for (const transaction of transactions) {
-      await this.registerLog.execute({
-        actorId: starrerId,
+      await this.log({
+        actorId: projectStar.userId.toString(),
         sessionId,
-        action: AuditLogAction.CREATE,
-        resource: 'points.point_transaction',
         resourceId: transaction.id.toString(),
         diff: {
           userId: { old: null, new: transaction.userId.toString() },
@@ -92,7 +120,5 @@ export class GrantStarPointsUseCase {
         status: AuditLogStatus.SUCCESS,
       })
     }
-
-    return right({ transactions })
   }
 }

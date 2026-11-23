@@ -11,8 +11,12 @@ export class GetTagsAnalyticsUseCase {
   constructor(private readonly analyticsRepository: AnalyticsRepository) {}
 
   async execute({ limit }: GetTagsAnalyticsUseCaseRequest): Promise<GetTagsAnalyticsUseCaseResponse> {
-    const tags = await this.analyticsRepository.findMostUsedTags(limit)
+    const tags = await this.loadMostUsedTags(limit)
 
     return right({ tags })
+  }
+
+  private async loadMostUsedTags(limit: number): Promise<TagUsage[]> {
+    return this.analyticsRepository.findMostUsedTags(limit)
   }
 }

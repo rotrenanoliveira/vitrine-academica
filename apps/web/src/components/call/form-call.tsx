@@ -6,6 +6,17 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import {
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  useComboboxAnchor,
+} from '@/components/ui/combobox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -23,8 +34,10 @@ type FormCallProps = {
 
 export function FormCall({ tags, call }: FormCallProps) {
   const router = useRouter()
+  const chipsAnchor = useComboboxAnchor()
   const initialSkills = new Map((call?.skills ?? []).map((skill) => [skill.tagId, skill.description ?? '']))
-  const [selected, setSelected] = useState(() => new Set(initialSkills.keys()))
+  const initialSelected = tags.filter((tag) => initialSkills.has(tag.id))
+  const [selectedTags, setSelectedTags] = useState<Tag[]>(initialSelected)
 
   const [_, handleSubmit, isPending] = useFormState(call ? actionUpdateCall : actionRegisterCall, {
     onSuccess: (message) => {
@@ -36,20 +49,6 @@ export function FormCall({ tags, call }: FormCallProps) {
       toast.error(message)
     },
   })
-
-  function toggleTag(tagId: string, checked: boolean) {
-    setSelected((current) => {
-      const next = new Set(current)
-
-      if (checked) {
-        next.add(tagId)
-      } else {
-        next.delete(tagId)
-      }
-
-      return next
-    })
-  }
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
@@ -79,47 +78,60 @@ export function FormCall({ tags, call }: FormCallProps) {
         <p className="text-xs text-muted-foreground">Horário de Brasília.</p>
       </div>
 
-      <fieldset className="space-y-3">
-        <legend className="text-sm font-medium">Habilidades necessárias</legend>
-
+      <div className="space-y-2">
+        <Label>Habilidades necessárias</Label>
+        <p className="text-sm text-muted-foreground">Busque e selecione as habilidades do chamado.</p>
+        {selectedTags.map((tag) => (
+          <input key={tag.id} type="hidden" name="tag-id" value={tag.id} />
+        ))}
         {tags.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhuma tag cadastrada no sistema.</p>
         ) : (
-          <ul className="space-y-3">
-            {tags.map((tag) => {
-              const checked = selected.has(tag.id)
-
-              return (
-                <li key={tag.id} className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <input
-                      id={`call-tag-${tag.id}`}
-                      type="checkbox"
-                      name="tag-id"
-                      value={tag.id}
-                      checked={checked}
-                      onChange={(event) => toggleTag(tag.id, event.target.checked)}
-                      className="size-4 border border-input accent-primary"
-                    />
-                    <Label htmlFor={`call-tag-${tag.id}`}>{tag.name}</Label>
-                  </div>
-
-                  {checked && (
-                    <Input
-                      name={`skill-description-${tag.id}`}
-                      type="text"
-                      maxLength={200}
-                      placeholder="Detalhe da habilidade (opcional)"
-                      aria-label={`Detalhe da habilidade ${tag.name}`}
-                      defaultValue={initialSkills.get(tag.id) ?? ''}
-                    />
-                  )}
-                </li>
-              )
-            })}
-          </ul>
+          <Combobox
+            multiple
+            items={tags}
+            value={selectedTags}
+            onValueChange={(value) => setSelectedTags(value)}
+            itemToStringLabel={(tag) => tag.name}
+            isItemEqualToValue={(a, b) => a.id === b.id}
+          >
+            <ComboboxChips ref={chipsAnchor} className="w-full">
+              {selectedTags.map((tag) => (
+                <ComboboxChip key={tag.id}>{tag.name}</ComboboxChip>
+              ))}
+              <ComboboxChipsInput placeholder="Buscar tags..." />
+            </ComboboxChips>
+            <ComboboxContent anchor={chipsAnchor}>
+              <ComboboxEmpty>Nenhuma tag encontrada.</ComboboxEmpty>
+              <ComboboxList>
+                {(tag: Tag) => (
+                  <ComboboxItem key={tag.id} value={tag}>
+                    {tag.name}
+                  </ComboboxItem>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
         )}
-      </fieldset>
+      </div>
+
+      {selectedTags.length > 0 && (
+        <ul className="space-y-3">
+          {selectedTags.map((tag) => (
+            <li key={tag.id} className="space-y-2">
+              <Label htmlFor={`skill-description-${tag.id}`}>{tag.name}</Label>
+              <Input
+                id={`skill-description-${tag.id}`}
+                name={`skill-description-${tag.id}`}
+                type="text"
+                maxLength={200}
+                placeholder="Detalhe da habilidade (opcional)"
+                defaultValue={initialSkills.get(tag.id) ?? ''}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
 
       <div className="flex w-full items-end justify-end">
         <Button type="submit" disabled={isPending || tags.length === 0}>

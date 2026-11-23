@@ -1,9 +1,10 @@
 import { type Either, left, right } from '@/core/either'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
 import { canManageInstitution } from '@/domain/institution/application/authorization/can-manage-institution'
 import type { InstitutionMembersRepository } from '@/domain/institution/application/repositories/institution-members-repository'
+import type { Event } from '../../../enterprise/entities/event'
 import type { EventRegistration } from '../../../enterprise/entities/event-registration'
 import { EventNotFoundError } from '../../_errors/event-not-found-error'
 import { InvalidRegistrationStatusError } from '../../_errors/invalid-registration-status-error'
@@ -20,15 +21,6 @@ interface ReviewEventRegistrationUseCaseRequest {
   reason?: string | null
 }
 
-type LogParams = {
-  actorId: string
-  sessionId: string | null
-  resourceId: string
-  text: string
-  status: AuditLogStatus
-  diff?: Record<string, { old: unknown; new: unknown }> | null
-}
-
 type ReviewEventRegistrationUseCaseResponse = Either<
   EventNotFoundError | NotAllowedToManageEventError | InvalidRegistrationStatusError,
   { registration: EventRegistration }
@@ -42,10 +34,69 @@ export class ReviewEventRegistrationUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
+  async execute({
+    registrationId,
+    actorId,
+    action,
+    reason = null,
+  }: ReviewEventRegistrationUseCaseRequest): Promise<ReviewEventRegistrationUseCaseResponse> {
+    const registrationResult = await this.findRegistrationOrFail(registrationId, actorId)
+
+    if (registrationResult.isLeft()) {
+      return left(registrationResult.value)
+    }
+
+    const registration = registrationResult.value
+
+    const eventResult = await this.findEventForRegistration(registration, actorId)
+
+    if (eventResult.isLeft()) {
+      return left(eventResult.value)
+    }
+
+    const canManage = await this.canManageEvent(eventResult.value, actorId, registrationId)
+
+    if (canManage.isLeft()) {
+      return left(canManage.value)
+    }
+
+    const reasonResult = await this.validateRejectReason(action, reason, actorId, registrationId)
+
+    if (reasonResult.isLeft()) {
+      return left(reasonResult.value)
+    }
+
+    const pending = await this.validateRegistrationPending(registration, actorId)
+
+    if (pending.isLeft()) {
+      return left(pending.value)
+    }
+
+    const { oldStatus } = this.moderateRegistration(registration, action, actorId, reason)
+
+    await this.eventRegistrationsRepository.save(registration)
+
+    await this.log({
+      actorId,
+      sessionId: null,
+      resourceId: registration.id.toString(),
+      status: AuditLogStatus.SUCCESS,
+      text: `Inscrição ${registration.id.toString()} revisada: ${registration.status}.`,
+      diff: {
+        status: { old: oldStatus, new: registration.status },
+        reviewReason: { old: null, new: registration.reviewReason },
+      },
+    })
+
+    return right({
+      registration,
+    })
+  }
+
   private async log({ actorId, sessionId, resourceId, text, status, diff }: LogParams) {
     await this.registerLog.execute({
       actorId,
-      sessionId,
+      sessionId: sessionId ?? null,
       action: AuditLogAction.UPDATE,
       resource: 'event.registration',
       resourceId,
@@ -55,12 +106,10 @@ export class ReviewEventRegistrationUseCase {
     })
   }
 
-  async execute({
-    registrationId,
-    actorId,
-    action,
-    reason = null,
-  }: ReviewEventRegistrationUseCaseRequest): Promise<ReviewEventRegistrationUseCaseResponse> {
+  private async findRegistrationOrFail(
+    registrationId: string,
+    actorId: string,
+  ): Promise<Either<InvalidRegistrationStatusError, EventRegistration>> {
     const registration = await this.eventRegistrationsRepository.findById(registrationId)
 
     if (!registration) {
@@ -75,13 +124,20 @@ export class ReviewEventRegistrationUseCase {
       return left(new InvalidRegistrationStatusError('Inscrição não encontrada'))
     }
 
+    return right(registration)
+  }
+
+  private async findEventForRegistration(
+    registration: EventRegistration,
+    actorId: string,
+  ): Promise<Either<EventNotFoundError, Event>> {
     const event = await this.eventsRepository.findById(registration.eventId.toString())
 
     if (!event) {
       await this.log({
         actorId,
         sessionId: null,
-        resourceId: registrationId,
+        resourceId: registration.id.toString(),
         status: AuditLogStatus.FAILURE,
         text: `Evento ${registration.eventId} não encontrada.`,
       })
@@ -89,6 +145,14 @@ export class ReviewEventRegistrationUseCase {
       return left(new EventNotFoundError())
     }
 
+    return right(event)
+  }
+
+  private async canManageEvent(
+    event: Event,
+    actorId: string,
+    registrationId: string,
+  ): Promise<Either<NotAllowedToManageEventError, true>> {
     const canManage = await canManageInstitution(
       this.institutionMembersRepository,
       event.institutionId.toString(),
@@ -107,6 +171,15 @@ export class ReviewEventRegistrationUseCase {
       return left(new NotAllowedToManageEventError())
     }
 
+    return right(true)
+  }
+
+  private async validateRejectReason(
+    action: ReviewAction,
+    reason: string | null,
+    actorId: string,
+    registrationId: string,
+  ): Promise<Either<InvalidRegistrationStatusError, null>> {
     if (action === 'REJECT' && !reason?.trim()) {
       await this.log({
         actorId,
@@ -119,18 +192,34 @@ export class ReviewEventRegistrationUseCase {
       return left(new InvalidRegistrationStatusError('Motivo obrigatório para rejeitar inscrição'))
     }
 
+    return right(null)
+  }
+
+  private async validateRegistrationPending(
+    registration: EventRegistration,
+    actorId: string,
+  ): Promise<Either<InvalidRegistrationStatusError, null>> {
     if (!registration.isPending()) {
       await this.log({
         actorId,
         sessionId: null,
-        resourceId: registrationId,
+        resourceId: registration.id.toString(),
         status: AuditLogStatus.FAILURE,
-        text: `Inscrição ${registrationId} já foi revisada.`,
+        text: `Inscrição ${registration.id.toString()} já foi revisada.`,
       })
 
       return left(new InvalidRegistrationStatusError('Inscrição já foi revisada'))
     }
 
+    return right(null)
+  }
+
+  private moderateRegistration(
+    registration: EventRegistration,
+    action: ReviewAction,
+    actorId: string,
+    reason: string | null,
+  ) {
     const oldStatus = registration.status
     const reviewerId = new UniqueEntityId(actorId)
 
@@ -142,20 +231,6 @@ export class ReviewEventRegistrationUseCase {
       registration.reject(reviewerId, reason ?? '')
     }
 
-    await this.eventRegistrationsRepository.save(registration)
-
-    await this.log({
-      actorId,
-      sessionId: null,
-      resourceId: registration.id.toString(),
-      status: AuditLogStatus.SUCCESS,
-      text: `Inscrição ${registration.id.toString()} revisada: ${registration.status}.`,
-      diff: {
-        status: { old: oldStatus, new: registration.status },
-        reviewReason: { old: null, new: registration.reviewReason },
-      },
-    })
-
-    return right({ registration })
+    return { oldStatus }
   }
 }

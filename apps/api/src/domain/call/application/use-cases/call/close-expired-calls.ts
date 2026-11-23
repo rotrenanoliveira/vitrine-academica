@@ -1,6 +1,6 @@
-import { type Either, right } from '@/core/either'
+import { type Either, left, right } from '@/core/either'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
 import type { Call } from '../../../enterprise/entities/call'
 import type { CallsRepository } from '../../repositories/calls-repository'
 import type { CreateProjectFromCallUseCase } from './create-project-from-call'
@@ -16,11 +16,11 @@ interface CloseExpiredCallFailure {
   error: unknown
 }
 
-type LogParams = {
-  resourceId: string
-  text: string
-  status: AuditLogStatus
-  diff?: Record<string, { old: unknown; new: unknown }> | null
+type SystemLogParams = Omit<LogParams, 'actorId'>
+
+type CallSnapshot = {
+  status: Call['status']
+  projectId: string | null
 }
 
 type CloseExpiredCallsUseCaseResponse = Either<never, { calls: Call[]; failures: CloseExpiredCallFailure[] }>
@@ -32,10 +32,38 @@ export class CloseExpiredCallsUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
-  private async log({ resourceId, text, status, diff }: LogParams) {
+  async execute({
+    date = new Date(),
+  }: CloseExpiredCallsUseCaseRequest = {}): Promise<CloseExpiredCallsUseCaseResponse> {
+    const expiredCalls = await this.callsRepository.findManyExpiredOpen(date)
+    const closedCalls: Call[] = []
+    const failures: CloseExpiredCallFailure[] = []
+
+    for (const call of expiredCalls) {
+      const callId = call.id.toString()
+      const snapshot = this.takeSnapshot(call)
+
+      const closeResult = await this.closeAndGenerateProject(call)
+
+      if (closeResult.isLeft()) {
+        failures.push({ callId, error: closeResult.value })
+        await this.logFailure(callId)
+
+        continue
+      }
+
+      closedCalls.push(call)
+
+      await this.logClosed(call, snapshot)
+    }
+
+    return right({ calls: closedCalls, failures })
+  }
+
+  private async log({ resourceId, sessionId, text, status, diff }: SystemLogParams) {
     await this.registerLog.execute({
       actorId: SYSTEM_ACTOR_ID,
-      sessionId: null,
+      sessionId: sessionId ?? null,
       action: AuditLogAction.UPDATE,
       resource: 'call',
       resourceId,
@@ -57,43 +85,37 @@ export class CloseExpiredCallsUseCase {
     }
   }
 
-  async execute({
-    date = new Date(),
-  }: CloseExpiredCallsUseCaseRequest = {}): Promise<CloseExpiredCallsUseCaseResponse> {
-    const expiredCalls = await this.callsRepository.findManyExpiredOpen(date)
-    const closedCalls: Call[] = []
-    const failures: CloseExpiredCallFailure[] = []
+  private async logClosed(call: Call, previous: CallSnapshot) {
+    const callId = call.id.toString()
 
-    for (const call of expiredCalls) {
-      const callId = call.id.toString()
-      const previousStatus = call.status
-      const previousProjectId = call.projectId?.toString() ?? null
+    await this.log({
+      resourceId: callId,
+      text: `Chamado ${callId} encerrado automaticamente por prazo vencido.`,
+      status: AuditLogStatus.SUCCESS,
+      diff: {
+        status: { old: previous.status, new: call.status },
+        projectId: { old: previous.projectId, new: call.projectId?.toString() ?? null },
+      },
+    })
+  }
 
-      try {
-        await this.createProjectFromCall.execute({ call, actorId: SYSTEM_ACTOR_ID })
-
-        call.close()
-        await this.callsRepository.save(call)
-      } catch (error) {
-        failures.push({ callId, error })
-        await this.logFailure(callId)
-
-        continue
-      }
-
-      closedCalls.push(call)
-
-      await this.log({
-        resourceId: callId,
-        text: `Chamado ${callId} encerrado automaticamente por prazo vencido.`,
-        status: AuditLogStatus.SUCCESS,
-        diff: {
-          status: { old: previousStatus, new: call.status },
-          projectId: { old: previousProjectId, new: call.projectId?.toString() ?? null },
-        },
-      })
+  private takeSnapshot(call: Call): CallSnapshot {
+    return {
+      status: call.status,
+      projectId: call.projectId?.toString() ?? null,
     }
+  }
 
-    return right({ calls: closedCalls, failures })
+  private async closeAndGenerateProject(call: Call): Promise<Either<unknown, null>> {
+    try {
+      await this.createProjectFromCall.execute({ call, actorId: SYSTEM_ACTOR_ID })
+
+      call.close()
+      await this.callsRepository.save(call)
+
+      return right(null)
+    } catch (error) {
+      return left(error)
+    }
   }
 }

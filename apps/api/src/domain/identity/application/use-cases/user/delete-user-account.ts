@@ -1,10 +1,11 @@
 import { type Either, left, right } from '@/core/either'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
-import { UserStatus } from '@/domain/identity/enterprise/entities/user'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
+import { type User, UserStatus } from '@/domain/identity/enterprise/entities/user'
 import type { InstitutionMembersRepository } from '@/domain/institution/application/repositories/institution-members-repository'
 import type { InstitutionsRepository } from '@/domain/institution/application/repositories/institutions-repository'
 import {
+  type InstitutionMember,
   InstitutionMemberRole,
   InstitutionMemberStatus,
 } from '@/domain/institution/enterprise/entities/institution-member'
@@ -39,11 +40,9 @@ const OPEN_MEMBER_STATUSES = [
   InstitutionMemberStatus.SUSPENDED,
 ]
 
-type LogParams = {
-  userId: string
-  text: string
-  status: AuditLogStatus
-  diff?: Record<string, { old: unknown; new: unknown }> | null
+type ManagershipEvaluation = {
+  blocked: Institution[]
+  toArchive: Institution[]
 }
 
 export class DeleteUserAccountUseCase {
@@ -57,28 +56,65 @@ export class DeleteUserAccountUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
-  private async log({ userId, text, status, diff }: LogParams) {
+  async execute({ userId }: DeleteUserAccountUseCaseRequest): Promise<DeleteUserAccountUseCaseResponse> {
+    const userResult = await this.findUserOrFail(userId)
+
+    if (userResult.isLeft()) {
+      return left(userResult.value)
+    }
+
+    const user = userResult.value
+
+    const memberships = await this.institutionMembersRepository.findManyByUserId(userId)
+    const { blocked: blockedInstitutions, toArchive: institutionsToArchive } = await this.getUserMemberships(
+      userId,
+      memberships,
+    )
+
+    const soleManagerResult = await this.isNotSoleManager(userId, blockedInstitutions)
+
+    if (soleManagerResult.isLeft()) {
+      return left(soleManagerResult.value)
+    }
+
+    await this.archiveInstitutions(institutionsToArchive)
+    await this.deactivateMemberships(memberships)
+    await this.revokeSessions(userId)
+    await this.clearAvatar(userId)
+    await this.anonymizeUser(user, userId)
+
+    return right({
+      archivedInstitutions: institutionsToArchive.map((institution) => ({
+        id: institution.id.toString(),
+        name: institution.name,
+      })),
+    })
+  }
+
+  private async log({ actorId, resourceId, text, status, diff, sessionId }: LogParams) {
     await this.registerLog.execute({
-      actorId: userId,
-      sessionId: null,
+      actorId,
+      sessionId: sessionId ?? null,
       action: AuditLogAction.DELETE,
       resource: 'identity.user',
-      resourceId: userId,
+      resourceId,
       diff: diff ?? null,
       text,
       status,
     })
   }
 
-  async execute({ userId }: DeleteUserAccountUseCaseRequest): Promise<DeleteUserAccountUseCaseResponse> {
+  private async findUserOrFail(userId: string): Promise<Either<UserNotFoundError, User>> {
     const user = await this.usersRepository.findById(userId)
 
     if (!user || user.status === UserStatus.DELETED) {
       return left(new UserNotFoundError())
     }
 
-    const memberships = await this.institutionMembersRepository.findManyByUserId(userId)
+    return right(user)
+  }
 
+  private async getUserMemberships(userId: string, memberships: InstitutionMember[]): Promise<ManagershipEvaluation> {
     const managerships = memberships.filter((member) => {
       return member.role === InstitutionMemberRole.MANAGER && member.status === InstitutionMemberStatus.ACTIVE
     })
@@ -115,9 +151,17 @@ export class DeleteUserAccountUseCase {
       }
     }
 
+    return { blocked, toArchive }
+  }
+
+  private async isNotSoleManager(
+    userId: string,
+    blocked: Institution[],
+  ): Promise<Either<SoleInstitutionManagerError, true>> {
     if (blocked.length > 0) {
       await this.log({
-        userId,
+        actorId: userId,
+        resourceId: userId,
         text: `Exclusão da conta ${userId} bloqueada: único gerente de ${blocked.length} instituição(ões).`,
         status: AuditLogStatus.FAILURE,
       })
@@ -129,18 +173,26 @@ export class DeleteUserAccountUseCase {
       )
     }
 
+    return right(true)
+  }
+
+  private async archiveInstitutions(toArchive: Institution[]) {
     for (const institution of toArchive) {
       institution.status = InstitutionStatus.ARCHIVED
       await this.institutionsRepository.save(institution)
     }
+  }
 
+  private async deactivateMemberships(memberships: InstitutionMember[]) {
     for (const member of memberships) {
       if (OPEN_MEMBER_STATUSES.includes(member.status)) {
         member.status = InstitutionMemberStatus.INACTIVE
         await this.institutionMembersRepository.save(member)
       }
     }
+  }
 
+  private async revokeSessions(userId: string) {
     const sessions = await this.sessionsRepository.findManyByUserId(userId)
 
     for (const session of sessions) {
@@ -149,7 +201,9 @@ export class DeleteUserAccountUseCase {
         await this.sessionsRepository.save(session)
       }
     }
+  }
 
+  private async clearAvatar(userId: string) {
     const account = await this.accountsRepository.findByUserId(userId)
 
     if (account?.avatarId) {
@@ -158,7 +212,9 @@ export class DeleteUserAccountUseCase {
       account.avatarId = null
       await this.accountsRepository.save(account)
     }
+  }
 
+  private async anonymizeUser(user: User, userId: string) {
     const oldStatus = user.status
 
     user.name = ANONYMOUS_NAME
@@ -168,17 +224,11 @@ export class DeleteUserAccountUseCase {
     await this.usersRepository.save(user)
 
     await this.log({
-      userId,
+      actorId: userId,
+      resourceId: userId,
       text: `Conta do usuário ${userId} excluída (anonimizada) com sucesso.`,
       status: AuditLogStatus.SUCCESS,
       diff: { status: { old: oldStatus, new: user.status } },
-    })
-
-    return right({
-      archivedInstitutions: toArchive.map((institution) => ({
-        id: institution.id.toString(),
-        name: institution.name,
-      })),
     })
   }
 }

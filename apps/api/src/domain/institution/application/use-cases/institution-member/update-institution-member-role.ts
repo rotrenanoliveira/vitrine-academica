@@ -1,6 +1,6 @@
 import { type Either, left, right } from '@/core/either'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
 import {
   type InstitutionMember,
   InstitutionMemberRole,
@@ -18,14 +18,6 @@ interface UpdateInstitutionMemberRoleUseCaseRequest {
   role: InstitutionMemberRole
 }
 
-type LogParams = {
-  actorId: string
-  resourceId: string
-  text: string
-  status: AuditLogStatus
-  diff?: Record<string, { old: unknown; new: unknown }> | null
-}
-
 type UpdateInstitutionMemberRoleUseCaseResponse = Either<
   InstitutionMemberNotFoundError | NotAllowedToManageInstitutionError | CannotRemoveLastInstitutionManagerError,
   { member: InstitutionMember }
@@ -37,10 +29,42 @@ export class UpdateInstitutionMemberRoleUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
-  private async log({ actorId, resourceId, text, status, diff }: LogParams) {
+  async execute({
+    memberId,
+    actorId,
+    role,
+  }: UpdateInstitutionMemberRoleUseCaseRequest): Promise<UpdateInstitutionMemberRoleUseCaseResponse> {
+    const memberResult = await this.findMemberOrFail(memberId, actorId)
+
+    if (memberResult.isLeft()) {
+      return left(memberResult.value)
+    }
+
+    const member = memberResult.value
+
+    const manageResult = await this.canManageInstitution(member, actorId)
+
+    if (manageResult.isLeft()) {
+      return left(manageResult.value)
+    }
+
+    const lastManagerResult = await this.validateInstitutionManagerRemoval(member, role, actorId)
+
+    if (lastManagerResult.isLeft()) {
+      return left(lastManagerResult.value)
+    }
+
+    const { member: updatedMember } = await this.updateMemberRole(member, role, actorId)
+
+    return right({
+      member: updatedMember,
+    })
+  }
+
+  private async log({ actorId, resourceId, text, status, diff, sessionId }: LogParams) {
     await this.registerLog.execute({
       actorId,
-      sessionId: null,
+      sessionId: sessionId ?? null,
       action: AuditLogAction.UPDATE,
       resource: 'institution.member',
       resourceId,
@@ -50,11 +74,10 @@ export class UpdateInstitutionMemberRoleUseCase {
     })
   }
 
-  async execute({
-    memberId,
-    actorId,
-    role,
-  }: UpdateInstitutionMemberRoleUseCaseRequest): Promise<UpdateInstitutionMemberRoleUseCaseResponse> {
+  private async findMemberOrFail(
+    memberId: string,
+    actorId: string,
+  ): Promise<Either<InstitutionMemberNotFoundError, InstitutionMember>> {
     const member = await this.institutionMembersRepository.findById(memberId)
 
     if (!member) {
@@ -64,9 +87,18 @@ export class UpdateInstitutionMemberRoleUseCase {
         text: `Membro ${memberId} não encontrado.`,
         status: AuditLogStatus.FAILURE,
       })
+
       return left(new InstitutionMemberNotFoundError())
     }
 
+    return right(member)
+  }
+
+  private async canManageInstitution(
+    member: InstitutionMember,
+    actorId: string,
+  ): Promise<Either<NotAllowedToManageInstitutionError, true>> {
+    const memberId = member.id.toString()
     const isAllowedToManage = await canManageInstitution(
       this.institutionMembersRepository,
       member.institutionId,
@@ -80,33 +112,50 @@ export class UpdateInstitutionMemberRoleUseCase {
         text: `Usuário ${actorId} não tem permissão para gerenciar a instituição ${memberId}.`,
         status: AuditLogStatus.FAILURE,
       })
+
       return left(new NotAllowedToManageInstitutionError())
     }
 
+    return right(true)
+  }
+
+  private async validateInstitutionManagerRemoval(
+    member: InstitutionMember,
+    role: InstitutionMemberRole,
+    actorId: string,
+  ): Promise<Either<CannotRemoveLastInstitutionManagerError, null>> {
+    const memberId = member.id.toString()
     const isDemotingAManager = member.role === InstitutionMemberRole.MANAGER && role !== InstitutionMemberRole.MANAGER
 
-    if (isDemotingAManager) {
-      const members = await this.institutionMembersRepository.findManyByInstitutionId(member.institutionId)
-
-      const otherActiveManagers = members.filter((otherMember) => {
-        return (
-          otherMember.id.toString() !== member.id.toString() &&
-          otherMember.role === InstitutionMemberRole.MANAGER &&
-          otherMember.status === InstitutionMemberStatus.ACTIVE
-        )
-      })
-
-      if (otherActiveManagers.length === 0) {
-        await this.log({
-          actorId,
-          resourceId: memberId,
-          text: `Tentativa de remover o único gerente da instituição pelo membro ${memberId}.`,
-          status: AuditLogStatus.FAILURE,
-        })
-        return left(new CannotRemoveLastInstitutionManagerError())
-      }
+    if (!isDemotingAManager) {
+      return right(null)
     }
 
+    const members = await this.institutionMembersRepository.findManyByInstitutionId(member.institutionId)
+
+    const otherActiveManagers = members.filter((otherMember) => {
+      return (
+        otherMember.id.toString() !== member.id.toString() &&
+        otherMember.role === InstitutionMemberRole.MANAGER &&
+        otherMember.status === InstitutionMemberStatus.ACTIVE
+      )
+    })
+
+    if (otherActiveManagers.length === 0) {
+      await this.log({
+        actorId,
+        resourceId: memberId,
+        text: `Tentativa de remover o único gerente da instituição pelo membro ${memberId}.`,
+        status: AuditLogStatus.FAILURE,
+      })
+
+      return left(new CannotRemoveLastInstitutionManagerError())
+    }
+
+    return right(null)
+  }
+
+  private async updateMemberRole(member: InstitutionMember, role: InstitutionMemberRole, actorId: string) {
     const oldRole = member.role
     member.role = role
 
@@ -114,12 +163,12 @@ export class UpdateInstitutionMemberRoleUseCase {
 
     await this.log({
       actorId,
-      resourceId: memberId,
-      text: `Cargo do membro ${memberId} atualizado com sucesso.`,
+      resourceId: member.id.toString(),
+      text: `Cargo do membro ${member.id.toString()} atualizado com sucesso.`,
       status: AuditLogStatus.SUCCESS,
       diff: { role: { old: oldRole, new: role } },
     })
 
-    return right({ member })
+    return { member }
   }
 }

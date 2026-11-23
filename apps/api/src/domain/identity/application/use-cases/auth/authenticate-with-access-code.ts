@@ -1,6 +1,7 @@
 import { type Either, left, right } from '@/core/either'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
+import type { AccessCode } from '../../../enterprise/entities/access-code'
 import type { Account } from '../../../enterprise/entities/account'
 import { Session } from '../../../enterprise/entities/session'
 import { type User, UserStatus } from '../../../enterprise/entities/user'
@@ -25,13 +26,6 @@ interface AuthenticateWithAccessCodeUseCaseRequest {
   code: string
 }
 
-type LogParams = {
-  actorId: string
-  resourceId: string
-  text: string
-  status: AuditLogStatus
-}
-
 type AuthenticateWithAccessCodeUseCaseResponse = Either<
   | UserNotFoundError
   | AccountNotFoundError
@@ -52,33 +46,74 @@ export class AuthenticateWithAccessCodeUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
-  private async log({ actorId, resourceId, text, status }: LogParams) {
-    await this.registerLog.execute({
-      actorId,
-      sessionId: null,
-      action: AuditLogAction.LOGIN,
-      resource: 'identity.session',
-      resourceId,
-      diff: null,
-      text,
-      status,
-    })
-  }
-
   async execute({
     email,
     code,
   }: AuthenticateWithAccessCodeUseCaseRequest): Promise<AuthenticateWithAccessCodeUseCaseResponse> {
     const emailNormalized = email.toLocaleLowerCase()
 
-    const user = await this.usersRepository.findByEmail(emailNormalized)
+    const userResult = await this.findUserOrFail(emailNormalized)
+
+    if (userResult.isLeft()) {
+      return left(userResult.value)
+    }
+
+    const user = userResult.value
+    const actorId = user.id.toString()
+
+    const availableResult = await this.validateUser(user, actorId)
+
+    if (availableResult.isLeft()) {
+      return left(availableResult.value)
+    }
+
+    const accountResult = await this.findAccountOrFail(user.id.toString(), actorId)
+
+    if (accountResult.isLeft()) {
+      return left(accountResult.value)
+    }
+
+    const account = accountResult.value
+
+    const accessCodeResult = await this.validateAccessCode(account, code, actorId)
+
+    if (accessCodeResult.isLeft()) {
+      return left(accessCodeResult.value)
+    }
+
+    const accessCode = accessCodeResult.value
+
+    await this.consumeAccessCodeAndActivate(user, account, accessCode)
+
+    const session = await this.createSession(user, account, actorId)
+
+    return right({ user, account, session })
+  }
+
+  private async log({ actorId, resourceId, text, status, diff, sessionId }: LogParams) {
+    await this.registerLog.execute({
+      actorId,
+      sessionId: sessionId ?? null,
+      action: AuditLogAction.LOGIN,
+      resource: 'identity.session',
+      resourceId,
+      diff: diff ?? null,
+      text,
+      status,
+    })
+  }
+
+  private async findUserOrFail(email: string): Promise<Either<UserNotFoundError, User>> {
+    const user = await this.usersRepository.findByEmail(email)
 
     if (!user) {
       return left(new UserNotFoundError())
     }
 
-    const actorId = user.id.toString()
+    return right(user)
+  }
 
+  private async validateUser(user: User, actorId: string): Promise<Either<UserUnavailableError, null>> {
     if (UNAVAILABLE_STATUSES.has(user.status)) {
       await this.log({
         actorId,
@@ -90,7 +125,11 @@ export class AuthenticateWithAccessCodeUseCase {
       return left(new UserUnavailableError())
     }
 
-    const account = await this.accountsRepository.findByUserId(user.id.toString())
+    return right(null)
+  }
+
+  private async findAccountOrFail(userId: string, actorId: string): Promise<Either<AccountNotFoundError, Account>> {
+    const account = await this.accountsRepository.findByUserId(userId)
 
     if (!account) {
       await this.log({
@@ -103,6 +142,14 @@ export class AuthenticateWithAccessCodeUseCase {
       return left(new AccountNotFoundError())
     }
 
+    return right(account)
+  }
+
+  private async validateAccessCode(
+    account: Account,
+    code: string,
+    actorId: string,
+  ): Promise<Either<InvalidAccessCodeError | AccessCodeAlreadyConsumedError | ExpiredAccessCodeError, AccessCode>> {
     const accessCode = await this.accessCodesRepository.findActiveByAccountId(account.id.toString())
 
     if (!accessCode) {
@@ -151,6 +198,10 @@ export class AuthenticateWithAccessCodeUseCase {
       return left(new ExpiredAccessCodeError())
     }
 
+    return right(accessCode)
+  }
+
+  private async consumeAccessCodeAndActivate(user: User, account: Account, accessCode: AccessCode) {
     accessCode.consume()
     await this.accessCodesRepository.save(accessCode)
 
@@ -163,7 +214,9 @@ export class AuthenticateWithAccessCodeUseCase {
       account.confirmationAt = new Date()
       await this.accountsRepository.save(account)
     }
+  }
 
+  private async createSession(user: User, account: Account, actorId: string) {
     const now = new Date()
     const expiresAt = new Date(now.getTime() + SESSION_EXPIRES_IN_DAYS * 24 * 60 * 60 * 1000)
 
@@ -183,6 +236,6 @@ export class AuthenticateWithAccessCodeUseCase {
       status: AuditLogStatus.SUCCESS,
     })
 
-    return right({ user, account, session })
+    return session
   }
 }

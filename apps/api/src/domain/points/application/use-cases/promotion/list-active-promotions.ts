@@ -18,6 +18,11 @@ export interface ActivePromotionItem {
   promoter: User
 }
 
+type PromotionRelations = {
+  projectsById: Map<string, Project>
+  promotersById: Map<string, User>
+}
+
 type ListActivePromotionsUseCaseResponse = Either<
   never,
   {
@@ -46,6 +51,16 @@ export class ListActivePromotionsUseCase {
       return right({ items: [], total: 0, page, limit })
     }
 
+    const relations = await this.findRelations(promotions)
+
+    const allItems = this.buildUniqueItemsByProject(promotions, relations)
+
+    const items = this.paginate(allItems, page, limit)
+
+    return right({ items, total: allItems.length, page, limit })
+  }
+
+  private async findRelations(promotions: Promotion[]): Promise<PromotionRelations> {
     const projects = await this.projectsRepository.findManyByIds(
       promotions.map((promotion) => promotion.projectId.toString()),
     )
@@ -53,9 +68,16 @@ export class ListActivePromotionsUseCase {
       promotions.map((promotion) => promotion.promoterId.toString()),
     )
 
-    const projectsById = new Map(projects.map((project) => [project.id.toString(), project]))
-    const promotersById = new Map(promoters.map((promoter) => [promoter.id.toString(), promoter]))
+    return {
+      projectsById: new Map(projects.map((project) => [project.id.toString(), project])),
+      promotersById: new Map(promoters.map((promoter) => [promoter.id.toString(), promoter])),
+    }
+  }
 
+  private buildUniqueItemsByProject(
+    promotions: Promotion[],
+    { projectsById, promotersById }: PromotionRelations,
+  ): ActivePromotionItem[] {
     const uniqueByProject = new Map<string, ActivePromotionItem>()
 
     for (const promotion of promotions) {
@@ -75,11 +97,12 @@ export class ListActivePromotionsUseCase {
       uniqueByProject.set(projectId, { promotion, project, promoter })
     }
 
-    const allItems = Array.from(uniqueByProject.values())
-    const total = allItems.length
-    const start = (page - 1) * limit
-    const items = allItems.slice(start, start + limit)
+    return Array.from(uniqueByProject.values())
+  }
 
-    return right({ items, total, page, limit })
+  private paginate(items: ActivePromotionItem[], page: number, limit: number): ActivePromotionItem[] {
+    const start = (page - 1) * limit
+
+    return items.slice(start, start + limit)
   }
 }
