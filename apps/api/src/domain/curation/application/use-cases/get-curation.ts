@@ -1,6 +1,6 @@
 import { type Either, right } from '@/core/either'
 import type { Project } from '@/domain/project/enterprise/entities/project'
-import type { CurationRepository } from '../repositories/curation-repository'
+import type { CurationFilters, CurationRepository } from '../repositories/curation-repository'
 
 const DEFAULT_PERIOD_IN_MONTHS = 3
 
@@ -17,6 +17,10 @@ interface GetCurationUseCaseRequest {
 }
 
 type GetCurationUseCaseResponse = Either<never, { projects: Project[] }>
+
+type CurationFiltersInput = Pick<GetCurationUseCaseRequest, 'institutionIds' | 'title' | 'tagIds'> & {
+  since: Date
+}
 
 function mergeUniqueByCreatedAtDesc(projects: Project[]) {
   const uniqueById = new Map<string, Project>()
@@ -40,37 +44,51 @@ export class GetCurationUseCase {
     tagIds,
     now = new Date(),
   }: GetCurationUseCaseRequest): Promise<GetCurationUseCaseResponse> {
+    const since = this.resolveSince(now, months)
+    const filters = this.buildFilters({ since, institutionIds, title, tagIds })
+
+    const projects = await this.findProjectsByScope(scope, filters)
+
+    return right({ projects: this.applyLimit(projects, limit) })
+  }
+
+  private resolveSince(now: Date, months: number): Date {
     const since = new Date(now)
     since.setUTCMonth(since.getUTCMonth() - months)
 
+    return since
+  }
+
+  private buildFilters({ since, institutionIds, title, tagIds }: CurationFiltersInput): CurationFilters {
     const normalizedTitle = title?.trim()
-    const filters = {
+
+    return {
       since,
       institutionIds: institutionIds && institutionIds.length > 0 ? institutionIds : undefined,
       title: normalizedTitle ? normalizedTitle : undefined,
       tagIds: tagIds && tagIds.length > 0 ? tagIds : undefined,
-      limit: undefined as number | undefined,
+      limit: undefined,
     }
+  }
 
-    let projects: Project[] = []
-
+  private async findProjectsByScope(scope: CurationScope, filters: CurationFilters): Promise<Project[]> {
     if (scope === 'board') {
-      projects = await this.curationRepository.findTopByTeachers(filters)
-    } else if (scope === 'community') {
-      projects = await this.curationRepository.findTopByCommunity(filters)
-    } else {
-      const [board, community] = await Promise.all([
-        this.curationRepository.findTopByTeachers(filters),
-        this.curationRepository.findTopByCommunity(filters),
-      ])
-
-      projects = mergeUniqueByCreatedAtDesc([...board, ...community])
+      return this.curationRepository.findTopByTeachers(filters)
     }
 
-    if (limit !== undefined) {
-      projects = projects.slice(0, limit)
+    if (scope === 'community') {
+      return this.curationRepository.findTopByCommunity(filters)
     }
 
-    return right({ projects })
+    const [board, community] = await Promise.all([
+      this.curationRepository.findTopByTeachers(filters),
+      this.curationRepository.findTopByCommunity(filters),
+    ])
+
+    return mergeUniqueByCreatedAtDesc([...board, ...community])
+  }
+
+  private applyLimit(projects: Project[], limit: number | undefined): Project[] {
+    return limit !== undefined ? projects.slice(0, limit) : projects
   }
 }

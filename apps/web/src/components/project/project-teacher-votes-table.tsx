@@ -61,7 +61,7 @@ export function ProjectTeacherVotesTable({
                   {criterionShortLabel(criterion.name)}
                 </th>
               ))}
-              <th className="w-28 bg-muted/60 px-3 py-3 text-center font-normal">Overall</th>
+              <th className="w-28 bg-muted/60 px-3 py-3 text-center font-normal">Média</th>
             </tr>
           </thead>
           <tbody>

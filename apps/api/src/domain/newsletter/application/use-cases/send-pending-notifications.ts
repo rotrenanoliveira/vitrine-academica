@@ -1,9 +1,11 @@
 import { type Either, right } from '@/core/either'
 import type { UsersRepository } from '@/domain/identity/application/repositories/users-repository'
+import type { User } from '@/domain/identity/enterprise/entities/user'
 import type { Mail } from '@/domain/mail/application/mail/mail'
 import { publicationMail } from '@/domain/mail/application/mail/messages/publication-mail'
 import type { ProjectsRepository } from '@/domain/project/application/repositories/projects-repositories'
-import { ProjectStatus } from '@/domain/project/enterprise/entities/project'
+import { type Project, ProjectStatus } from '@/domain/project/enterprise/entities/project'
+import type { AuthorSubscription } from '../../enterprise/entities/author-subscription'
 import { NotificationStatus, type PublicationNotification } from '../../enterprise/entities/publication-notification'
 import type { AuthorSubscriptionsRepository } from '../repositories/author-subscriptions-repository'
 import type { PublicationNotificationsRepository } from '../repositories/publication-notifications-repository'
@@ -13,6 +15,12 @@ const DEFAULT_LIMIT = 20
 interface SendPendingNotificationsUseCaseRequest {
   webUrl: string
   limit?: number | undefined
+}
+
+type DeliveryContext = {
+  subscription: AuthorSubscription
+  project: Project
+  author: User
 }
 
 type SendPendingNotificationsUseCaseResponse = Either<never, { sent: number; failed: number }>
@@ -49,37 +57,55 @@ export class SendPendingNotificationsUseCase {
   }
 
   private async deliver(notification: PublicationNotification, webUrl: string): Promise<boolean> {
-    const subscription = await this.subscriptionsRepository.findById(notification.subscriptionId.toString())
-    const project = await this.projectsRepository.findById(notification.projectId.toString())
+    const context = await this.findDeliveryContext(notification)
 
-    if (!subscription?.isActive || !project || project.status !== ProjectStatus.PUBLISHED) {
-      return this.fail(notification)
-    }
-
-    const author = await this.usersRepository.findById(project.author.toString())
-
-    if (!author) {
+    if (!context) {
       return this.fail(notification)
     }
 
     try {
-      const result = await this.mail.send(
-        publicationMail({
-          to: subscription.email,
-          authorName: author.name,
-          projectTitle: project.title,
-          projectUrl: `${webUrl}/projetos/${project.slug}`,
-          unsubscribeUrl: `${webUrl}/newsletter/cancelar?token=${subscription.unsubscribeToken}`,
-        }),
-      )
-
-      notification.markAsSent(result.id)
-      await this.notificationsRepository.save(notification)
+      await this.sendAndMarkAsSent(notification, context, webUrl)
 
       return true
     } catch {
       return this.fail(notification)
     }
+  }
+
+  private async findDeliveryContext(notification: PublicationNotification): Promise<DeliveryContext | null> {
+    const subscription = await this.subscriptionsRepository.findById(notification.subscriptionId.toString())
+    const project = await this.projectsRepository.findById(notification.projectId.toString())
+
+    if (!subscription?.isActive || !project || project.status !== ProjectStatus.PUBLISHED) {
+      return null
+    }
+
+    const author = await this.usersRepository.findById(project.author.toString())
+
+    if (!author) {
+      return null
+    }
+
+    return { subscription, project, author }
+  }
+
+  private async sendAndMarkAsSent(
+    notification: PublicationNotification,
+    { subscription, project, author }: DeliveryContext,
+    webUrl: string,
+  ) {
+    const result = await this.mail.send(
+      publicationMail({
+        to: subscription.email,
+        authorName: author.name,
+        projectTitle: project.title,
+        projectUrl: `${webUrl}/projetos/${project.slug}`,
+        unsubscribeUrl: `${webUrl}/newsletter/cancelar?token=${subscription.unsubscribeToken}`,
+      }),
+    )
+
+    notification.markAsSent(result.id)
+    await this.notificationsRepository.save(notification)
   }
 
   private async fail(notification: PublicationNotification): Promise<false> {

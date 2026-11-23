@@ -1,6 +1,8 @@
 import { type Either, left, right } from '@/core/either'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
+import type { Project } from '../../../enterprise/entities/project'
+import type { ProjectStar } from '../../../enterprise/entities/project-star'
 import { ProjectNotFoundError } from '../../_errors/project-not-found-error'
 import { StarNotFoundError } from '../../_errors/star-not-found-error'
 import type { ProjectStarsRepository } from '../../repositories/project-stars-repository'
@@ -12,15 +14,6 @@ interface UnstarProjectUseCaseRequest {
   sessionId: string
 }
 
-type LogParams = {
-  actorId: string
-  sessionId: string
-  resourceId: string
-  text: string
-  status: AuditLogStatus
-  diff?: Record<string, { old: unknown; new: unknown }> | null
-}
-
 type UnstarProjectUseCaseResponse = Either<ProjectNotFoundError | StarNotFoundError, null>
 
 export class UnstarProjectUseCase {
@@ -30,47 +23,20 @@ export class UnstarProjectUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
-  private async log({ actorId, sessionId, resourceId, text, status, diff }: LogParams) {
-    await this.registerLog.execute({
-      actorId,
-      sessionId,
-      action: AuditLogAction.DELETE,
-      resource: 'project.project_star',
-      resourceId,
-      diff: diff ?? null,
-      status,
-      text,
-    })
-  }
-
   async execute({ projectId, userId, sessionId }: UnstarProjectUseCaseRequest): Promise<UnstarProjectUseCaseResponse> {
-    const project = await this.projectsRepository.findById(projectId)
+    const projectResult = await this.findProjectOrFail(projectId, userId, sessionId)
 
-    if (!project) {
-      await this.log({
-        actorId: userId,
-        sessionId,
-        resourceId: projectId,
-        text: `Projeto ${projectId} não encontrado ao remover estrela.`,
-        status: AuditLogStatus.FAILURE,
-      })
-
-      return left(new ProjectNotFoundError())
+    if (projectResult.isLeft()) {
+      return left(projectResult.value)
     }
 
-    const star = await this.projectStarsRepository.findActiveByProjectAndUser(projectId, userId)
+    const starResult = await this.findActiveStarOrFail(projectId, userId, sessionId)
 
-    if (!star) {
-      await this.log({
-        actorId: userId,
-        sessionId,
-        resourceId: projectId,
-        text: `Estrela ativa não encontrada para o usuário ${userId} no projeto ${projectId}.`,
-        status: AuditLogStatus.FAILURE,
-      })
-
-      return left(new StarNotFoundError())
+    if (starResult.isLeft()) {
+      return left(starResult.value)
     }
+
+    const star = starResult.value
 
     star.deactivate()
     await this.projectStarsRepository.save(star)
@@ -89,5 +55,62 @@ export class UnstarProjectUseCase {
     })
 
     return right(null)
+  }
+
+  private async log({ actorId, sessionId, resourceId, text, status, diff }: LogParams) {
+    await this.registerLog.execute({
+      actorId,
+      sessionId: sessionId ?? null,
+      action: AuditLogAction.DELETE,
+      resource: 'project.project_star',
+      resourceId,
+      diff: diff ?? null,
+      status,
+      text,
+    })
+  }
+
+  private async findProjectOrFail(
+    projectId: string,
+    userId: string,
+    sessionId: string,
+  ): Promise<Either<ProjectNotFoundError, Project>> {
+    const project = await this.projectsRepository.findById(projectId)
+
+    if (!project) {
+      await this.log({
+        actorId: userId,
+        sessionId,
+        resourceId: projectId,
+        text: `Projeto ${projectId} não encontrado ao remover estrela.`,
+        status: AuditLogStatus.FAILURE,
+      })
+
+      return left(new ProjectNotFoundError())
+    }
+
+    return right(project)
+  }
+
+  private async findActiveStarOrFail(
+    projectId: string,
+    userId: string,
+    sessionId: string,
+  ): Promise<Either<StarNotFoundError, ProjectStar>> {
+    const star = await this.projectStarsRepository.findActiveByProjectAndUser(projectId, userId)
+
+    if (!star) {
+      await this.log({
+        actorId: userId,
+        sessionId,
+        resourceId: projectId,
+        text: `Estrela ativa não encontrada para o usuário ${userId} no projeto ${projectId}.`,
+        status: AuditLogStatus.FAILURE,
+      })
+
+      return left(new StarNotFoundError())
+    }
+
+    return right(star)
   }
 }

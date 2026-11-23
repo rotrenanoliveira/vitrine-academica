@@ -28,15 +28,19 @@ export class ListMySubscriptionsUseCase {
   }: ListMySubscriptionsUseCaseRequest): Promise<ListMySubscriptionsUseCaseResponse> {
     const subscriptions = await this.subscriptionsRepository.findManyBySubscriberId(subscriberId, status)
 
+    const items = await this.attachAuthors(subscriptions)
+
+    return right({ subscriptions: items })
+  }
+
+  private async attachAuthors(subscriptions: AuthorSubscription[]): Promise<SubscriptionItem[]> {
     const authors = await Promise.all(
       subscriptions.map((subscription) => this.usersRepository.findById(subscription.authorId.toString())),
     )
 
-    const items = subscriptions.map((subscription, index) => ({
+    return subscriptions.map((subscription, index) => ({
       subscription,
       author: authors[index] ?? null,
     }))
-
-    return right({ subscriptions: items })
   }
 }

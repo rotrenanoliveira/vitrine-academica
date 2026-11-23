@@ -1,7 +1,8 @@
 import { type Either, left, right } from '@/core/either'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
 import { InstitutionMember, type InstitutionMemberRole } from '../../../enterprise/entities/institution-member'
+import type { Institution } from '../../../enterprise/entities/institutions'
 import { InstitutionMemberAlreadyExistsError } from '../../_errors/institution-member-already-exists-error'
 import { InstitutionNotFoundError } from '../../_errors/institution-not-found-error'
 import { NotAllowedToManageInstitutionError } from '../../_errors/not-allowed-to-manage-institution-error'
@@ -16,14 +17,6 @@ interface CreateInstitutionMemberUseCaseRequest {
   role: InstitutionMemberRole
 }
 
-type LogParams = {
-  actorId: string
-  resourceId: string
-  text: string
-  status: AuditLogStatus
-  diff?: Record<string, { old: unknown; new: unknown }> | null
-}
-
 type CreateInstitutionMemberUseCaseResponse = Either<
   InstitutionNotFoundError | NotAllowedToManageInstitutionError | InstitutionMemberAlreadyExistsError,
   { member: InstitutionMember }
@@ -36,10 +29,39 @@ export class CreateInstitutionMemberUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
-  private async log({ actorId, resourceId, text, status, diff }: LogParams) {
+  async execute({
+    institutionId,
+    actorId,
+    userId,
+    role,
+  }: CreateInstitutionMemberUseCaseRequest): Promise<CreateInstitutionMemberUseCaseResponse> {
+    const institutionResult = await this.findInstitutionOrFail(institutionId, actorId)
+
+    if (institutionResult.isLeft()) {
+      return left(institutionResult.value)
+    }
+
+    const manageResult = await this.canManageInstitution(institutionId, actorId)
+
+    if (manageResult.isLeft()) {
+      return left(manageResult.value)
+    }
+
+    const duplicateResult = await this.validateMemberRole(institutionId, userId, role, actorId)
+
+    if (duplicateResult.isLeft()) {
+      return left(duplicateResult.value)
+    }
+
+    const { member } = await this.createMember(institutionId, userId, role, actorId)
+
+    return right({ member })
+  }
+
+  private async log({ actorId, resourceId, text, status, diff, sessionId }: LogParams) {
     await this.registerLog.execute({
       actorId,
-      sessionId: null,
+      sessionId: sessionId ?? null,
       action: AuditLogAction.CREATE,
       resource: 'institution.member',
       resourceId,
@@ -49,12 +71,10 @@ export class CreateInstitutionMemberUseCase {
     })
   }
 
-  async execute({
-    institutionId,
-    actorId,
-    userId,
-    role,
-  }: CreateInstitutionMemberUseCaseRequest): Promise<CreateInstitutionMemberUseCaseResponse> {
+  private async findInstitutionOrFail(
+    institutionId: string,
+    actorId: string,
+  ): Promise<Either<InstitutionNotFoundError, Institution>> {
     const institution = await this.institutionsRepository.findById(institutionId)
 
     if (!institution) {
@@ -64,9 +84,17 @@ export class CreateInstitutionMemberUseCase {
         text: `Instituição ${institutionId} não encontrada.`,
         status: AuditLogStatus.FAILURE,
       })
+
       return left(new InstitutionNotFoundError())
     }
 
+    return right(institution)
+  }
+
+  private async canManageInstitution(
+    institutionId: string,
+    actorId: string,
+  ): Promise<Either<NotAllowedToManageInstitutionError, true>> {
     const isAllowedToManage = await canManageInstitution(this.institutionMembersRepository, institutionId, actorId)
 
     if (!isAllowedToManage) {
@@ -76,9 +104,19 @@ export class CreateInstitutionMemberUseCase {
         text: `Usuário ${actorId} não tem permissão para gerenciar a instituição ${institutionId}.`,
         status: AuditLogStatus.FAILURE,
       })
+
       return left(new NotAllowedToManageInstitutionError())
     }
 
+    return right(true)
+  }
+
+  private async validateMemberRole(
+    institutionId: string,
+    userId: string,
+    role: InstitutionMemberRole,
+    actorId: string,
+  ): Promise<Either<InstitutionMemberAlreadyExistsError, null>> {
     const existingMember = await this.institutionMembersRepository.findByInstitutionAndUser(institutionId, userId)
 
     if (existingMember && existingMember.role === role) {
@@ -88,9 +126,14 @@ export class CreateInstitutionMemberUseCase {
         text: `Membro ${existingMember.id.toString()} já existe.`,
         status: AuditLogStatus.FAILURE,
       })
+
       return left(new InstitutionMemberAlreadyExistsError())
     }
 
+    return right(null)
+  }
+
+  private async createMember(institutionId: string, userId: string, role: InstitutionMemberRole, actorId: string) {
     const member = InstitutionMember.create({
       institutionId,
       userId,
@@ -107,6 +150,6 @@ export class CreateInstitutionMemberUseCase {
       diff: null,
     })
 
-    return right({ member })
+    return { member }
   }
 }

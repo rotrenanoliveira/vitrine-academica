@@ -1,7 +1,7 @@
 import { type Either, left, right } from '@/core/either'
 import type { UsersRepository } from '@/domain/identity/application/repositories/users-repository'
 import type { User } from '@/domain/identity/enterprise/entities/user'
-import { ProjectStatus } from '../../../enterprise/entities/project'
+import { type Project, ProjectStatus } from '../../../enterprise/entities/project'
 import { type ProjectMember, ProjectMemberStatus } from '../../../enterprise/entities/project-member'
 import { ProjectNotFoundError } from '../../_errors/project-not-found-error'
 import type { ProjectMembersRepository } from '../../repositories/project-members-repository'
@@ -12,7 +12,7 @@ interface ListProjectMembersUseCaseRequest {
   requesterId?: string
 }
 
-export interface ProjectMemberItem {
+export type ProjectMemberItem = {
   projectMember: ProjectMember
   user: User
 }
@@ -36,13 +36,40 @@ export class ListProjectMembersUseCase {
       return left(new ProjectNotFoundError())
     }
 
-    const isOwner = Boolean(requesterId) && project.author.toString() === requesterId
-    const isPublished = project.status === ProjectStatus.PUBLISHED
-
-    if (!isOwner && !isPublished && !(requesterId && (await this.canReadUnpublished(projectId, requesterId)))) {
+    if (!(await this.canAccessProject(project, requesterId))) {
       return left(new ProjectNotFoundError())
     }
 
+    const isOwner = Boolean(requesterId) && project.author.toString() === requesterId
+    const members = await this.findProjectMembers(projectId, isOwner)
+
+    return right({ members })
+  }
+
+  private async canAccessProject(project: Project, requesterId?: string): Promise<boolean> {
+    const isOwner = Boolean(requesterId) && project.author.toString() === requesterId
+    const isPublished = project.status === ProjectStatus.PUBLISHED
+
+    if (isOwner || isPublished) {
+      return true
+    }
+
+    if (!requesterId) {
+      return false
+    }
+
+    return this.isProjectMember(project.id.toString(), requesterId)
+  }
+
+  private async isProjectMember(projectId: string, userId: string): Promise<boolean> {
+    const projectMember = await this.projectMembersRepository.findByProjectAndUser(projectId, userId)
+
+    return (
+      projectMember?.status === ProjectMemberStatus.ACCEPTED || projectMember?.status === ProjectMemberStatus.PENDING
+    )
+  }
+
+  private async findProjectMembers(projectId: string, isOwner: boolean): Promise<ProjectMemberItem[]> {
     const projectMembers = await this.projectMembersRepository.findManyByProjectId(projectId)
 
     const visibleMembers = projectMembers.filter((projectMember) =>
@@ -55,7 +82,7 @@ export class ListProjectMembersUseCase {
       visibleMembers.map((projectMember) => this.usersRepository.findById(projectMember.userId.toString())),
     )
 
-    const members = visibleMembers.flatMap((projectMember, index) => {
+    return visibleMembers.flatMap((projectMember, index) => {
       const user = users[index]
 
       if (!user) {
@@ -64,16 +91,5 @@ export class ListProjectMembersUseCase {
 
       return [{ projectMember, user }]
     })
-
-    return right({ members })
-  }
-
-  // Convite recusado não conta: só aceito ou pendente leem a lista de um projeto ainda não publicado
-  private async canReadUnpublished(projectId: string, userId: string): Promise<boolean> {
-    const projectMember = await this.projectMembersRepository.findByProjectAndUser(projectId, userId)
-
-    return (
-      projectMember?.status === ProjectMemberStatus.ACCEPTED || projectMember?.status === ProjectMemberStatus.PENDING
-    )
   }
 }

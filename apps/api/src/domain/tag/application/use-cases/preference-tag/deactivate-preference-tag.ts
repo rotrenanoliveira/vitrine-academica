@@ -1,6 +1,6 @@
 import { type Either, left, right } from '@/core/either'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
 import { UserNotFoundError } from '@/domain/identity/application/_errors/user-not-found-error'
 import type { UsersRepository } from '@/domain/identity/application/repositories/users-repository'
 import { type PreferenceTag, PreferenceTagStatus } from '../../../enterprise/entities/preference-tag'
@@ -10,14 +10,6 @@ import type { PreferenceTagsRepository } from '../../repositories/preference-tag
 interface DeactivatePreferenceTagUseCaseRequest {
   userId: string
   tagId: string
-}
-
-type LogParams = {
-  actorId: string
-  resourceId: string
-  text: string
-  status: AuditLogStatus
-  diff?: Record<string, { old: unknown; new: unknown }> | null
 }
 
 type DeactivatePreferenceTagUseCaseResponse = Either<
@@ -32,10 +24,38 @@ export class DeactivatePreferenceTagUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
-  private async log({ actorId, resourceId, text, status, diff }: LogParams) {
+  async execute({
+    userId,
+    tagId,
+  }: DeactivatePreferenceTagUseCaseRequest): Promise<DeactivatePreferenceTagUseCaseResponse> {
+    const userResult = await this.validateUserExists(userId, tagId)
+
+    if (userResult.isLeft()) {
+      return left(userResult.value)
+    }
+
+    const preferenceTagResult = await this.findPreferenceTagOrFail(userId, tagId)
+
+    if (preferenceTagResult.isLeft()) {
+      return left(preferenceTagResult.value)
+    }
+
+    const preferenceTag = preferenceTagResult.value
+
+    // Já está inativa: nada a fazer (operação idempotente)
+    if (preferenceTag.status === PreferenceTagStatus.INACTIVE) {
+      return right({ preferenceTag })
+    }
+
+    await this.deactivatePreferenceTag(preferenceTag, userId, tagId)
+
+    return right({ preferenceTag })
+  }
+
+  private async log({ actorId, sessionId, resourceId, text, status, diff }: LogParams) {
     await this.registerLog.execute({
       actorId,
-      sessionId: null,
+      sessionId: sessionId ?? null,
       action: AuditLogAction.UPDATE,
       resource: 'preference-tag',
       resourceId,
@@ -45,10 +65,7 @@ export class DeactivatePreferenceTagUseCase {
     })
   }
 
-  async execute({
-    userId,
-    tagId,
-  }: DeactivatePreferenceTagUseCaseRequest): Promise<DeactivatePreferenceTagUseCaseResponse> {
+  private async validateUserExists(userId: string, tagId: string): Promise<Either<UserNotFoundError, null>> {
     const user = await this.usersRepository.findById(userId)
 
     if (!user) {
@@ -62,6 +79,13 @@ export class DeactivatePreferenceTagUseCase {
       return left(new UserNotFoundError())
     }
 
+    return right(null)
+  }
+
+  private async findPreferenceTagOrFail(
+    userId: string,
+    tagId: string,
+  ): Promise<Either<PreferenceTagNotFoundError, PreferenceTag>> {
     const preferenceTag = await this.preferenceTagsRepository.findByUserIdAndTagId(userId, tagId)
 
     if (!preferenceTag) {
@@ -75,11 +99,10 @@ export class DeactivatePreferenceTagUseCase {
       return left(new PreferenceTagNotFoundError())
     }
 
-    // Já está inativa: nada a fazer (operação idempotente)
-    if (preferenceTag.status === PreferenceTagStatus.INACTIVE) {
-      return right({ preferenceTag })
-    }
+    return right(preferenceTag)
+  }
 
+  private async deactivatePreferenceTag(preferenceTag: PreferenceTag, userId: string, tagId: string) {
     preferenceTag.status = PreferenceTagStatus.INACTIVE
     await this.preferenceTagsRepository.save(preferenceTag)
 
@@ -90,7 +113,5 @@ export class DeactivatePreferenceTagUseCase {
       status: AuditLogStatus.SUCCESS,
       diff: { status: { old: PreferenceTagStatus.ACTIVE, new: PreferenceTagStatus.INACTIVE } },
     })
-
-    return right({ preferenceTag })
   }
 }

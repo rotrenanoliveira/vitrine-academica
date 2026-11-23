@@ -1,12 +1,13 @@
 import { type Either, left, right } from '@/core/either'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
 import type { UsersRepository } from '@/domain/identity/application/repositories/users-repository'
 import { UserStatus } from '@/domain/identity/enterprise/entities/user'
 import type { InstitutionMembersRepository } from '@/domain/institution/application/repositories/institution-members-repository'
-import { ProjectStatus } from '../../../enterprise/entities/project'
+import { type Project, ProjectStatus } from '../../../enterprise/entities/project'
 import { ProjectTeacherRating } from '../../../enterprise/entities/project-teacher-rating'
+import type { RatingCriterion } from '../../../enterprise/entities/rating-criterion'
 import { TeacherRatingItem } from '../../../enterprise/entities/teacher-rating-item'
 import { CannotRateOwnProjectError } from '../../_errors/cannot-rate-own-project-error'
 import { CriterionNotActiveError } from '../../_errors/criterion-not-active-error'
@@ -32,16 +33,6 @@ interface RateProjectByCriteriaUseCaseRequest {
   scores: CriterionScoreInput[]
 }
 
-type LogParams = {
-  actorId: string
-  sessionId: string
-  resourceId: string
-  action: AuditLogAction
-  text: string
-  status: AuditLogStatus
-  diff?: Record<string, { old: unknown; new: unknown }> | null
-}
-
 type RateProjectByCriteriaUseCaseResponse = Either<
   | ProjectNotFoundError
   | ProjectNotEligibleForRatingError
@@ -63,10 +54,82 @@ export class RateProjectByCriteriaUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
-  private async log({ actorId, sessionId, resourceId, action, text, status, diff }: LogParams) {
+  async execute({
+    projectId,
+    teacherId,
+    sessionId,
+    scores,
+  }: RateProjectByCriteriaUseCaseRequest): Promise<RateProjectByCriteriaUseCaseResponse> {
+    const activeUserResult = await this.assertActiveUser(teacherId, sessionId, projectId)
+
+    if (activeUserResult.isLeft()) {
+      return left(activeUserResult.value)
+    }
+
+    const allowedResult = await this.validateTeacherRating(teacherId, sessionId, projectId)
+
+    if (allowedResult.isLeft()) {
+      return left(allowedResult.value)
+    }
+
+    const projectResult = await this.findProjectOrFail(projectId, teacherId, sessionId)
+
+    if (projectResult.isLeft()) {
+      return left(projectResult.value)
+    }
+
+    const project = projectResult.value
+
+    const eligibleResult = await this.validateProjectEligibility(project, teacherId, sessionId)
+
+    if (eligibleResult.isLeft()) {
+      return left(eligibleResult.value)
+    }
+
+    const activeCriteria = await this.ratingCriteriaRepository.findActiveValid()
+
+    const scoresValidation = this.validateRating(scores, activeCriteria)
+
+    if (scoresValidation.isLeft()) {
+      return left(scoresValidation.value)
+    }
+
+    const overallScore = this.calculateOverallScore(scores)
+
+    const existing = await this.projectTeacherRatingsRepository.findByProjectAndTeacher(projectId, teacherId)
+
+    if (existing) {
+      return this.updateExistingRating({
+        existing,
+        scores,
+        overallScore,
+        projectId,
+        teacherId,
+        sessionId,
+      })
+    }
+
+    return this.createRating({
+      projectId,
+      teacherId,
+      sessionId,
+      scores,
+      overallScore,
+    })
+  }
+
+  private async log({
+    actorId,
+    sessionId,
+    resourceId,
+    text,
+    status,
+    diff,
+    action = AuditLogAction.CREATE,
+  }: LogParams & { action?: AuditLogAction }) {
     await this.registerLog.execute({
       actorId,
-      sessionId,
+      sessionId: sessionId ?? null,
       action,
       resource: 'project.project_teacher_rating',
       resourceId,
@@ -76,12 +139,11 @@ export class RateProjectByCriteriaUseCase {
     })
   }
 
-  async execute({
-    projectId,
-    teacherId,
-    sessionId,
-    scores,
-  }: RateProjectByCriteriaUseCaseRequest): Promise<RateProjectByCriteriaUseCaseResponse> {
+  private async assertActiveUser(
+    teacherId: string,
+    sessionId: string,
+    projectId: string,
+  ): Promise<Either<UserNotActiveError, null>> {
     const user = await this.usersRepository.findById(teacherId)
 
     if (!user || user.status !== UserStatus.ACTIVE) {
@@ -89,7 +151,6 @@ export class RateProjectByCriteriaUseCase {
         actorId: teacherId,
         sessionId,
         resourceId: projectId,
-        action: AuditLogAction.CREATE,
         text: `Professor ${teacherId} não está ativo para avaliar o projeto ${projectId}.`,
         status: AuditLogStatus.FAILURE,
       })
@@ -97,6 +158,14 @@ export class RateProjectByCriteriaUseCase {
       return left(new UserNotActiveError())
     }
 
+    return right(null)
+  }
+
+  private async validateTeacherRating(
+    teacherId: string,
+    sessionId: string,
+    projectId: string,
+  ): Promise<Either<TeacherRatingNotAllowedError, null>> {
     const allowed = await canRateAsTeacher(this.institutionMembersRepository, teacherId)
 
     if (!allowed) {
@@ -104,7 +173,6 @@ export class RateProjectByCriteriaUseCase {
         actorId: teacherId,
         sessionId,
         resourceId: projectId,
-        action: AuditLogAction.CREATE,
         text: `Usuário ${teacherId} sem vínculo de professor ativo tentou avaliar o projeto ${projectId}.`,
         status: AuditLogStatus.FAILURE,
       })
@@ -112,6 +180,14 @@ export class RateProjectByCriteriaUseCase {
       return left(new TeacherRatingNotAllowedError())
     }
 
+    return right(null)
+  }
+
+  private async findProjectOrFail(
+    projectId: string,
+    teacherId: string,
+    sessionId: string,
+  ): Promise<Either<ProjectNotFoundError, Project>> {
     const project = await this.projectsRepository.findById(projectId)
 
     if (!project) {
@@ -119,7 +195,6 @@ export class RateProjectByCriteriaUseCase {
         actorId: teacherId,
         sessionId,
         resourceId: projectId,
-        action: AuditLogAction.CREATE,
         text: `Projeto ${projectId} não encontrado.`,
         status: AuditLogStatus.FAILURE,
       })
@@ -127,12 +202,21 @@ export class RateProjectByCriteriaUseCase {
       return left(new ProjectNotFoundError())
     }
 
+    return right(project)
+  }
+
+  private async validateProjectEligibility(
+    project: Project,
+    teacherId: string,
+    sessionId: string,
+  ): Promise<Either<ProjectNotEligibleForRatingError | CannotRateOwnProjectError, null>> {
+    const projectId = project.id.toString()
+
     if (project.status !== ProjectStatus.PUBLISHED) {
       await this.log({
         actorId: teacherId,
         sessionId,
         resourceId: projectId,
-        action: AuditLogAction.CREATE,
         text: `Projeto ${projectId} não está publicado (status=${project.status}).`,
         status: AuditLogStatus.FAILURE,
       })
@@ -145,7 +229,6 @@ export class RateProjectByCriteriaUseCase {
         actorId: teacherId,
         sessionId,
         resourceId: projectId,
-        action: AuditLogAction.CREATE,
         text: `Professor ${teacherId} tentou avaliar o próprio projeto ${projectId}.`,
         status: AuditLogStatus.FAILURE,
       })
@@ -153,8 +236,13 @@ export class RateProjectByCriteriaUseCase {
       return left(new CannotRateOwnProjectError())
     }
 
-    const activeCriteria = await this.ratingCriteriaRepository.findActiveValid()
+    return right(null)
+  }
 
+  private validateRating(
+    scores: CriterionScoreInput[],
+    activeCriteria: RatingCriterion[],
+  ): Either<InvalidCriteriaScoresError | CriterionNotActiveError, null> {
     if (activeCriteria.length === 0) {
       return left(new CriterionNotActiveError('Não há critérios avaliativos cadastrados'))
     }
@@ -178,44 +266,75 @@ export class RateProjectByCriteriaUseCase {
       }
     }
 
-    const overallScore = Math.round((scores.reduce((sum, item) => sum + item.score, 0) / scores.length) * 10) / 10
+    return right(null)
+  }
 
-    const existing = await this.projectTeacherRatingsRepository.findByProjectAndTeacher(projectId, teacherId)
+  private calculateOverallScore(scores: CriterionScoreInput[]): number {
+    return Math.round((scores.reduce((sum, item) => sum + item.score, 0) / scores.length) * 10) / 10
+  }
 
-    if (existing) {
-      const previousOverall = existing.overallScore
-      const items = scores.map((score) => {
-        const previousItem = existing.items.find((item) => item.criterionId.toString() === score.criterionId)
+  private async updateExistingRating({
+    existing,
+    scores,
+    overallScore,
+    projectId,
+    teacherId,
+    sessionId,
+  }: {
+    existing: ProjectTeacherRating
+    scores: CriterionScoreInput[]
+    overallScore: number
+    projectId: string
+    teacherId: string
+    sessionId: string
+  }): Promise<RateProjectByCriteriaUseCaseResponse> {
+    const previousOverall = existing.overallScore
+    const items = scores.map((score) => {
+      const previousItem = existing.items.find((item) => item.criterionId.toString() === score.criterionId)
 
-        return TeacherRatingItem.create(
-          {
-            ratingId: existing.id,
-            criterionId: new UniqueEntityId(score.criterionId),
-            score: score.score,
-          },
-          previousItem?.id,
-        )
-      })
-
-      existing.updateScores(items, overallScore)
-      await this.projectTeacherRatingsRepository.save(existing)
-
-      await this.log({
-        actorId: teacherId,
-        sessionId,
-        resourceId: existing.id.toString(),
-        action: AuditLogAction.UPDATE,
-        text: `Avaliação atualizada no projeto ${projectId} pelo professor ${teacherId}.`,
-        status: AuditLogStatus.SUCCESS,
-        diff: {
-          overallScore: { old: previousOverall, new: overallScore },
-          scores: { old: null, new: scores },
+      return TeacherRatingItem.create(
+        {
+          ratingId: existing.id,
+          criterionId: new UniqueEntityId(score.criterionId),
+          score: score.score,
         },
-      })
+        previousItem?.id,
+      )
+    })
 
-      return right({ rating: existing, created: false })
-    }
+    existing.updateScores(items, overallScore)
 
+    await this.projectTeacherRatingsRepository.save(existing)
+
+    await this.log({
+      actorId: teacherId,
+      sessionId,
+      resourceId: existing.id.toString(),
+      action: AuditLogAction.UPDATE,
+      text: `Avaliação atualizada no projeto ${projectId} pelo professor ${teacherId}.`,
+      status: AuditLogStatus.SUCCESS,
+      diff: {
+        overallScore: { old: previousOverall, new: overallScore },
+        scores: { old: null, new: scores },
+      },
+    })
+
+    return right({ rating: existing, created: false })
+  }
+
+  private async createRating({
+    projectId,
+    teacherId,
+    sessionId,
+    scores,
+    overallScore,
+  }: {
+    projectId: string
+    teacherId: string
+    sessionId: string
+    scores: CriterionScoreInput[]
+    overallScore: number
+  }): Promise<RateProjectByCriteriaUseCaseResponse> {
     const ratingId = new UniqueEntityId()
 
     const items = scores.map((score) =>
@@ -242,7 +361,6 @@ export class RateProjectByCriteriaUseCase {
       actorId: teacherId,
       sessionId,
       resourceId: rating.id.toString(),
-      action: AuditLogAction.CREATE,
       text: `Avaliação criada no projeto ${projectId} pelo professor ${teacherId}.`,
       status: AuditLogStatus.SUCCESS,
       diff: {

@@ -1,6 +1,6 @@
 import { type Either, left, right } from '@/core/either'
 import type { RegisterLogUseCase } from '@/domain/audit/application/use-cases/audit/register-log'
-import { AuditLogAction, AuditLogStatus } from '@/domain/audit/enterprise/entities/audit-log'
+import { AuditLogAction, AuditLogStatus, type LogParams } from '@/domain/audit/enterprise/entities/audit-log'
 import { InstitutionMember, InstitutionMemberRole } from '../../../enterprise/entities/institution-member'
 import {
   type InstitutionMembershipRequest,
@@ -17,14 +17,6 @@ import type { InstitutionMembershipRequestsRepository } from '../../repositories
 interface ApproveInstitutionMembershipRequestUseCaseRequest {
   requestId: string
   actorId: string
-}
-
-type LogParams = {
-  actorId: string
-  resourceId: string
-  text: string
-  status: AuditLogStatus
-  diff?: Record<string, { old: unknown; new: unknown }> | null
 }
 
 type ApproveInstitutionMembershipRequestUseCaseResponse = Either<
@@ -54,10 +46,39 @@ export class ApproveInstitutionMembershipRequestUseCase {
     private readonly registerLog: RegisterLogUseCase,
   ) {}
 
-  private async log({ actorId, resourceId, text, status, diff }: LogParams) {
+  async execute({
+    requestId,
+    actorId,
+  }: ApproveInstitutionMembershipRequestUseCaseRequest): Promise<ApproveInstitutionMembershipRequestUseCaseResponse> {
+    const requestResult = await this.findRequestOrFail(requestId, actorId)
+
+    if (requestResult.isLeft()) {
+      return left(requestResult.value)
+    }
+
+    const request = requestResult.value
+
+    const manageResult = await this.canManageInstitution(request, actorId)
+
+    if (manageResult.isLeft()) {
+      return left(manageResult.value)
+    }
+
+    const duplicateResult = await this.validateMemberRole(request, actorId)
+
+    if (duplicateResult.isLeft()) {
+      return left(duplicateResult.value)
+    }
+
+    const { member: approvedMember } = await this.approveMembership(request, actorId)
+
+    return right({ request, member: approvedMember })
+  }
+
+  private async log({ actorId, resourceId, text, status, diff, sessionId }: LogParams) {
     await this.registerLog.execute({
       actorId,
-      sessionId: null,
+      sessionId: sessionId ?? null,
       action: AuditLogAction.UPDATE,
       resource: 'institution.membership-request',
       resourceId,
@@ -67,10 +88,10 @@ export class ApproveInstitutionMembershipRequestUseCase {
     })
   }
 
-  async execute({
-    requestId,
-    actorId,
-  }: ApproveInstitutionMembershipRequestUseCaseRequest): Promise<ApproveInstitutionMembershipRequestUseCaseResponse> {
+  private async findRequestOrFail(
+    requestId: string,
+    actorId: string,
+  ): Promise<Either<InstitutionMembershipRequestNotFoundError, InstitutionMembershipRequest>> {
     const request = await this.institutionMembershipRequestsRepository.findById(requestId)
 
     if (!request) {
@@ -84,6 +105,14 @@ export class ApproveInstitutionMembershipRequestUseCase {
       return left(new InstitutionMembershipRequestNotFoundError())
     }
 
+    return right(request)
+  }
+
+  private async canManageInstitution(
+    request: InstitutionMembershipRequest,
+    actorId: string,
+  ): Promise<Either<NotAllowedToManageInstitutionError, true>> {
+    const requestId = request.id.toString()
     const isAllowedToManage = await canManageInstitution(
       this.institutionMembersRepository,
       request.institutionId,
@@ -101,22 +130,34 @@ export class ApproveInstitutionMembershipRequestUseCase {
       return left(new NotAllowedToManageInstitutionError())
     }
 
+    return right(true)
+  }
+
+  private async validateMemberRole(
+    request: InstitutionMembershipRequest,
+    actorId: string,
+  ): Promise<Either<InstitutionMemberAlreadyExistsError, null>> {
+    const mappedRole = mapRequestRoleToMemberRole(request.role)
     const existingMember = await this.institutionMembersRepository.findByInstitutionAndUser(
       request.institutionId,
       request.userId,
     )
 
-    if (existingMember && existingMember.role === mapRequestRoleToMemberRole(request.role)) {
+    if (existingMember && existingMember.role === mappedRole) {
       await this.log({
         actorId,
-        resourceId: requestId,
-        text: `Usuário ${request.userId} já é membro da instituição ${request.institutionId} como ${mapRequestRoleToMemberRole(request.role)}.`,
+        resourceId: request.id.toString(),
+        text: `Usuário ${request.userId} já é membro da instituição ${request.institutionId} como ${mappedRole}.`,
         status: AuditLogStatus.FAILURE,
       })
 
       return left(new InstitutionMemberAlreadyExistsError())
     }
 
+    return right(null)
+  }
+
+  private async approveMembership(request: InstitutionMembershipRequest, actorId: string) {
     const oldStatus = request.status
     request.status = InstitutionMembershipRequestStatus.APPROVED
 
@@ -127,19 +168,20 @@ export class ApproveInstitutionMembershipRequestUseCase {
     })
 
     await this.institutionMembershipRequestsRepository.save(request)
+
     await this.institutionMembersRepository.create(member)
 
     await this.log({
       actorId,
-      resourceId: requestId,
+      resourceId: request.id.toString(),
       status: AuditLogStatus.SUCCESS,
-      text: `Solicitação de membro na instituição ${requestId} aprovada com sucesso.`,
+      text: `Solicitação de membro na instituição ${request.id.toString()} aprovada com sucesso.`,
       diff: {
         status: { old: oldStatus, new: InstitutionMembershipRequestStatus.APPROVED },
         memberId: { old: null, new: member.id.toString() },
       },
     })
 
-    return right({ request, member })
+    return { member }
   }
 }
